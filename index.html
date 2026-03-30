@@ -1,186 +1,450 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Year 5 Science — Adaptive Practice</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        :root{
-            --ink:#1a1a2e;--ink2:#4a4a6a;--ink3:#8888aa;--ink4:#c0c0d8;
-            --paper:#f0f4ff;--surface:#ffffff;--border:#dde2f0;--border2:#bec5e0;
-            --chem:#1e40af;--chem-bg:#dbeafe;--r:12px;
-        }
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
-        .screen{display:none;min-height:100vh;flex-direction:column}
-        .screen.active{display:flex}
-        #s-login{align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 100%)}
-        .login-card{background:var(--surface);border-radius:24px;padding:2rem;width:min(420px,92vw);box-shadow:0 32px 80px rgba(0,0,0,.5)}
-        .field{margin-bottom:.85rem}
-        .field label{display:block;font-size:11px;font-weight:600;margin-bottom:5px;text-transform:uppercase}
-        .field input,.field select{width:100%;padding:10px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px}
-        .btn-start{width:100%;padding:12px;background:#0f3460;color:white;border:none;border-radius:var(--r);font-weight:800;cursor:pointer}
-        .qhdr{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem;display:flex;align-items:center;gap:15px;position:sticky;top:0;z-index:100}
-        .prog-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
-        .prog-fill{height:100%;background:#1a1a4e;transition:width .4s}
-        .qbody{flex:1;padding:1.5rem;max-width:660px;margin:0 auto;width:100%}
-        .dom-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:var(--chem-bg);color:var(--chem);margin-bottom:10px}
-        .q-text{font-size:18px;font-weight:700;margin-bottom:1.5rem}
-        .opts{display:flex;flex-direction:column;gap:10px}
-        .opt{display:flex;align-items:center;gap:12px;padding:12px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;background:white}
-        .opt.correct{border-color:#16a34a;background:#f0fdf4}
-        .opt.wrong{border-color:#dc2626;background:#fef2f2}
-        .fb{margin-top:1rem;padding:12px;border-radius:var(--r);display:none;font-size:14px}
-        .fb.show{display:block}
-        .ai-loading{display:none;padding:2rem;text-align:center}
-        .ai-loading.show{display:block}
-        .res-hero{background:#1a1a4e;color:white;padding:3rem;text-align:center}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Year 5 Science — Adaptive Practice (Gemini AI)</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1a2e;--ink2:#4a4a6a;--ink3:#8888aa;--ink4:#c0c0d8;
+  --paper:#f0f4ff;--surface:#ffffff;--border:#dde2f0;--border2:#bec5e0;
+  --bio:#166534;--bio-bg:#dcfce7;--bio-mid:#22c55e;
+  --chem:#1e40af;--chem-bg:#dbeafe;--chem-mid:#3b82f6;
+  --phys:#92400e;--phys-bg:#fef3c7;--phys-mid:#f59e0b;
+  --ws:#5b21b6;--ws-bg:#ede9fe;--ws-mid:#8b5cf6;
+  --ext:#be185d;--ext-bg:#fce7f3;
+  --exc-bg:#d1fae5;--exc-txt:#065f46;--exc-bdr:#6ee7b7;
+  --ep-bg:#dbeafe;--ep-txt:#1e40af;--ep-bdr:#93c5fd;
+  --ex-bg:#f1f5f9;--ex-txt:#334155;--ex-bdr:#cbd5e1;
+  --em-bg:#fef3c7;--em-txt:#92400e;--em-bdr:#fcd34d;
+  --er-bg:#fee2e2;--er-txt:#991b1b;--er-bdr:#fca5a5;
+  --r:12px;--rl:18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* LOGIN */
+#s-login{align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 50%,#24243e 100%);
+  position:relative;overflow:hidden}
+.stars-bg{position:absolute;inset:0;pointer-events:none}
+.star-dot{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d) ease-in-out infinite var(--dl)}
+@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.9}}
+.login-card{background:var(--surface);border-radius:24px;padding:2.2rem 2rem;
+  width:min(420px,92vw);box-shadow:0 32px 80px rgba(0,0,0,.5);position:relative;z-index:1}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem}
+.logo-rocket{font-size:28px}
+.logo-name{font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:var(--ink)}
+.logo-sub{font-size:11px;color:var(--ink3)}
+.login-card h1{font-family:'Nunito',sans-serif;font-size:21px;font-weight:800;letter-spacing:-.5px;margin-bottom:.3rem}
+.login-card > p{font-size:13px;color:var(--ink3);margin-bottom:1.4rem;line-height:1.5}
+.field{margin-bottom:.85rem}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase}
+.field input,.field select{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--ink);appearance:none;transition:border-color .15s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(26,26,46,.07)}
+.btn-start{width:100%;padding:12px;background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;margin-top:.5rem;letter-spacing:.3px;transition:opacity .15s}
+.btn-start:hover{opacity:.88}
+.login-note{font-size:11px;color:var(--ink4);text-align:center;margin-top:.8rem;line-height:1.5}
+
+/* QUIZ HEADER */
+#s-quiz{background:var(--paper)}
+.qhdr{background:var(--surface);border-bottom:1px solid var(--border);padding:.65rem 1rem;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;flex-wrap:wrap}
+.qhdr-info{min-width:0}
+.qhdr-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qhdr-cls{font-size:10px;color:var(--ink3);font-family:monospace}
+.qhdr-prog{flex:1;min-width:80px}
+.prog-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#1a1a4e,#0f3460);transition:width .4s cubic-bezier(.4,0,.2,1)}
+.qhdr-count{font-size:11px;color:var(--ink3);font-family:monospace;white-space:nowrap}
+.diff-chip{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.dc-easy{background:#dcfce7;color:#166534}
+.dc-medium{background:#fef3c7;color:#92400e}
+.dc-hard{background:#fee2e2;color:#991b1b}
+.dc-ext{background:#fce7f3;color:#be185d}
+.streak-chip{display:none;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#92400e;background:#fef3c7;padding:3px 9px;border-radius:20px}
+.streak-chip.show{display:flex}
+/* Stop button */
+.btn-stop{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Nunito',sans-serif;background:transparent;border:1.5px solid #fca5a5;color:#991b1b;cursor:pointer;white-space:nowrap;transition:all .12s}
+.btn-stop:hover{background:#fee2e2}
+
+/* QUESTION BODY */
+.qbody{flex:1;padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%;padding-bottom:2rem}
+.q-num{font-size:11px;color:var(--ink3);font-family:monospace;margin-bottom:.4rem}
+.dom-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:.6rem}
+.db-bio{background:var(--bio-bg);color:var(--bio)}
+.db-chem{background:var(--chem-bg);color:var(--chem)}
+.db-phys{background:var(--phys-bg);color:var(--phys)}
+.db-ws{background:var(--ws-bg);color:var(--ws)}
+.db-ext{background:var(--ext-bg);color:var(--ext)}
+.ai-chip{font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:#ede9fe;color:#5b21b6;margin-left:5px;vertical-align:middle}
+.ext-badge{font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--ext-bg);color:var(--ext);margin-left:5px;vertical-align:middle;text-transform:uppercase;letter-spacing:.4px}
+/* Context box — Cambridge/PTS style */
+.q-context{background:var(--surface);border:1.5px solid var(--border2);border-left:4px solid var(--chem-mid);border-radius:var(--r);padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--ink2);line-height:1.6}
+.q-context-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:4px}
+.q-image{margin-bottom:1rem;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--border);background:#f8f8fc}
+.q-image img{width:100%;display:block;max-height:240px;object-fit:contain;padding:8px}
+.q-image-cap{font-size:11px;color:var(--ink3);padding:4px 10px;background:var(--paper);border-top:1px solid var(--border);font-style:italic}
+.q-hint{background:#fffbeb;border:1px solid #fcd34d;border-radius:var(--r);padding:8px 12px;font-size:12px;color:#78350f;margin-bottom:1rem;line-height:1.5}
+.q-text{font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;line-height:1.5;color:var(--ink);margin-bottom:1rem;letter-spacing:-.15px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:center;gap:11px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:14px;font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--surface);text-align:left;transition:border-color .12s,background .12s}
+.opt:hover:not(.locked){border-color:var(--border2);background:var(--paper)}
+.opt.locked{cursor:default}
+.opt.correct{border-color:#16a34a;background:#f0fdf4;color:#14532d}
+.opt.wrong{border-color:#dc2626;background:#fef2f2;color:#7f1d1d}
+.opt.reveal{border-color:#16a34a;background:#f0fdf4;color:#14532d}
+.opt-let{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:monospace;flex-shrink:0;color:var(--ink3);transition:all .12s}
+.opt.correct .opt-let{background:#16a34a;border-color:#16a34a;color:#fff}
+.opt.wrong .opt-let{background:#dc2626;border-color:#dc2626;color:#fff}
+.opt.reveal .opt-let{background:#16a34a;border-color:#16a34a;color:#fff}
+.fb{margin-top:.9rem;padding:10px 13px;border-radius:var(--r);font-size:13px;line-height:1.6;display:none}
+.fb.show{display:block}
+.fb.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#14532d}
+.fb.no{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+.ext-tip{margin-top:.75rem;padding:9px 12px;background:var(--ext-bg);border:1px solid #f9a8d4;border-radius:var(--r);font-size:12px;color:var(--ext);line-height:1.55;display:none}
+.ext-tip.show{display:block}
+/* Loading spinner */
+.ai-loading{display:none;align-items:center;gap:10px;padding:1.5rem;justify-content:center;color:var(--ink3);font-size:13px}
+.ai-loading.show{display:flex}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.qnav{display:flex;justify-content:space-between;align-items:center;margin-top:1.3rem;padding-top:1.1rem;border-top:1px solid var(--border)}
+.btn{padding:8px 18px;border-radius:var(--r);font-size:13px;font-weight:600;font-family:'Nunito',sans-serif;cursor:pointer;transition:all .12s;border:1.5px solid transparent}
+.btn-out{background:var(--surface);border-color:var(--border2);color:var(--ink2)}
+.btn-out:hover{border-color:var(--ink);color:var(--ink)}
+.btn-pri{background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white}
+.btn-pri:hover{opacity:.88}
+.btn:disabled{opacity:.35;cursor:default}
+
+/* RESULTS */
+#s-results{background:var(--paper)}
+.res-hero{background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 50%,#0f3460 100%);color:white;padding:1.8rem 1.3rem 1.5rem;text-align:center;position:relative;overflow:hidden}
+.res-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,rgba(34,197,94,.1),transparent 55%),radial-gradient(circle at 70% 30%,rgba(59,130,246,.1),transparent 55%)}
+.rh-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;opacity:.5;margin-bottom:.4rem;font-family:monospace}
+.rh-name{font-size:15px;opacity:.7;margin-bottom:1rem}
+.rh-grade{display:inline-block;padding:6px 22px;border-radius:30px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;margin-bottom:.8rem}
+.g-exc{background:var(--exc-bg);color:var(--exc-txt)}
+.g-ep{background:var(--ep-bg);color:var(--ep-txt)}
+.g-ex{background:var(--ex-bg);color:var(--ex-txt)}
+.g-em{background:var(--em-bg);color:var(--em-txt)}
+.g-er{background:var(--er-bg);color:var(--er-txt)}
+.rh-score-row{display:flex;justify-content:center;align-items:baseline;gap:8px;margin-bottom:.25rem}
+.rh-score-big{font-family:'Nunito',sans-serif;font-size:52px;font-weight:800;letter-spacing:-3px;line-height:1}
+.rh-score-pct{font-size:20px;opacity:.6}
+.rh-tagline{font-size:13px;opacity:.55}
+.rh-meta{display:flex;justify-content:center;gap:14px;margin-top:.8rem;font-size:11px;opacity:.4;font-family:monospace;flex-wrap:wrap}
+.res-body{padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%;padding-bottom:2rem}
+.sec-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ink3);margin:1.3rem 0 .65rem}
+.dom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.5rem}
+.dom-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rl);padding:1rem;position:relative;overflow:hidden}
+.dom-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.dca-bio::before{background:var(--bio-mid)}.dca-chem::before{background:var(--chem-mid)}
+.dca-phys::before{background:var(--phys-mid)}.dca-ws::before{background:var(--ws-mid)}
+.dom-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:.4rem}
+.dom-score-big{font-family:'Nunito',sans-serif;font-size:26px;font-weight:800;letter-spacing:-1px;color:var(--ink);line-height:1}
+.dom-score-den{font-size:13px;color:var(--ink3)}
+.dom-pct{font-size:12px;color:var(--ink3);margin:.2rem 0 .5rem}
+.dom-bar{height:5px;border-radius:3px;background:var(--border)}
+.dom-bar-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.dba-bio .dom-bar-fill{background:var(--bio-mid)}.dba-chem .dom-bar-fill{background:var(--chem-mid)}
+.dba-phys .dom-bar-fill{background:var(--phys-mid)}.dba-ws .dom-bar-fill{background:var(--ws-mid)}
+.grade-scale{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rl);padding:1rem;margin-bottom:.5rem}
+.gs-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.gs-row:last-child{border-bottom:none}
+.gs-pill{font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;min-width:95px;text-align:center;font-family:'Nunito',sans-serif}
+.gs-range{color:var(--ink3);font-family:monospace;font-size:11px;flex:1}
+.gs-yours{font-size:11px;font-weight:600;color:#16a34a}
+.ext-section{background:linear-gradient(135deg,#fdf4ff,#fce7f3);border:1.5px solid #f9a8d4;border-radius:var(--rl);padding:1.1rem;margin-bottom:.5rem}
+.ext-section-head{display:flex;align-items:center;gap:8px;margin-bottom:.75rem}
+.ext-topic{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #fbcfe8}
+.ext-topic:last-child{border-bottom:none;padding-bottom:0}
+.ext-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.ext-topic-name{font-weight:600;color:var(--ext);font-size:13px;margin-bottom:2px}
+.ext-topic-desc{font-size:12px;color:#9d174d;line-height:1.45}
+.ext-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--ext);text-decoration:none;margin-top:4px;padding:2px 8px;background:#fce7f3;border-radius:20px;border:1px solid #f9a8d4}
+.study-dom{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rl);margin-bottom:10px;overflow:hidden}
+.study-dom-hdr{display:flex;align-items:center;gap:8px;padding:.8rem 1rem;border-bottom:1px solid var(--border)}
+.study-dom-score{font-size:11px;color:var(--ink3);font-family:monospace}
+.p-high{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#fee2e2;color:#991b1b;text-transform:uppercase}
+.p-med{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#fef3c7;color:#92400e;text-transform:uppercase}
+.p-good{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#dcfce7;color:#166534;text-transform:uppercase}
+.study-body{padding:.85rem 1rem}
+.study-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:.5rem}
+.topic-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.85rem}
+.ttag{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--paper);border:1.5px solid var(--border2);color:var(--ink2);text-decoration:none;transition:all .1s}
+a.ttag:hover{border-color:var(--chem-mid);background:var(--chem-bg);color:var(--chem)}
+.res-links{display:flex;flex-direction:column;gap:5px}
+.rlink{display:flex;align-items:center;gap:9px;padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--r);text-decoration:none;color:var(--ink);background:var(--paper);transition:border-color .12s;font-size:12px}
+.rlink:hover{border-color:var(--ink);background:var(--surface)}
+.rlink-icon{font-size:14px;flex-shrink:0}
+.rlink-body{flex:1}
+.rlink-name{font-weight:600;font-size:12px}
+.rlink-desc{font-size:11px;color:var(--ink3);margin-top:1px}
+.rtag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;text-transform:uppercase;flex-shrink:0}
+.rt-free{background:#dcfce7;color:#166534}
+.rt-video{background:#dbeafe;color:#1e40af}
+.rt-read{background:#fef3c7;color:#92400e}
+.missed-item{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:.8rem 1rem;margin-bottom:7px;font-size:12px}
+.missed-q{font-size:13px;color:var(--ink2);margin:.3rem 0;line-height:1.4}
+.missed-wrong{color:#dc2626;font-size:11px}
+.missed-right{color:#16a34a;font-weight:600;font-size:11px;margin-top:2px}
+.action-btns{display:flex;flex-direction:column;gap:8px;margin:1.2rem 0}
+.btn-full{width:100%;padding:11px;font-size:13px;text-align:center;border-radius:var(--r);font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;border:none;transition:opacity .12s}
+.btn-dl{background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white}
+.btn-dl:hover{opacity:.87}
+.btn-retry{background:var(--surface);color:var(--ink);border:1.5px solid var(--border2)!important}
+.btn-retry:hover{border-color:var(--ink)!important}
+.sent-note{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:var(--r);padding:.85rem 1rem;font-size:12px;color:#14532d;line-height:1.55}
+.sent-note strong{display:block;margin-bottom:.2rem;font-size:13px}
+@media(max-width:480px){.dom-grid{grid-template-columns:1fr}}
+.fade-in{animation:fi .22s ease}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+</style>
 </head>
 <body>
 
 <div id="s-login" class="screen active">
-    <div class="login-card">
-        <h1>Year 5 Science</h1>
-        <div class="field"><label>Name</label><input type="text" id="inp-name" placeholder="Full Name"></div>
-        <div class="field">
-            <label>Class</label>
-            <select id="inp-class">
-                <option value="">Select Class...</option>
-                <option value="5A">5A</option>
-                <option value="5B">5B</option>
-                <option value="5C">5C</option>
-                <option value="5D">5D</option>
-                <option value="5E">5E</option>
-            </select>
-        </div>
-        <div class="field">
-            <label>Focus Topic</label>
-            <select id="inp-domain">
-                <option value="all">All Topics</option>
-                <option value="Biology">Biology</option>
-                <option value="Chemistry">Chemistry</option>
-                <option value="Physics">Physics</option>
-            </select>
-        </div>
-        <button class="btn-start" onclick="startQuiz()">Start Quiz</button>
+  <div class="stars-bg" id="stars"></div>
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-rocket">🚀</div>
+      <div>
+        <div class="logo-name">Year 5 Science</div>
+        <div class="logo-sub">NLCS Jeju · Adaptive Practice</div>
+      </div>
     </div>
+    <h1>Sign in to begin</h1>
+    <p>AI generates fresh questions just for you. Stop whenever you like — your results are saved automatically.</p>
+    <div class="field"><label>Your name</label><input type="text" id="inp-name" placeholder="e.g. Claire Kim" autocomplete="name"/></div>
+    <div class="field"><label>Class</label>
+      <select id="inp-class">
+        <option value="">— select your class —</option>
+        <option>5A</option><option>5B</option><option>5C</option><option>5D</option><option>5E</option>
+      </select></div>
+    <div class="field"><label>Focus area</label>
+      <select id="inp-domain">
+        <option value="all">All topics (mixed)</option>
+        <option value="Biology">Biology — Life cycles, Adaptations, Reproduction</option>
+        <option value="Chemistry">Chemistry — Materials, Changes, Separation</option>
+        <option value="Physics">Physics — Forces, Space, Solar System</option>
+        <option value="Working Scientifically">Working Scientifically — Experiments, Data, Graphs</option>
+      </select></div>
+    <div class="field"><label>Question style</label>
+      <select id="inp-style">
+        <option value="mixed">Mixed styles</option>
+        <option value="pts">PTS format — short, scenario-based</option>
+        <option value="cambridge">Cambridge style — data, diagrams, longer contexts</option>
+      </select></div>
+    <button class="btn-start" onclick="startQuiz()">Start — AI generates questions for you 🚀</button>
+    <p class="login-note">Questions adapt to your level. Stop any time — your score is saved automatically.</p>
+  </div>
 </div>
 
 <div id="s-quiz" class="screen">
-    <div class="qhdr">
-        <div id="hdr-count" style="font-weight:bold">Q1</div>
-        <div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
-        <button onclick="finishQuiz()" style="background:none; border:none; color:red; cursor:pointer; font-weight:bold">Finish</button>
+  <div class="qhdr">
+    <div class="qhdr-info">
+      <div class="qhdr-name" id="hdr-name"></div>
+      <div class="qhdr-cls" id="hdr-cls"></div>
     </div>
-    <div id="qbody" class="qbody">
-        <div class="ai-loading show" id="load-box">AI is generating your question...</div>
+    <div class="qhdr-prog"><div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div></div>
+    <div class="qhdr-count" id="hdr-count"></div>
+    <div class="diff-chip" id="hdr-diff"></div>
+    <div class="streak-chip" id="streak">🔥 <span id="streak-n">0</span></div>
+    <button class="btn-stop" onclick="stopAndFinish()">Finish &amp; see results</button>
+  </div>
+  <div class="qbody fade-in" id="qbody">
+    <div class="ai-loading show" id="first-load">
+      <div class="spinner"></div>
+      <span id="load-msg">Connecting to Gemini AI…</span>
     </div>
+  </div>
 </div>
 
 <div id="s-results" class="screen">
-    <div class="res-hero">
-        <h2 id="res-name"></h2>
-        <div style="font-size:48px; font-weight:800" id="res-score">0/0</div>
-        <button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; border-radius:12px; cursor:pointer">Try Again</button>
+  <div class="res-hero">
+    <div class="rh-label">Practice Complete</div>
+    <div class="rh-name" id="rh-name"></div>
+    <div class="rh-grade" id="rh-grade"></div>
+    <div class="rh-score-row">
+      <div class="rh-score-big" id="rh-score"></div>
+      <div class="rh-score-pct" id="rh-pct"></div>
     </div>
+    <div class="rh-tagline" id="rh-tag"></div>
+    <div class="rh-meta" id="rh-meta"></div>
+  </div>
+  <div class="res-body">
+    <p class="sec-head">📊 Score by domain</p>
+    <div class="dom-grid" id="rd-domains"></div>
+    <p class="sec-head">🎯 Grade scale</p>
+    <div class="grade-scale" id="rd-gradescale"></div>
+    <div class="action-btns">
+      <button class="btn btn-full btn-dl" onclick="downloadCSV()">⬇ Download my results (optional)</button>
+      <button class="btn btn-full btn-retry" onclick="retryQuiz()">↺ Try again</button>
+    </div>
+    <div class="sent-note"><strong>✅ Results sent to your teacher</strong>Your score, grade and domain breakdown have been recorded automatically.</div>
+    <p class="sec-head" style="margin-top:1.3rem">🚀 Extension challenges</p>
+    <div id="rd-extensions"></div>
+    <p class="sec-head">📖 What to study next</p>
+    <div id="rd-study"></div>
+    <p class="sec-head">❌ Questions to review</p>
+    <div id="rd-review"></div>
+  </div>
 </div>
 
 <script>
 window.GEMINI_API_KEY = 'AIzaSyDQ44QdbO9wWHXPAHyF6F3OLLUAxLs4poo';
+const SHEETS_ENDPOINT='https://script.google.com/macros/s/AKfycbzJbsGAELB71C0FYnP5NwugHlKj_8fjvg05tiiTvZENQc-c51V7uBVobZKQJ4N0EBrW/exec';
 
-let state = { name: '', cl: '', domain: 'all', qIdx: 0, score: 0, currentQ: null, locked: false };
-
-const FALLBACK = [
-    {d:'Biology', q:'What part of a plant absorbs water?', o:['Leaves','Flowers','Roots','Stem'], a:2, e:'Roots absorb water and nutrients from the soil.'},
-    {d:'Physics', q:'Which force pulls objects toward the Earth?', o:['Friction','Gravity','Magnetism','Air Resistance'], a:1, e:'Gravity is the force that pulls everything toward the center of the Earth.'},
-    {d:'Chemistry', q:'Which of these is a reversible change?', o:['Burning wood','Melting ice','Cooking an egg','Baking bread'], a:1, e:'Melting is reversible because you can freeze the water back into ice.'}
+const GRADES=[
+  {label:'Exceeding', min:81,cls:'g-exc',bg:'var(--exc-bg)',txt:'var(--exc-txt)',bdr:'var(--exc-bdr)'},
+  {label:'Expected+', min:70,cls:'g-ep', bg:'var(--ep-bg)', txt:'var(--ep-txt)', bdr:'var(--ep-bdr)'},
+  {label:'Expected',  min:60,cls:'g-ex', bg:'var(--ex-bg)', txt:'var(--ex-txt)', bdr:'var(--ex-bdr)'},
+  {label:'Expected\u2212',min:50,cls:'g-em',bg:'var(--em-bg)',txt:'var(--em-txt)',bdr:'var(--em-bdr)'},
+  {label:'Emerging',  min:0, cls:'g-er', bg:'var(--er-bg)', txt:'var(--er-txt)', bdr:'var(--er-bdr)'},
 ];
 
+function getGrade(pct){return GRADES.find(g=>pct>=g.min)||GRADES[4];}
+function gradePill(pct){const g=getGrade(pct);return`<span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;background:${g.bg};color:${g.txt};border:1px solid ${g.bdr};font-family:'Nunito',sans-serif">${g.label}</span>`;}
+
+const FALLBACK=[
+  {d:'Biology',diff:1,q:'What is the correct order of a frog\'s life cycle?',o:['Egg → Frog → Tadpole','Egg → Tadpole → Froglet → Frog','Tadpole → Egg → Frog','Frog → Tadpole → Egg'],a:1,e:'Frogs hatch from eggs into tadpoles, develop legs to become froglets, then become adult frogs.'},
+  {d:'Chemistry',diff:1,q:'Which of these is a reversible change?',o:['Burning wood','Cooking an egg','Dissolving salt in water','Baking a cake'],a:2,e:'Dissolving salt is reversible — evaporate the water and the salt returns.'},
+  {d:'Physics',diff:1,q:'What causes day and night on Earth?',o:['The Sun moving around the Earth','The Moon blocking the Sun','The Earth rotating on its own axis','Clouds'],a:2,e:'Earth rotates on its axis once every 24 hours.'},
+  {d:'Working Scientifically',diff:1,q:'What do we call the variable that you change in a fair test?',o:['Dependent','Control','Independent','Anomalous'],a:2,e:'The independent variable is what you change.'}
+];
+
+// QUIZ STATE
+let quiz = {
+  name:'', cls:'', domain:'all', style:'mixed',
+  qIdx:0, score:0, streak:0, history:[], startTime:null,
+  currentQ:null, locked:false
+};
+
 function startQuiz() {
-    state.name = document.getElementById('inp-name').value;
-    state.cl = document.getElementById('inp-class').value;
-    state.domain = document.getElementById('inp-domain').value;
-    if(!state.name || !state.cl) return alert("Please enter your name and select your class!");
-    document.getElementById('s-login').classList.remove('active');
-    document.getElementById('s-quiz').classList.add('active');
-    loadNextQuestion();
+  quiz.name = document.getElementById('inp-name').value.trim();
+  quiz.cls = document.getElementById('inp-class').value;
+  quiz.domain = document.getElementById('inp-domain').value;
+  quiz.style = document.getElementById('inp-style').value;
+  if(!quiz.name || !quiz.cls) return alert("Please enter your name and class.");
+
+  quiz.startTime = new Date();
+  document.getElementById('s-login').classList.remove('active');
+  document.getElementById('s-quiz').classList.add('active');
+  document.getElementById('hdr-name').innerText = quiz.name;
+  document.getElementById('hdr-cls').innerText = quiz.cls;
+  
+  loadNext();
 }
 
-async function loadNextQuestion() {
-    state.qIdx++;
-    state.locked = false;
-    document.getElementById('hdr-count').innerText = `Q${state.qIdx}`;
-    document.getElementById('prog').style.width = Math.min((state.qIdx * 10), 100) + '%';
-    document.getElementById('qbody').innerHTML = `<div class="ai-loading show">Generating Question ${state.qIdx}...</div>`;
+async function loadNext() {
+  quiz.qIdx++;
+  quiz.locked = false;
+  updateHeader();
+  const container = document.getElementById('qbody');
+  container.innerHTML = `<div class="ai-loading show"><div class="spinner"></div><span>AI is thinking...</span></div>`;
 
-    try {
-        const q = await fetchAI();
-        renderQ(q);
-    } catch (e) {
-        console.warn("AI logic failed, reverting to internal bank:", e);
-        renderQ(FALLBACK[Math.floor(Math.random()*FALLBACK.length)]);
-    }
+  try {
+    const q = await fetchAIQuestion();
+    renderQuestion(q);
+  } catch (e) {
+    console.warn("AI failed, using fallback", e);
+    renderQuestion(FALLBACK[Math.floor(Math.random()*FALLBACK.length)]);
+  }
 }
 
-async function fetchAI() {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${window.GEMINI_API_KEY}`;
-    
-    const prompt = `Generate a Year 5 Science question about ${state.domain}. 
-    Return ONLY JSON with this structure: {"d": "Topic Name", "q": "The Question", "o": ["Option A", "Option B", "Option C", "Option D"], "a": 0, "e": "Short Explanation"}. 
-    The 'a' value must be the index (0-3) of the correct answer.`;
+async function fetchAIQuestion() {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${window.GEMINI_API_KEY}`;
+  const prompt = `Generate a Year 5 Science question about ${quiz.domain}. Style: ${quiz.style}. Return ONLY JSON: {"d":"Biology|Chemistry|Physics|Working Scientifically","diff":1|2|3,"q":"Question text","o":["A","B","C","D"],"a":0,"e":"Explanation text"}`;
 
-    const resp = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-    });
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+  });
 
-    if (!resp.ok) throw new Error("API Status: " + resp.status);
-
-    const data = await resp.json();
-    let rawText = data.candidates[0].content.parts[0].text;
-    rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-    return JSON.parse(rawText);
+  if (!response.ok) throw new Error("API Error");
+  const data = await response.json();
+  const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+  return JSON.parse(text);
 }
 
-function renderQ(q) {
-    state.currentQ = q;
-    document.getElementById('qbody').innerHTML = `
-        <div class="dom-badge">${q.d}</div>
-        <div class="q-text">${q.q}</div>
-        <div class="opts">
-            ${q.o.map((opt, i) => `<div class="opt" onclick="check(${i})"><b>${String.fromCharCode(65+i)}</b> ${opt}</div>`).join('')}
+function renderQuestion(q) {
+  quiz.currentQ = q;
+  const container = document.getElementById('qbody');
+  const dClass = q.d === 'Biology' ? 'db-bio' : q.d === 'Chemistry' ? 'db-chem' : q.d === 'Physics' ? 'db-phys' : 'db-ws';
+  
+  container.innerHTML = `
+    <div class="dom-badge ${dClass}">${q.d}</div>
+    <div class="q-text">${q.q}</div>
+    <div class="opts">
+      ${q.o.map((opt, i) => `
+        <div class="opt" onclick="checkAnswer(${i})">
+          <div class="opt-let">${String.fromCharCode(65+i)}</div>
+          <div>${opt}</div>
         </div>
-        <div id="fb" class="fb"></div>
-        <button id="next-btn" onclick="loadNextQuestion()" style="display:none; margin-top:20px; width:100%; padding:12px; border-radius:12px; background:#1a1a4e; color:white; border:none; cursor:pointer; font-weight:bold">Next Question ➔</button>
-    `;
+      `).join('')}
+    </div>
+    <div id="feedback" class="fb"></div>
+    <div id="next-box" style="display:none; margin-top:20px;">
+      <button class="btn btn-pri" onclick="loadNext()">Next Question ➔</button>
+    </div>
+  `;
 }
 
-function check(idx) {
-    if(state.locked) return;
-    state.locked = true;
-    const isCorrect = idx === state.currentQ.a;
-    if(isCorrect) state.score++;
+function checkAnswer(idx) {
+  if (quiz.locked) return;
+  quiz.locked = true;
+  const isCorrect = idx === quiz.currentQ.a;
+  if (isCorrect) { quiz.score++; quiz.streak++; } else { quiz.streak = 0; }
+  
+  quiz.history.push({ ...quiz.currentQ, user: idx, correct: isCorrect });
 
-    const opts = document.querySelectorAll('.opt');
-    opts[idx].classList.add(isCorrect ? 'correct' : 'wrong');
-    opts[state.currentQ.a].classList.add('correct');
+  const opts = document.querySelectorAll('.opt');
+  opts[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  opts[quiz.currentQ.a].classList.add('correct');
 
-    const fb = document.getElementById('fb');
-    fb.innerHTML = `<b>${isCorrect ? 'Correct!' : 'Incorrect.'}</b> ${state.currentQ.e}`;
-    fb.className = "fb show";
-    fb.style.background = isCorrect ? '#f0fdf4' : '#fef2f2';
-    document.getElementById('next-btn').style.display = 'block';
+  const fb = document.getElementById('feedback');
+  fb.innerHTML = `<strong>${isCorrect ? 'Correct!' : 'Not quite.'}</strong> ${quiz.currentQ.e}`;
+  fb.className = `fb show ${isCorrect ? 'ok' : 'no'}`;
+  document.getElementById('next-box').style.display = 'block';
+  updateHeader();
 }
 
-function finishQuiz() {
-    document.getElementById('s-quiz').classList.remove('active');
-    document.getElementById('s-results').classList.add('active');
-    document.getElementById('res-name').innerText = state.name + " (" + state.cl + ")";
-    document.getElementById('res-score').innerText = `${state.score} / ${state.qIdx}`;
+function updateHeader() {
+  document.getElementById('hdr-count').innerText = `Question ${quiz.qIdx}`;
+  document.getElementById('prog').style.width = Math.min((quiz.qIdx * 10), 100) + '%';
+  document.getElementById('streak-n').innerText = quiz.streak;
+  document.getElementById('streak').classList.toggle('show', quiz.streak > 1);
 }
+
+function stopAndFinish() {
+  document.getElementById('s-quiz').classList.remove('active');
+  document.getElementById('s-results').classList.add('active');
+  showResults();
+  saveToSheets();
+}
+
+function showResults() {
+  const pct = Math.round((quiz.score / quiz.qIdx) * 100);
+  const g = getGrade(pct);
+  document.getElementById('rh-name').innerText = quiz.name + " · " + quiz.cls;
+  document.getElementById('rh-grade').innerText = g.label;
+  document.getElementById('rh-grade').className = "rh-grade " + g.cls;
+  document.getElementById('rh-score').innerText = `${quiz.score}/${quiz.qIdx}`;
+  document.getElementById('rh-pct').innerText = pct + "%";
+}
+
+async function saveToSheets() {
+  const pct = Math.round((quiz.score / quiz.qIdx) * 100);
+  const payload = { name: quiz.name, class: quiz.cls, score: quiz.score, total: quiz.qIdx, percent: pct };
+  try { await fetch(SHEETS_ENDPOINT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); } 
+  catch(e) { console.error("Sheets save failed", e); }
+}
+
+function retryQuiz() { location.reload(); }
 </script>
 </body>
 </html>
