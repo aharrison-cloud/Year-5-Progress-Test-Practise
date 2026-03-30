@@ -4,65 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Year 5 Science - NLCS Jeju</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --p:#1a1a4e; --s:#f0f4ff; --w:#ffffff; --b:#dde2f0; --r:12px; }
+        :root { --p: #1a1a4e; --s: #f0f4ff; --w: #ffffff; --b: #dde2f0; --r: 12px; }
         body { font-family: 'Nunito', sans-serif; background: #0f0c29; color: #1a1a2e; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .screen { display: none; width: 100%; height: 100vh; align-items: center; justify-content: center; position: fixed; }
+        .active { display: flex; }
         .card { background: var(--w); padding: 2.5rem; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 90%; max-width: 420px; text-align: center; }
         input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1.5px solid var(--b); border-radius: var(--r); font-size: 16px; box-sizing: border-box; }
         button { background: var(--p); color: white; border: none; padding: 15px; border-radius: var(--r); font-weight: 800; cursor: pointer; width: 100%; margin-top: 10px; }
-        #quiz-screen { display: none; width: 90%; max-width: 600px; background: var(--s); padding: 2rem; border-radius: 24px; }
-        .q-box { background: white; padding: 2rem; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .opt { border: 2px solid var(--b); padding: 15px; border-radius: var(--r); margin: 10px 0; cursor: pointer; text-align: left; font-weight: 600; background: white; }
+        #quiz-screen { background: var(--s); }
+        .q-container { background: white; padding: 2rem; border-radius: 24px; width: 90%; max-width: 600px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .opt { border: 2px solid var(--b); padding: 15px; border-radius: var(--r); margin: 10px 0; cursor: pointer; text-align: left; transition: 0.2s; font-weight: 600; }
+        .opt:hover { background: #f8faff; border-color: var(--p); }
         .correct { border-color: #22c55e !important; background: #dcfce7 !important; color: #166534; }
         .wrong { border-color: #ef4444 !important; background: #fee2e2 !important; color: #991b1b; }
-        #feedback { margin-top: 15px; padding: 15px; border-radius: 12px; display: none; font-weight: 700; }
+        #feedback { margin-top: 15px; padding: 15px; border-radius: 12px; display: none; font-size: 14px; line-height: 1.5; font-weight: 700; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen" class="card">
-        <h1 style="margin:0; font-size: 26px;">🚀 Year 5 Science</h1>
-        <p style="color: #666; margin-bottom: 20px;">NLCS Jeju Practice</p>
-        <input type="text" id="u-name" placeholder="Full Name">
-        <select id="u-class">
-            <option value="">Select Class</option>
-            <option>5A</option><option>5B</option><option>5C</option><option>5D</option><option>5E</option>
-        </select>
-        <button onclick="startApp()">Start Learning</button>
+    <div id="login-screen" class="screen active">
+        <div class="card">
+            <h1 style="margin:0; font-size: 26px;">🚀 Science Practice</h1>
+            <p style="color: #666; margin-bottom: 20px;">NLCS Jeju Year 5</p>
+            <input type="text" id="u-name" placeholder="Enter Your Name">
+            <select id="u-class">
+                <option value="">Select Class</option>
+                <option>5A</option><option>5B</option><option>5C</option><option>5D</option><option>5E</option>
+            </select>
+            <button onclick="startApp()">Start Learning</button>
+        </div>
     </div>
 
-    <div id="quiz-screen">
-        <div class="q-box" id="q-content">
-            <h3 id="status">Generating AI Question...</h3>
+    <div id="quiz-screen" class="screen">
+        <div class="q-container" id="q-box">
+            <h3>Generating Year 5 Science question...</h3>
         </div>
     </div>
 
 <script>
-    const KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU'; 
+    const API_KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU';
 
     function startApp() {
-        if(!document.getElementById('u-name').value || !document.getElementById('u-class').value) {
-            return alert("Enter name and class!");
-        }
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('quiz-screen').style.display = 'block';
-        fetchQuestion();
+        const name = document.getElementById('u-name').value;
+        const cls = document.getElementById('u-class').value;
+        if (!name || !cls) return alert("Please enter your name and class");
+
+        document.getElementById('login-screen').classList.remove('active');
+        document.getElementById('quiz-screen').classList.add('active');
+        fetchNext();
     }
 
-    async function fetchQuestion() {
-        const container = document.getElementById('q-content');
-        container.innerHTML = "<h3>Generating new question...</h3>";
+    async function fetchNext() {
+        const box = document.getElementById('q-box');
+        box.innerHTML = `<h3 style="color:#1a1a4e">AI is writing a new question...</h3>`;
 
         try {
-            // Using v1beta for reliable JSON support
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
+            // Using v1beta to ensure responseMimeType is supported and avoid 400 errors
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
             
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: "Generate a Year 5 Science question. Return JSON: {\"q\":\"question\",\"o\":[\"A\",\"B\",\"C\",\"D\"],\"a\":0,\"e\":\"explanation\"}" }] }],
+                    contents: [{ parts: [{ text: "Generate one Year 5 Science multiple choice question. Return ONLY raw JSON in this format: {\"q\":\"question text\",\"o\":[\"option1\",\"option2\",\"option3\",\"option4\"],\"a\":0,\"e\":\"explanation text\"}" }] }],
                     generationConfig: { 
                         responseMimeType: "application/json",
                         temperature: 0.7 
@@ -70,21 +76,21 @@
                 })
             });
 
-            if(!response.ok) throw new Error("API Error: " + response.status);
+            if (!response.ok) throw new Error("Connection Error (" + response.status + ")");
 
             const data = await response.json();
-            const q = JSON.parse(data.candidates[0].content.parts[0].text);
+            const qData = JSON.parse(data.candidates[0].content.parts[0].text);
             
-            container.innerHTML = `
-                <h2 style="margin-top:0">${q.q}</h2>
-                <div id="options-list">
-                    ${q.o.map((opt, i) => `<div class="opt" onclick="check(${i}, ${q.a}, this, '${q.e.replace(/'/g, "\\'")}')">${opt}</div>`).join('')}
+            box.innerHTML = `
+                <h2 style="margin-top:0; font-size:20px;">${qData.q}</h2>
+                <div id="options">
+                    ${qData.o.map((opt, i) => `<div class="opt" onclick="check(${i}, ${qData.a}, this, '${qData.e.replace(/'/g, "\\'")}')">${opt}</div>`).join('')}
                 </div>
                 <div id="feedback"></div>
-                <button id="next-btn" style="display:none; margin-top:20px" onclick="fetchQuestion()">Next Question ➔</button>
+                <button id="next-btn" style="display:none; margin-top:15px;" onclick="fetchNext()">Next Question ➔</button>
             `;
         } catch (err) {
-            container.innerHTML = `<h3 style="color:red">System Error</h3><p>${err.message}</p><button onclick="fetchQuestion()">Retry</button>`;
+            box.innerHTML = `<h3 style="color:red">System Error</h3><p>${err.message}</p><button onclick="fetchNext()">Try Again</button>`;
         }
     }
 
@@ -93,8 +99,8 @@
         opts.forEach(o => o.style.pointerEvents = 'none');
         const fb = document.getElementById('feedback');
         fb.style.display = 'block';
-        
-        if(idx === correct) {
+
+        if (idx === correct) {
             el.classList.add('correct');
             fb.style.background = "#dcfce7";
             fb.innerHTML = "✅ Correct! " + explain;
