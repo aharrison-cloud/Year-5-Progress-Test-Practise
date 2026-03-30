@@ -45,7 +45,8 @@
     </div>
 
 <script>
-    const KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU'; 
+    // The environment provides the key at runtime
+    const apiKey = ""; 
 
     function startApp() {
         const name = document.getElementById('u-name').value;
@@ -61,15 +62,14 @@
         const container = document.getElementById('q-content');
         container.innerHTML = `<div id="loading">AI is generating a Science question...</div>`;
 
-        // We will try these model names in order. If one 404s, we try the next.
-        const models = ['gemini-1.5-flash', 'gemini-1.5-flash-latest'];
-        let success = false;
+        // Updated to use the supported preview model and v1beta endpoint
+        const model = 'gemini-2.5-flash-preview-09-2025';
+        let retries = 0;
+        const maxRetries = 5;
 
-        for (const model of models) {
-            if (success) break;
-
+        async function makeRequest() {
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${KEY}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(url, {
                     method: 'POST',
@@ -77,23 +77,30 @@
                     body: JSON.stringify({
                         contents: [{ 
                             parts: [{ 
-                                text: "Act as a Year 5 Science teacher. Generate one multiple choice question. Return ONLY this format:\nQUESTION: [Text]\nA) [Opt]\nB) [Opt]\nC) [Opt]\nD) [Opt]\nANSWER: [Letter]\nEXPLANATION: [Text]" 
+                                text: "Act as a Year 5 Science teacher. Generate one multiple choice question suitable for a 10-year-old. Return ONLY this format:\nQUESTION: [Text]\nA) [Opt]\nB) [Opt]\nC) [Opt]\nD) [Opt]\nANSWER: [Letter]\nEXPLANATION: [Text]" 
                             }] 
                         }]
                     })
                 });
 
-                if (response.status === 404) continue; // Try the next model name
-                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                if (!response.ok) {
+                    if (response.status === 404) throw new Error("Endpoint not found (404). Check model name.");
+                    throw new Error(`API Error: ${response.status}`);
+                }
 
                 const data = await response.json();
-                const text = data.candidates[0].content.parts[0].text;
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (!text) throw new Error("Empty response from AI.");
                 
                 parseAndDisplay(text, container);
-                success = true;
 
             } catch (err) {
-                if (model === models[models.length - 1]) {
+                if (retries < maxRetries) {
+                    const delay = Math.pow(2, retries) * 1000;
+                    retries++;
+                    setTimeout(makeRequest, delay);
+                } else {
                     container.innerHTML = `
                         <div class="err-msg">
                             <h3>Connection Failed</h3>
@@ -103,6 +110,8 @@
                 }
             }
         }
+
+        makeRequest();
     }
 
     function parseAndDisplay(text, container) {
