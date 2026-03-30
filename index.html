@@ -10,21 +10,26 @@
         body { font-family: 'Nunito', sans-serif; background: #0f0c29; color: #1a1a2e; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
         .card { background: var(--w); padding: 2.5rem; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 90%; max-width: 420px; text-align: center; }
         input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1.5px solid var(--b); border-radius: var(--r); font-size: 16px; box-sizing: border-box; }
-        button { background: var(--p); color: white; border: none; padding: 15px; border-radius: var(--r); font-weight: 800; cursor: pointer; width: 100%; margin-top: 10px; }
+        button { background: var(--p); color: white; border: none; padding: 15px; border-radius: var(--r); font-weight: 800; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.3s; }
+        button:hover { opacity: 0.9; transform: scale(0.98); }
         #quiz-screen { display: none; width: 90%; max-width: 600px; background: var(--s); padding: 2rem; border-radius: 24px; }
         .q-box { background: white; padding: 2rem; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .opt { border: 2px solid var(--b); padding: 15px; border-radius: var(--r); margin: 10px 0; cursor: pointer; text-align: left; font-weight: 600; background: white; }
+        .opt { border: 2px solid var(--b); padding: 15px; border-radius: var(--r); margin: 10px 0; cursor: pointer; text-align: left; font-weight: 600; background: white; transition: 0.2s; }
+        .opt:hover { border-color: var(--p); background: #f8faff; }
         .correct { border-color: #22c55e !important; background: #dcfce7 !important; color: #166534; }
         .wrong { border-color: #ef4444 !important; background: #fee2e2 !important; color: #991b1b; }
-        #feedback { margin-top: 15px; padding: 15px; border-radius: 12px; display: none; font-weight: 700; }
+        #feedback { margin-top: 15px; padding: 15px; border-radius: 12px; display: none; font-weight: 700; line-height: 1.4; }
+        #loading { font-weight: bold; color: var(--p); margin: 20px 0; }
+        .err-msg { color: #be123c; background: #fff1f2; padding: 15px; border-radius: 12px; border: 1px solid #fecdd3; }
     </style>
 </head>
 <body>
 
+    <!-- SCREEN 1: LOGIN -->
     <div id="login-screen" class="card">
         <h1 style="margin:0; font-size: 26px;">🚀 Year 5 Science</h1>
         <p style="color: #666; margin-bottom: 20px;">NLCS Jeju Practice</p>
-        <input type="text" id="u-name" placeholder="Full Name">
+        <input type="text" id="u-name" placeholder="Enter Full Name">
         <select id="u-class">
             <option value="">Select Class</option>
             <option>5A</option><option>5B</option><option>5C</option><option>5D</option><option>5E</option>
@@ -32,9 +37,10 @@
         <button onclick="startApp()">Start Learning</button>
     </div>
 
+    <!-- SCREEN 2: QUIZ -->
     <div id="quiz-screen">
         <div class="q-box" id="q-content">
-            <h3>Generating Question...</h3>
+            <div id="loading">Initializing AI...</div>
         </div>
     </div>
 
@@ -42,7 +48,10 @@
     const KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU'; 
 
     function startApp() {
-        if(!document.getElementById('u-name').value || !document.getElementById('u-class').value) return alert("Please enter details!");
+        const name = document.getElementById('u-name').value;
+        const cls = document.getElementById('u-class').value;
+        if(!name || !cls) return alert("Please enter your name and class!");
+        
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('quiz-screen').style.display = 'block';
         fetchQuestion();
@@ -50,54 +59,96 @@
 
     async function fetchQuestion() {
         const container = document.getElementById('q-content');
-        container.innerHTML = "<h3>AI is writing your question...</h3>";
+        container.innerHTML = `<div id="loading">AI is generating a Science question...</div>`;
 
-        try {
-            // THE FIX: Using v1beta and the specific model path to stop 404/400 errors
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
-            
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: "Generate one Year 5 Science question. Return ONLY raw JSON: {\"q\":\"question\",\"o\":[\"A\",\"B\",\"C\",\"D\"],\"a\":0,\"e\":\"explanation\"}" }] }],
-                    generationConfig: { 
-                        responseMimeType: "application/json",
-                        temperature: 0.7 
-                    }
-                })
-            });
+        // We will try these model names in order. If one 404s, we try the next.
+        const models = ['gemini-1.5-flash', 'gemini-1.5-flash-latest'];
+        let success = false;
 
-            if(!response.ok) throw new Error("API Error: " + response.status);
+        for (const model of models) {
+            if (success) break;
 
-            const data = await response.json();
-            const q = JSON.parse(data.candidates[0].content.parts[0].text);
-            
-            container.innerHTML = `
-                <h2 style="margin-top:0">${q.q}</h2>
-                <div id="options-list">
-                    ${q.o.map((opt, i) => `<div class="opt" onclick="check(${i}, ${q.a}, this, '${q.e.replace(/'/g, "\\'")}')">${opt}</div>`).join('')}
-                </div>
-                <div id="feedback"></div>
-                <button id="next-btn" style="display:none; margin-top:20px" onclick="fetchQuestion()">Next Question ➔</button>
-            `;
-        } catch (err) {
-            container.innerHTML = `<h3 style="color:red">Connection Error</h3><p>${err.message}</p><button onclick="fetchQuestion()">Retry</button>`;
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${KEY}`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ 
+                            parts: [{ 
+                                text: "Act as a Year 5 Science teacher. Generate one multiple choice question. Return ONLY this format:\nQUESTION: [Text]\nA) [Opt]\nB) [Opt]\nC) [Opt]\nD) [Opt]\nANSWER: [Letter]\nEXPLANATION: [Text]" 
+                            }] 
+                        }]
+                    })
+                });
+
+                if (response.status === 404) continue; // Try the next model name
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+
+                const data = await response.json();
+                const text = data.candidates[0].content.parts[0].text;
+                
+                parseAndDisplay(text, container);
+                success = true;
+
+            } catch (err) {
+                if (model === models[models.length - 1]) {
+                    container.innerHTML = `
+                        <div class="err-msg">
+                            <h3>Connection Failed</h3>
+                            <p>${err.message}</p>
+                            <button onclick="fetchQuestion()">Retry Connection</button>
+                        </div>`;
+                }
+            }
         }
     }
 
-    function check(idx, correct, el, explain) {
-        const opts = document.querySelectorAll('.opt');
-        opts.forEach(o => o.style.pointerEvents = 'none');
+    function parseAndDisplay(text, container) {
+        const lines = text.split('\n').filter(l => l.trim() !== "");
+        const qText = lines.find(l => l.toUpperCase().includes('QUESTION:'))?.split(':').slice(1).join(':').trim() || "Science Question";
+        const optA = lines.find(l => l.startsWith('A)'))?.replace('A)', '').trim();
+        const optB = lines.find(l => l.startsWith('B)'))?.replace('B)', '').trim();
+        const optC = lines.find(l => l.startsWith('C)'))?.replace('C)', '').trim();
+        const optD = lines.find(l => l.startsWith('D)'))?.replace('D)', '').trim();
+        const answerChar = lines.find(l => l.toUpperCase().includes('ANSWER:'))?.split(':').slice(1).join(':').trim().toUpperCase().charAt(0);
+        const explain = lines.find(l => l.toUpperCase().includes('EXPLANATION:'))?.split(':').slice(1).join(':').trim() || "Well done!";
+
+        const charToIndex = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
+        const correctIndex = charToIndex[answerChar] ?? 0;
+
+        container.innerHTML = `
+            <h2 style="margin-top:0; font-size:20px;">${qText}</h2>
+            <div id="options-list">
+                <div class="opt" onclick="verify(0, ${correctIndex}, this, '${explain.replace(/'/g, "\\'")}')">${optA}</div>
+                <div class="opt" onclick="verify(1, ${correctIndex}, this, '${explain.replace(/'/g, "\\'")}')">${optB}</div>
+                <div class="opt" onclick="verify(2, ${correctIndex}, this, '${explain.replace(/'/g, "\\'")}')">${optC}</div>
+                <div class="opt" onclick="verify(3, ${correctIndex}, this, '${explain.replace(/'/g, "\\'")}')">${optD}</div>
+            </div>
+            <div id="feedback"></div>
+            <button id="next-btn" style="display:none; margin-top:20px" onclick="fetchQuestion()">Next Question ➔</button>
+        `;
+    }
+
+    function verify(selected, correct, el, info) {
+        const allOpts = document.querySelectorAll('.opt');
+        allOpts.forEach(o => o.style.pointerEvents = 'none');
+        
         const fb = document.getElementById('feedback');
         fb.style.display = 'block';
-        if(idx === correct) {
+
+        if(selected === correct) {
             el.classList.add('correct');
-            fb.style.background = "#dcfce7"; fb.innerHTML = "✅ " + explain;
+            fb.style.background = "#dcfce7";
+            fb.style.color = "#166534";
+            fb.innerHTML = "✅ Correct! " + info;
         } else {
             el.classList.add('wrong');
-            opts[correct].classList.add('correct');
-            fb.style.background = "#fee2e2"; fb.innerHTML = "❌ " + explain;
+            allOpts[correct].classList.add('correct');
+            fb.style.background = "#fee2e2";
+            fb.style.color = "#991b1b";
+            fb.innerHTML = "❌ Not quite. " + info;
         }
         document.getElementById('next-btn').style.display = 'block';
     }
