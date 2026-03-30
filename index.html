@@ -1,207 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Year 5 Science — Adaptive Practice</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{
-  --ink:#1a1a2e;--ink2:#4a4a6a;--ink3:#8888aa;--ink4:#c0c0d8;
-  --paper:#f0f4ff;--surface:#ffffff;--border:#dde2f0;--border2:#bec5e0;
-  --bio:#166534;--bio-bg:#dcfce7;--bio-mid:#22c55e;
-  --chem:#1e40af;--chem-bg:#dbeafe;--chem-mid:#3b82f6;
-  --phys:#92400e;--phys-bg:#fef3c7;--phys-mid:#f59e0b;
-  --ws:#5b21b6;--ws-bg:#ede9fe;--ws-mid:#8b5cf6;
-  --exc-bg:#d1fae5;--exc-txt:#065f46;--exc-bdr:#6ee7b7;
-  --ep-bg:#dbeafe;--ep-txt:#1e40af;--ep-bdr:#93c5fd;
-  --ex-bg:#f1f5f9;--ex-txt:#334155;--ex-bdr:#cbd5e1;
-  --em-bg:#fef3c7;--em-txt:#92400e;--em-bdr:#fcd34d;
-  --er-bg:#fee2e2;--er-txt:#991b1b;--er-bdr:#fca5a5;
-  --r:12px;--rl:18px;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
-.screen{display:none;min-height:100vh;flex-direction:column}
-.screen.active{display:flex}
-#s-login{align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 50%,#24243e 100%);position:relative;overflow:hidden}
-.stars-bg{position:absolute;inset:0;pointer-events:none}
-.star-dot{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d) ease-in-out infinite var(--dl)}
-@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.9}}
-.login-card{background:var(--surface);border-radius:24px;padding:2.2rem 2rem;width:min(420px,92vw);box-shadow:0 32px 80px rgba(0,0,0,.5);position:relative;z-index:1}
-.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem}
-.logo-rocket{font-size:28px}
-.logo-name{font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:var(--ink)}
-.login-card h1{font-family:'Nunito',sans-serif;font-size:21px;font-weight:800;letter-spacing:-.5px;margin-bottom:1.4rem}
-.field{margin-bottom:.85rem}
-.field label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:5px;text-transform:uppercase}
-.field input, .field select{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;background:var(--paper);color:var(--ink)}
-.btn-start{width:100%;padding:12px;background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:800;cursor:pointer;margin-top:.5rem}
-.qhdr{background:var(--surface);border-bottom:1px solid var(--border);padding:.65rem 1rem;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
-.prog-track{height:5px;background:var(--border);border-radius:3px;flex:1;overflow:hidden}
-.prog-fill{height:100%;background:linear-gradient(90deg,#1a1a4e,#0f3460);transition:width .4s}
-.qbody{flex:1;padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%}
-.dom-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-bottom:.6rem}
-.db-bio{background:var(--bio-bg);color:var(--bio)}
-.db-chem{background:var(--chem-bg);color:var(--chem)}
-.db-phys{background:var(--phys-bg);color:var(--phys)}
-.db-ws{background:var(--ws-bg);color:var(--ws)}
-.opt{display:flex;align-items:center;gap:11px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;margin-bottom:8px;background:var(--surface)}
-.opt.correct{border-color:#16a34a;background:#f0fdf4}
-.opt.wrong{border-color:#dc2626;background:#fef2f2}
-.ai-loading{display:none;align-items:center;gap:10px;padding:1.5rem;justify-content:center}
-.ai-loading.show{display:flex}
-.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Year 5 Science - NLCS Jeju</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --p:#1a1a4e; --s:#f0f4ff; --w:#ffffff; --r:12px; }
+        body { font-family: 'Nunito', sans-serif; background: var(--s); margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .card { background: var(--w); padding: 2rem; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #dde2f0; border-radius: var(--r); font-size: 16px; box-sizing: border-box; }
+        button { background: var(--p); color: white; border: none; padding: 14px; border-radius: var(--r); font-weight: 800; cursor: pointer; width: 100%; }
+        #quiz-screen { display: none; width: 90%; max-width: 600px; background: white; padding: 2rem; border-radius: 24px; }
+        .opt { border: 2px solid #dde2f0; padding: 15px; border-radius: var(--r); margin: 10px 0; cursor: pointer; text-align: left; }
+        .correct { border-color: #22c55e; background: #dcfce7; }
+        .wrong { border-color: #ef4444; background: #fee2e2; }
+    </style>
 </head>
 <body>
 
-<div id="s-login" class="screen active">
-  <div class="stars-bg" id="stars"></div>
-  <div class="login-card">
-    <div class="login-logo"><div class="logo-rocket">🚀</div><div><div class="logo-name">Year 5 Science</div><div style="font-size:11px;color:var(--ink3)">NLCS Jeju</div></div></div>
-    <h1>Sign in</h1>
-    <div class="field"><label>Name</label><input type="text" id="inp-name" placeholder="Enter name"/></div>
-    <div class="field"><label>Class</label>
-      <select id="inp-class">
-        <option value="">— select —</option>
-        <option>5A</option><option>5B</option><option>5C</option><option>5D</option><option>5E</option>
-      </select></div>
-    <div class="field"><label>Focus area</label>
-      <select id="inp-domain">
-        <option value="all">All topics</option>
-        <option value="Biology">Biology</option>
-        <option value="Chemistry">Chemistry</option>
-        <option value="Physics">Physics</option>
-        <option value="Working Scientifically">Working Scientifically</option>
-      </select></div>
-    <button class="btn-start" onclick="startQuiz()">Start Practice 🚀</button>
-  </div>
-</div>
+    <div id="login-screen" class="card">
+        <h2 style="margin-top:0">🚀 Year 5 Science</h2>
+        <input type="text" id="u-name" placeholder="Enter Name">
+        <select id="u-class">
+            <option value="">Select Class</option>
+            <option>5A</option><option>5B</option><option>5C</option><option>5D</option><option>5E</option>
+        </select>
+        <button onclick="startApp()">Start Practice</button>
+    </div>
 
-<div id="s-quiz" class="screen">
-  <div class="qhdr">
-    <div id="hdr-name" style="font-size:13px; font-weight:600"></div>
-    <div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
-    <button onclick="location.reload()" style="font-size:11px; border:none; background:none; cursor:pointer; color:var(--ink3)">Quit</button>
-  </div>
-  <div class="qbody" id="qbody"></div>
-</div>
+    <div id="quiz-screen">
+        <div id="q-content">
+            <h3>Loading AI Question...</h3>
+        </div>
+    </div>
 
 <script>
-// --- CORE CONFIGURATION ---
-const API_KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU';
-let quiz = { name:'', cls:'', domain:'all', qIdx:0, score:0, history:[], currentQ:null, locked:false };
+    // YOUR NEW KEY
+    const KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU'; 
 
-function startQuiz() {
-  quiz.name = document.getElementById('inp-name').value.trim();
-  quiz.cls = document.getElementById('inp-class').value;
-  quiz.domain = document.getElementById('inp-domain').value;
+    function startApp() {
+        const name = document.getElementById('u-name').value;
+        const cls = document.getElementById('u-class').value;
+        
+        if(!name || !cls) return alert("Please fill in your name and class!");
 
-  if(!quiz.name || !quiz.cls) {
-    alert("Please enter your name and select a class.");
-    return;
-  }
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'block';
+        fetchQuestion();
+    }
 
-  document.getElementById('s-login').classList.remove('active');
-  document.getElementById('s-quiz').classList.add('active');
-  document.getElementById('hdr-name').innerText = quiz.name;
-  loadNext();
-}
+    async function fetchQuestion() {
+        const container = document.getElementById('q-content');
+        container.innerHTML = "<h3>Generating Question...</h3>";
 
-async function fetchAIQuestion() {
-  // Using the updated Key and stable v1 endpoint to fix 404 errors
-  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-  
-  const prompt = `Generate a Year 5 Science multiple choice question about ${quiz.domain}. 
-  Return ONLY a JSON object: {"d":"Biology|Chemistry|Physics|Working Scientifically","q":"question text","o":["opt1","opt2","opt3","opt4"],"a":0,"e":"explanation"}`;
+        try {
+            // Updated to the most stable v1 endpoint to prevent 404s
+            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${KEY}`;
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: "Provide a Year 5 Science question in JSON format: {\"q\":\"question\",\"o\":[\"A\",\"B\",\"C\",\"D\"],\"a\":0,\"e\":\"explanation\"}" }] }],
+                    generationConfig: { responseMimeType: "application/json" }
+                })
+            });
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: "application/json" }
-    })
-  });
+            if(!response.ok) throw new Error("API Error: " + response.status);
 
-  if(!response.ok) {
-      const errData = await response.json();
-      console.error("API Response Error:", errData);
-      throw new Error(response.status);
-  }
-  
-  const data = await response.json();
-  return JSON.parse(data.candidates[0].content.parts[0].text);
-}
+            const data = await response.json();
+            const q = JSON.parse(data.candidates[0].content.parts[0].text);
+            
+            container.innerHTML = `
+                <h2>${q.q}</h2>
+                ${q.o.map((opt, i) => `<div class="opt" onclick="check(${i}, ${q.a}, this, '${q.e.replace(/'/g, "\\'")}')">${opt}</div>`).join('')}
+                <div id="feedback" style="margin-top:20px; font-weight:700; display:none"></div>
+                <button id="next-btn" style="display:none; margin-top:20px" onclick="fetchQuestion()">Next Question</button>
+            `;
+        } catch (err) {
+            container.innerHTML = `<h3 style="color:red">Error: ${err.message}</h3><button onclick="fetchQuestion()">Retry</button>`;
+        }
+    }
 
-async function loadNext() {
-  quiz.qIdx++;
-  quiz.locked = false;
-  document.getElementById('prog').style.width = Math.min((quiz.qIdx * 10), 100) + '%';
-  
-  const container = document.getElementById('qbody');
-  container.innerHTML = `<div class="ai-loading show"><div class="spinner"></div><span>Generating Question ${quiz.qIdx}...</span></div>`;
-  
-  try {
-    const q = await fetchAIQuestion();
-    quiz.currentQ = q;
-    renderQuestion(q);
-  } catch (err) {
-    console.error("Fetch Error:", err);
-    container.innerHTML = `<div style="text-align:center; padding:2rem">
-      <p style="color:red; margin-bottom:1rem">Connection Error (${err.message}). Check console for details.</p>
-      <button class="btn-start" onclick="loadNext()">Retry Connection</button>
-    </div>`;
-  }
-}
-
-function renderQuestion(q) {
-  const dClass = q.d.includes('Bio')?'db-bio':q.d.includes('Chem')?'db-chem':q.d.includes('Phys')?'db-phys':'db-ws';
-  document.getElementById('qbody').innerHTML = `
-    <div class="dom-badge ${dClass}">${q.d}</div>
-    <div style="font-family:Nunito,sans-serif; font-size:18px; font-weight:700; margin-bottom:1.5rem">${q.q}</div>
-    <div class="opts">
-      ${q.o.map((opt, i) => `<div class="opt" onclick="checkAnswer(${i})">
-        <div style="width:24px; font-weight:800; color:var(--ink3)">${String.fromCharCode(65+i)}</div>
-        <div>${opt}</div>
-      </div>`).join('')}
-    </div>
-    <div id="feedback" style="display:none; margin-top:1.5rem; padding:1rem; border-radius:12px; font-size:14px"></div>
-    <button id="btn-next" class="btn-start" style="display:none; width:auto; padding:8px 24px" onclick="loadNext()">Next Question ➔</button>
-  `;
-}
-
-function checkAnswer(idx) {
-  if(quiz.locked) return;
-  quiz.locked = true;
-  
-  const isCorrect = (idx === quiz.currentQ.a);
-  const opts = document.querySelectorAll('.opt');
-  
-  opts[idx].classList.add(isCorrect ? 'correct' : 'wrong');
-  opts[quiz.currentQ.a].classList.add('correct');
-
-  const fb = document.getElementById('feedback');
-  fb.style.display = 'block';
-  fb.style.background = isCorrect ? '#f0fdf4' : '#fef2f2';
-  fb.innerHTML = `<strong>${isCorrect ? 'Correct!' : 'Not quite.'}</strong> ${quiz.currentQ.e}`;
-  document.getElementById('btn-next').style.display = 'block';
-}
-
-// Background Visuals
-const starsCont = document.getElementById('stars');
-for(let i=0; i<40; i++) {
-  const s = document.createElement('div');
-  s.className = 'star-dot';
-  s.style.left = Math.random()*100+'%';
-  s.style.top = Math.random()*100+'%';
-  s.style.width = s.style.height = (Math.random()*3+1)+'px';
-  s.style.setProperty('--d', (Math.random()*3+2)+'s');
-  s.style.setProperty('--dl', (Math.random()*5)+'s');
-  starsCont.appendChild(s);
-}
+    function check(idx, correct, el, explain) {
+        const opts = document.querySelectorAll('.opt');
+        opts.forEach(o => o.style.pointerEvents = 'none');
+        
+        if(idx === correct) {
+            el.classList.add('correct');
+        } else {
+            el.classList.add('wrong');
+            opts[correct].classList.add('correct');
+        }
+        
+        const fb = document.getElementById('feedback');
+        fb.style.display = 'block';
+        fb.innerText = explain;
+        document.getElementById('next-btn').style.display = 'block';
+    }
 </script>
 </body>
 </html>
