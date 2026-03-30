@@ -123,11 +123,11 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
     <div class="dom-grid" id="rd-domains"></div>
     <p style="font-size:11px; font-weight:700; color:var(--ink3); margin:20px 0 10px">GRADE SCALE</p>
     <div class="grade-scale">
-        <div class="gs-row"><span class="gs-pill g-exc" style="background:var(--exc-bg); color:var(--exc-txt); border:1px solid var(--exc-bdr)">Exceeding</span><span>81% - 100%</span></div>
-        <div class="gs-row"><span class="gs-pill g-ep" style="background:var(--ep-bg); color:var(--ep-txt); border:1px solid var(--ep-bdr)">Expected+</span><span>70% - 80%</span></div>
-        <div class="gs-row"><span class="gs-pill g-ex" style="background:var(--ex-bg); color:var(--ex-txt); border:1px solid var(--ex-bdr)">Expected</span><span>60% - 69%</span></div>
-        <div class="gs-row"><span class="gs-pill g-em" style="background:var(--em-bg); color:var(--em-txt); border:1px solid var(--em-bdr)">Expected-</span><span>50% - 59%</span></div>
-        <div class="gs-row"><span class="gs-pill g-er" style="background:var(--er-bg); color:var(--er-txt); border:1px solid var(--er-bdr)">Emerging</span><span>0% - 49%</span></div>
+        <div class="gs-row"><span class="gs-pill" style="background:var(--exc-bg); color:var(--exc-txt); border:1px solid var(--exc-bdr)">Exceeding</span><span>81% - 100%</span></div>
+        <div class="gs-row"><span class="gs-pill" style="background:var(--ep-bg); color:var(--ep-txt); border:1px solid var(--ep-bdr)">Expected+</span><span>70% - 80%</span></div>
+        <div class="gs-row"><span class="gs-pill" style="background:var(--ex-bg); color:var(--ex-txt); border:1px solid var(--ex-bdr)">Expected</span><span>60% - 69%</span></div>
+        <div class="gs-row"><span class="gs-pill" style="background:var(--em-bg); color:var(--em-txt); border:1px solid var(--em-bdr)">Expected-</span><span>50% - 59%</span></div>
+        <div class="gs-row"><span class="gs-pill" style="background:var(--er-bg); color:var(--er-txt); border:1px solid var(--er-bdr)">Emerging</span><span>0% - 49%</span></div>
     </div>
     <button class="btn-start" style="width:100%" onclick="location.reload()">↺ Try Again</button>
     <div id="rd-review" style="margin-top:20px"></div>
@@ -138,11 +138,11 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 window.GEMINI_API_KEY = 'AIzaSyDQ44QdbO9wWHXPAHyF6F3OLLUAxLs4poo';
 
 const GRADES=[
-  {label:'Exceeding', min:81,cls:'g-exc', styles:'background:var(--exc-bg); color:var(--exc-txt); border:1px solid var(--exc-bdr)'},
-  {label:'Expected+', min:70,cls:'g-ep', styles:'background:var(--ep-bg); color:var(--ep-txt); border:1px solid var(--ep-bdr)'},
-  {label:'Expected',  min:60,cls:'g-ex', styles:'background:var(--ex-bg); color:var(--ex-txt); border:1px solid var(--ex-bdr)'},
-  {label:'Expected\u2212',min:50,cls:'g-em', styles:'background:var(--em-bg); color:var(--em-txt); border:1px solid var(--em-bdr)'},
-  {label:'Emerging',  min:0, cls:'g-er', styles:'background:var(--er-bg); color:var(--er-txt); border:1px solid var(--er-bdr)'},
+  {label:'Exceeding', min:81, style:'background:var(--exc-bg); color:var(--exc-txt); border:1px solid var(--exc-bdr)'},
+  {label:'Expected+', min:70, style:'background:var(--ep-bg); color:var(--ep-txt); border:1px solid var(--ep-bdr)'},
+  {label:'Expected',  min:60, style:'background:var(--ex-bg); color:var(--ex-txt); border:1px solid var(--ex-bdr)'},
+  {label:'Expected\u2212',min:50, style:'background:var(--em-bg); color:var(--em-txt); border:1px solid var(--em-bdr)'},
+  {label:'Emerging',  min:0,  style:'background:var(--er-bg); color:var(--er-txt); border:1px solid var(--er-bdr)'},
 ];
 
 let quiz = { name:'', cls:'', domain:'all', qIdx:0, score:0, history:[], currentQ:null, locked:false };
@@ -164,19 +164,20 @@ async function loadNext() {
   document.getElementById('hdr-count').innerText = `Question ${quiz.qIdx}`;
   document.getElementById('prog').style.width = Math.min((quiz.qIdx * 10), 100) + '%';
   const container = document.getElementById('qbody');
-  container.innerHTML = `<div class="ai-loading show"><div class="spinner"></div><span>AI is writing a ${quiz.domain} question...</span></div>`;
+  container.innerHTML = `<div class="ai-loading show"><div class="spinner"></div><span>AI is writing your question...</span></div>`;
   
   try {
     const q = await fetchAIQuestion();
     renderQuestion(q);
   } catch (e) {
-    container.innerHTML = `<div style="text-align:center; padding:20px;"><p style="color:red; font-weight:bold">API Error. Please try again.</p><button class="btn-start" style="width:auto; margin-top:10px" onclick="loadNext()">Retry</button></div>`;
+    container.innerHTML = `<div style="text-align:center; padding:20px;"><p style="color:red; font-weight:bold">Connection Error (404/429). Please try again.</p><button class="btn-start" style="width:auto; margin-top:10px" onclick="loadNext()">Retry</button></div>`;
   }
 }
 
 async function fetchAIQuestion() {
-  // THE CRITICAL FIX: Added ':generateContent' to the model path
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${window.GEMINI_API_KEY}`;
+  // THE FIX: Explicitly appending the command to ensure it isn't lost in transit
+  const model = "gemini-1.5-flash";
+  const url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + window.GEMINI_API_KEY;
   
   const prompt = `Return ONLY a raw JSON object for a Year 5 Science question on ${quiz.domain}. Structure: {"d":"Biology|Chemistry|Physics|Working Scientifically","q":"text","o":["A","B","C","D"],"a":0,"e":"explanation"}`;
 
@@ -234,11 +235,11 @@ function stopAndFinish() {
   const pct = total > 0 ? Math.round((quiz.score / total) * 100) : 0;
   const g = GRADES.find(gr => pct >= gr.min) || GRADES[4];
 
-  document.getElementById('rh-name').innerText = `${quiz.name} (${quiz.cls})`;
-  document.getElementById('rh-score').innerText = `${quiz.score}/${total}`;
-  document.getElementById('rh-pct').innerText = `${pct}% Overall`;
+  document.getElementById('rh-name').innerText = quiz.name + " (" + quiz.cls + ")";
+  document.getElementById('rh-score').innerText = quiz.score + "/" + total;
+  document.getElementById('rh-pct').innerText = pct + "% Overall";
   document.getElementById('rh-grade').innerText = g.label;
-  document.getElementById('rh-grade').style = g.styles;
+  document.getElementById('rh-grade').setAttribute("style", g.style);
 
   const domGrid = document.getElementById('rd-domains');
   domGrid.innerHTML = '';
@@ -252,7 +253,7 @@ function stopAndFinish() {
   const review = document.getElementById('rd-review');
   const missed = quiz.history.filter(h => !h.correct);
   review.innerHTML = missed.length > 0 ? `<p style="font-size:11px; font-weight:700; color:var(--ink3); margin-bottom:10px">REVIEW MISSED QUESTIONS</p>` + 
-    missed.map(m => `<div style="background:white; border:1px solid var(--border); padding:10px; border-radius:12px; margin-bottom:8px; font-size:13px"><strong>${m.q}</strong><br><span style="color:#166534">Correct Answer: ${m.o[m.a]}</span></div>`).join('') : "";
+    missed.map(m => `<div style="background:white; border:1px solid var(--border); padding:10px; border-radius:12px; margin-bottom:8px; font-size:13px"><strong>${m.q}</strong><br><span style="color:#166534">Correct: ${m.o[m.a]}</span></div>`).join('') : "";
 }
 
 // Background stars
