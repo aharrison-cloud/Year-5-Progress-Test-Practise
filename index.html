@@ -9,8 +9,7 @@
         :root{
             --ink:#1a1a2e;--ink2:#4a4a6a;--ink3:#8888aa;--ink4:#c0c0d8;
             --paper:#f0f4ff;--surface:#ffffff;--border:#dde2f0;--border2:#bec5e0;
-            --chem:#1e40af;--chem-bg:#dbeafe;--exc-bg:#d1fae5;--exc-txt:#065f46;
-            --r:12px;
+            --chem:#1e40af;--chem-bg:#dbeafe;--r:12px;
         }
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
         body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
@@ -22,7 +21,7 @@
         .field label{display:block;font-size:11px;font-weight:600;margin-bottom:5px;text-transform:uppercase}
         .field input,.field select{width:100%;padding:10px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px}
         .btn-start{width:100%;padding:12px;background:#0f3460;color:white;border:none;border-radius:var(--r);font-weight:800;cursor:pointer}
-        .qhdr{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem;display:flex;align-items:center;gap:15px;sticky:top}
+        .qhdr{background:var(--surface);border-bottom:1px solid var(--border);padding:.8rem;display:flex;align-items:center;gap:15px;position:sticky;top:0;z-index:100}
         .prog-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
         .prog-fill{height:100%;background:#1a1a4e;transition:width .4s}
         .qbody{flex:1;padding:1.5rem;max-width:660px;margin:0 auto;width:100%}
@@ -55,7 +54,7 @@
     <div class="qhdr">
         <div id="hdr-count" style="font-weight:bold">Q1</div>
         <div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
-        <button onclick="finishQuiz()" style="background:none; border:none; color:red; cursor:pointer">Stop</button>
+        <button onclick="finishQuiz()" style="background:none; border:none; color:red; cursor:pointer; font-weight:bold">Finish</button>
     </div>
     <div id="qbody" class="qbody">
         <div class="ai-loading show" id="load-box">AI is generating your question...</div>
@@ -84,7 +83,7 @@ function startQuiz() {
     state.name = document.getElementById('inp-name').value;
     state.cl = document.getElementById('inp-class').value;
     state.domain = document.getElementById('inp-domain').value;
-    if(!state.name || !state.cl) return alert("Enter name and class!");
+    if(!state.name || !state.cl) return alert("Please enter your name and class!");
     document.getElementById('s-login').classList.remove('active');
     document.getElementById('s-quiz').classList.add('active');
     loadNextQuestion();
@@ -94,25 +93,24 @@ async function loadNextQuestion() {
     state.qIdx++;
     state.locked = false;
     document.getElementById('hdr-count').innerText = `Q${state.qIdx}`;
-    document.getElementById('prog').style.width = (state.qIdx * 10) + '%';
+    document.getElementById('prog').style.width = Math.min((state.qIdx * 10), 100) + '%';
     document.getElementById('qbody').innerHTML = `<div class="ai-loading show">Generating Question ${state.qIdx}...</div>`;
 
     try {
         const q = await fetchAI();
         renderQ(q);
     } catch (e) {
-        console.warn("AI failed, using fallback", e);
+        console.warn("AI logic failed, reverting to internal bank:", e);
         renderQ(FALLBACK[Math.floor(Math.random()*FALLBACK.length)]);
     }
 }
 
 async function fetchAI() {
-    // FIXED URL and JSON structure
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${window.GEMINI_API_KEY}`;
     
     const prompt = `Generate a Year 5 Science question about ${state.domain}. 
-    Format: JSON only. 
-    Keys: {"d": "Topic", "q": "Question", "o": ["A", "B", "C", "D"], "a": index_of_correct_answer, "e": "Explanation"}`;
+    Return ONLY JSON with this structure: {"d": "Topic Name", "q": "The Question", "o": ["Option A", "Option B", "Option C", "Option D"], "a": 0, "e": "Short Explanation"}. 
+    The 'a' value must be the index (0-3) of the correct answer.`;
 
     const resp = await fetch(url, {
         method: 'POST',
@@ -120,11 +118,14 @@ async function fetchAI() {
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
     });
 
-    if (!resp.ok) throw new Error("API Error: " + resp.status);
+    if (!resp.ok) throw new Error("API Status: " + resp.status);
 
     const data = await resp.json();
-    const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
-    return JSON.parse(text);
+    let rawText = data.candidates[0].content.parts[0].text;
+    
+    // Clean potential Markdown formatting from AI
+    rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+    return JSON.parse(rawText);
 }
 
 function renderQ(q) {
@@ -136,7 +137,7 @@ function renderQ(q) {
             ${q.o.map((opt, i) => `<div class="opt" onclick="check(${i})"><b>${String.fromCharCode(65+i)}</b> ${opt}</div>`).join('')}
         </div>
         <div id="fb" class="fb"></div>
-        <button id="next-btn" onclick="loadNextQuestion()" style="display:none; margin-top:20px; width:100%; padding:12px; border-radius:12px; background:#1a1a4e; color:white; border:none; cursor:pointer">Next Question ➔</button>
+        <button id="next-btn" onclick="loadNextQuestion()" style="display:none; margin-top:20px; width:100%; padding:12px; border-radius:12px; background:#1a1a4e; color:white; border:none; cursor:pointer; font-weight:bold">Next Question ➔</button>
     `;
 }
 
@@ -152,7 +153,7 @@ function check(idx) {
 
     const fb = document.getElementById('fb');
     fb.innerHTML = `<b>${isCorrect ? 'Correct!' : 'Incorrect.'}</b> ${state.currentQ.e}`;
-    fb.style.display = 'block';
+    fb.className = "fb show";
     fb.style.background = isCorrect ? '#f0fdf4' : '#fef2f2';
     document.getElementById('next-btn').style.display = 'block';
 }
