@@ -26,15 +26,12 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 .screen{display:none;min-height:100vh;flex-direction:column}
 .screen.active{display:flex}
 
-/* LOGIN */
-#s-login{align-items:center;justify-content:center;
-  background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 50%,#24243e 100%);
-  position:relative;overflow:hidden}
+/* LOGIN SCREEN */
+#s-login{align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 50%,#24243e 100%);position:relative;overflow:hidden}
 .stars-bg{position:absolute;inset:0;pointer-events:none}
 .star-dot{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d) ease-in-out infinite var(--dl)}
 @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.9}}
-.login-card{background:var(--surface);border-radius:24px;padding:2.2rem 2rem;
-  width:min(420px,92vw);box-shadow:0 32px 80px rgba(0,0,0,.5);position:relative;z-index:1}
+.login-card{background:var(--surface);border-radius:24px;padding:2.2rem 2rem;width:min(420px,92vw);box-shadow:0 32px 80px rgba(0,0,0,.5);position:relative;z-index:1}
 .login-logo{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem}
 .logo-rocket{font-size:28px}
 .logo-name{font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:var(--ink)}
@@ -43,137 +40,47 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 .login-card > p{font-size:13px;color:var(--ink3);margin-bottom:1.4rem;line-height:1.5}
 .field{margin-bottom:.85rem}
 .field label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase}
-.field input,.field select{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--ink);appearance:none;transition:border-color .15s}
-.field input:focus,.field select:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(26,26,46,.07)}
-.btn-start{width:100%;padding:12px;background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;margin-top:.5rem;letter-spacing:.3px;transition:opacity .15s}
-.btn-start:hover{opacity:.88}
-.login-note{font-size:11px;color:var(--ink4);text-align:center;margin-top:.8rem;line-height:1.5}
+.field input, .field select{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;background:var(--paper);color:var(--ink);appearance:none;transition:border-color .15s}
+.btn-start{width:100%;padding:12px;background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:800;cursor:pointer;margin-top:.5rem;letter-spacing:.3px}
 
-/* QUIZ HEADER */
-#s-quiz{background:var(--paper)}
-.qhdr{background:var(--surface);border-bottom:1px solid var(--border);padding:.65rem 1rem;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;flex-wrap:wrap}
-.qhdr-info{min-width:0}
+/* QUIZ UI */
+.qhdr{background:var(--surface);border-bottom:1px solid var(--border);padding:.65rem 1rem;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
 .qhdr-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.qhdr-cls{font-size:10px;color:var(--ink3);font-family:monospace}
-.qhdr-prog{flex:1;min-width:80px}
-.prog-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
-.prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#1a1a4e,#0f3460);transition:width .4s cubic-bezier(.4,0,.2,1)}
-.qhdr-count{font-size:11px;color:var(--ink3);font-family:monospace;white-space:nowrap}
-.diff-chip{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
-.dc-easy{background:#dcfce7;color:#166534}
-.dc-medium{background:#fef3c7;color:#92400e}
-.dc-hard{background:#fee2e2;color:#991b1b}
-.dc-ext{background:#fce7f3;color:#be185d}
-.streak-chip{display:none;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#92400e;background:#fef3c7;padding:3px 9px;border-radius:20px}
-.streak-chip.show{display:flex}
-.btn-stop{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Nunito',sans-serif;background:transparent;border:1.5px solid #fca5a5;color:#991b1b;cursor:pointer;white-space:nowrap;transition:all .12s}
-.btn-stop:hover{background:#fee2e2}
+.prog-track{height:5px;background:var(--border);border-radius:3px;flex:1;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#1a1a4e,#0f3460);transition:width .4s cubic-bezier(.4,0,.2,1)}
+.btn-stop{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid #fca5a5;color:#991b1b;cursor:pointer;background:none;transition:all .12s}
 
-/* QUESTION BODY */
-.qbody{flex:1;padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%;padding-bottom:2rem}
-.q-num{font-size:11px;color:var(--ink3);font-family:monospace;margin-bottom:.4rem}
+.qbody{flex:1;padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%}
 .dom-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:.6rem}
 .db-bio{background:var(--bio-bg);color:var(--bio)}
 .db-chem{background:var(--chem-bg);color:var(--chem)}
 .db-phys{background:var(--phys-bg);color:var(--phys)}
 .db-ws{background:var(--ws-bg);color:var(--ws)}
-.db-ext{background:var(--ext-bg);color:var(--ext)}
-.ai-chip{font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:#ede9fe;color:#5b21b6;margin-left:5px;vertical-align:middle}
-.ext-badge{font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--ext-bg);color:var(--ext);margin-left:5px;vertical-align:middle;text-transform:uppercase;letter-spacing:.4px}
-.q-context{background:var(--surface);border:1.5px solid var(--border2);border-left:4px solid var(--chem-mid);border-radius:var(--r);padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--ink2);line-height:1.6}
-.q-context-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:4px}
-.q-image{margin-bottom:1rem;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--border);background:#f8f8fc}
-.q-image img{width:100%;display:block;max-height:240px;object-fit:contain;padding:8px}
-.q-image-cap{font-size:11px;color:var(--ink3);padding:4px 10px;background:var(--paper);border-top:1px solid var(--border);font-style:italic}
-.q-hint{background:#fffbeb;border:1px solid #fcd34d;border-radius:var(--r);padding:8px 12px;font-size:12px;color:#78350f;margin-bottom:1rem;line-height:1.5}
-.q-text{font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;line-height:1.5;color:var(--ink);margin-bottom:1rem;letter-spacing:-.15px}
+.q-text{font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;line-height:1.5;color:var(--ink);margin-bottom:1rem}
 .opts{display:flex;flex-direction:column;gap:8px}
-.opt{display:flex;align-items:center;gap:11px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:14px;font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--surface);text-align:left;transition:border-color .12s,background .12s}
-.opt:hover:not(.locked){border-color:var(--border2);background:var(--paper)}
-.opt.locked{cursor:default}
+.opt{display:flex;align-items:center;gap:11px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:14px;background:var(--surface);transition:all .12s}
 .opt.correct{border-color:#16a34a;background:#f0fdf4;color:#14532d}
 .opt.wrong{border-color:#dc2626;background:#fef2f2;color:#7f1d1d}
-.opt.reveal{border-color:#16a34a;background:#f0fdf4;color:#14532d}
-.opt-let{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:monospace;flex-shrink:0;color:var(--ink3);transition:all .12s}
+.opt-let{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink3)}
 .opt.correct .opt-let{background:#16a34a;border-color:#16a34a;color:#fff}
 .opt.wrong .opt-let{background:#dc2626;border-color:#dc2626;color:#fff}
-.opt.reveal .opt-let{background:#16a34a;border-color:#16a34a;color:#fff}
-.fb{margin-top:.9rem;padding:10px 13px;border-radius:var(--r);font-size:13px;line-height:1.6;display:none}
-.fb.show{display:block}
-.fb.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#14532d}
-.fb.no{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
-.ext-tip{margin-top:.75rem;padding:9px 12px;background:var(--ext-bg);border:1px solid #f9a8d4;border-radius:var(--r);font-size:12px;color:var(--ext);line-height:1.55;display:none}
-.ext-tip.show{display:block}
-.ai-loading{display:none;align-items:center;gap:10px;padding:1.5rem;justify-content:center;color:var(--ink3);font-size:13px}
-.ai-loading.show{display:flex}
-.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
-@keyframes spin{to{transform:rotate(360deg)}}
-.qnav{display:flex;justify-content:space-between;align-items:center;margin-top:1.3rem;padding-top:1.1rem;border-top:1px solid var(--border)}
-.btn{padding:8px 18px;border-radius:var(--r);font-size:13px;font-weight:600;font-family:'Nunito',sans-serif;cursor:pointer;transition:all .12s;border:1.5px solid transparent}
-.btn-out{background:var(--surface);border-color:var(--border2);color:var(--ink2)}
-.btn-out:hover{border-color:var(--ink);color:var(--ink)}
-.btn-pri{background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white}
-.btn-pri:hover{opacity:.88}
-.btn:disabled{opacity:.35;cursor:default}
 
-/* RESULTS */
-#s-results{background:var(--paper)}
-.res-hero{background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 50%,#0f3460 100%);color:white;padding:1.8rem 1.3rem 1.5rem;text-align:center;position:relative;overflow:hidden}
-.rh-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;opacity:.5;margin-bottom:.4rem;font-family:monospace}
-.rh-name{font-size:15px;opacity:.7;margin-bottom:1rem}
+/* RESULTS DASHBOARD */
+.res-hero{background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 50%,#0f3460 100%);color:white;padding:1.8rem 1.3rem;text-align:center}
 .rh-grade{display:inline-block;padding:6px 22px;border-radius:30px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;margin-bottom:.8rem}
-.g-exc{background:var(--exc-bg);color:var(--exc-txt)}
-.g-ep{background:var(--ep-bg);color:var(--ep-txt)}
-.g-ex{background:var(--ex-bg);color:var(--ex-txt)}
-.g-em{background:var(--em-bg);color:var(--em-txt)}
-.g-er{background:var(--er-bg);color:var(--er-txt)}
-.rh-score-row{display:flex;justify-content:center;align-items:baseline;gap:8px;margin-bottom:.25rem}
 .rh-score-big{font-family:'Nunito',sans-serif;font-size:52px;font-weight:800;letter-spacing:-3px;line-height:1}
-.rh-score-pct{font-size:20px;opacity:.6}
-.rh-tagline{font-size:13px;opacity:.55}
-.rh-meta{display:flex;justify-content:center;gap:14px;margin-top:.8rem;font-size:11px;opacity:.4;font-family:monospace;flex-wrap:wrap}
-.res-body{padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%;padding-bottom:2rem}
-.sec-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ink3);margin:1.3rem 0 .65rem}
+.res-body{padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%}
 .dom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.5rem}
 .dom-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rl);padding:1rem;position:relative;overflow:hidden}
 .dom-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
-.dca-bio::before{background:var(--bio-mid)}.dca-chem::before{background:var(--chem-mid)}
-.dca-phys::before{background:var(--phys-mid)}.dca-ws::before{background:var(--ws-mid)}
-.dom-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:.4rem}
-.dom-score-big{font-family:'Nunito',sans-serif;font-size:26px;font-weight:800;letter-spacing:-1px;color:var(--ink);line-height:1}
-.dom-score-den{font-size:13px;color:var(--ink3)}
-.dom-pct{font-size:12px;color:var(--ink3);margin:.2rem 0 .5rem}
-.dom-bar{height:5px;border-radius:3px;background:var(--border)}
-.dom-bar-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
-.dba-bio .dom-bar-fill{background:var(--bio-mid)}.dba-chem .dom-bar-fill{background:var(--chem-mid)}
-.dba-phys .dom-bar-fill{background:var(--phys-mid)}.dba-ws .dom-bar-fill{background:var(--ws-mid)}
+.dca-bio::before{background:var(--bio-mid)}.dca-chem::before{background:var(--chem-mid)}.dca-phys::before{background:var(--phys-mid)}.dca-ws::before{background:var(--ws-mid)}
 .grade-scale{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rl);padding:1rem;margin-bottom:.5rem}
 .gs-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
-.gs-row:last-child{border-bottom:none}
-.gs-pill{font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;min-width:95px;text-align:center;font-family:'Nunito',sans-serif}
-.gs-range{color:var(--ink3);font-family:monospace;font-size:11px;flex:1}
-.gs-yours{font-size:11px;font-weight:600;color:#16a34a}
-.ext-section{background:linear-gradient(135deg,#fdf4ff,#fce7f3);border:1.5px solid #f9a8d4;border-radius:var(--rl);padding:1.1rem;margin-bottom:.5rem}
-.ext-section-head{display:flex;align-items:center;gap:8px;margin-bottom:.75rem}
-.ext-topic{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #fbcfe8}
-.ext-topic:last-child{border-bottom:none;padding-bottom:0}
-.ext-icon{font-size:14px;flex-shrink:0;margin-top:1px}
-.ext-topic-name{font-weight:600;color:var(--ext);font-size:13px;margin-bottom:2px}
-.ext-topic-desc{font-size:12px;color:#9d174d;line-height:1.45}
-.study-dom{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rl);margin-bottom:10px;overflow:hidden}
-.study-dom-hdr{display:flex;align-items:center;gap:8px;padding:.8rem 1rem;border-bottom:1px solid var(--border)}
-.study-body{padding:.85rem 1rem}
-.topic-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.85rem}
-.ttag{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--paper);border:1.5px solid var(--border2);color:var(--ink2);text-decoration:none}
-.missed-item{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:.8rem 1rem;margin-bottom:7px;font-size:12px}
-.missed-q{font-size:13px;color:var(--ink2);margin:.3rem 0;line-height:1.4}
-.missed-right{color:#16a34a;font-weight:600;font-size:11px;margin-top:2px}
-.action-btns{display:flex;flex-direction:column;gap:8px;margin:1.2rem 0}
-.btn-full{width:100%;padding:11px;font-size:13px;text-align:center;border-radius:var(--r);font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;border:none}
-.btn-dl{background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white}
-.btn-retry{background:var(--surface);color:var(--ink);border:1.5px solid var(--border2)!important}
-.fade-in{animation:fi .22s ease}
-@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.gs-pill{font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;min-width:95px;text-align:center}
+.ai-loading{display:none;align-items:center;gap:10px;padding:1.5rem;justify-content:center;color:var(--ink3);font-size:13px}
+.ai-loading.show{display:flex}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -181,77 +88,61 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 <div id="s-login" class="screen active">
   <div class="stars-bg" id="stars"></div>
   <div class="login-card">
-    <div class="login-logo">
-      <div class="logo-rocket">🚀</div>
-      <div>
-        <div class="logo-name">Year 5 Science</div>
-        <div class="logo-sub">NLCS Jeju · Adaptive Practice</div>
-      </div>
-    </div>
+    <div class="login-logo"><div class="logo-rocket">🚀</div><div><div class="logo-name">Year 5 Science</div><div class="logo-sub">NLCS Jeju</div></div></div>
     <h1>Sign in to begin</h1>
-    <p>AI generates fresh questions just for you. Stop whenever you like — your results are saved automatically.</p>
-    <div class="field"><label>Your name</label><input type="text" id="inp-name" placeholder="e.g. Claire Kim"/></div>
+    <div class="field"><label>Your name</label><input type="text" id="inp-name" placeholder="Name"/></div>
     <div class="field"><label>Class</label>
       <select id="inp-class">
-        <option value="">— select your class —</option>
+        <option value="">— select —</option>
         <option>5A</option><option>5B</option><option>5C</option><option>5D</option><option>5E</option>
       </select></div>
     <div class="field"><label>Focus area</label>
       <select id="inp-domain">
-        <option value="all">All topics (mixed)</option>
+        <option value="all">All topics</option>
         <option value="Biology">Biology</option>
         <option value="Chemistry">Chemistry</option>
         <option value="Physics">Physics</option>
         <option value="Working Scientifically">Working Scientifically</option>
       </select></div>
-    <div class="field"><label>Question style</label>
-      <select id="inp-style">
-        <option value="mixed">Mixed styles</option>
-        <option value="pts">PTS format</option>
-        <option value="cambridge">Cambridge style</option>
-      </select></div>
-    <button class="btn-start" onclick="startQuiz()">Start — AI generates questions 🚀</button>
+    <button class="btn-start" onclick="startQuiz()">Start Practice 🚀</button>
   </div>
 </div>
 
 <div id="s-quiz" class="screen">
   <div class="qhdr">
-    <div class="qhdr-info"><div class="qhdr-name" id="hdr-name"></div><div class="qhdr-cls" id="hdr-cls"></div></div>
-    <div class="qhdr-prog"><div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div></div>
-    <div class="qhdr-count" id="hdr-count"></div>
-    <div class="streak-chip" id="streak">🔥 <span id="streak-n">0</span></div>
-    <button class="btn-stop" onclick="stopAndFinish()">Finish & Results</button>
+    <div class="qhdr-name" id="hdr-name"></div>
+    <div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+    <div id="hdr-count" style="font-size:11px; font-family:monospace"></div>
+    <button class="btn-stop" onclick="stopAndFinish()">Finish</button>
   </div>
-  <div class="qbody fade-in" id="qbody">
-    <div class="ai-loading show" id="first-load"><div class="spinner"></div><span>Connecting to Gemini AI...</span></div>
-  </div>
+  <div class="qbody" id="qbody"></div>
 </div>
 
 <div id="s-results" class="screen">
   <div class="res-hero">
-    <div class="rh-label">Practice Complete</div>
-    <div class="rh-name" id="rh-name"></div>
-    <div class="rh-grade" id="rh-grade"></div>
-    <div class="rh-score-row"><div class="rh-score-big" id="rh-score"></div><div class="rh-score-pct" id="rh-pct"></div></div>
+    <div id="rh-name" style="opacity:0.7; margin-bottom:10px"></div>
+    <div id="rh-grade"></div>
+    <div class="rh-score-big" id="rh-score"></div>
+    <div id="rh-pct" style="font-size:20px; opacity:0.6"></div>
   </div>
   <div class="res-body">
-    <p class="sec-head">📊 Score by domain</p>
+    <p style="font-size:11px; font-weight:700; color:var(--ink3); margin-bottom:10px">SCORE BY DOMAIN</p>
     <div class="dom-grid" id="rd-domains"></div>
-    <p class="sec-head">🎯 Grade scale</p>
+    
+    <p style="font-size:11px; font-weight:700; color:var(--ink3); margin:20px 0 10px">GRADE SCALE</p>
     <div class="grade-scale">
-        <div class="gs-row"><span class="gs-pill g-exc">Exceeding</span><span class="gs-range">81% - 100%</span></div>
-        <div class="gs-row"><span class="gs-pill g-ep">Expected+</span><span class="gs-range">70% - 80%</span></div>
-        <div class="gs-row"><span class="gs-pill g-ex">Expected</span><span class="gs-range">60% - 69%</span></div>
-        <div class="gs-row"><span class="gs-pill g-em">Expected-</span><span class="gs-range">50% - 59%</span></div>
-        <div class="gs-row"><span class="gs-pill g-er">Emerging</span><span class="gs-range">0% - 49%</span></div>
+        <div class="gs-row"><span class="gs-pill g-exc">Exceeding</span><span>81% - 100%</span></div>
+        <div class="gs-row"><span class="gs-pill g-ep">Expected+</span><span>70% - 80%</span></div>
+        <div class="gs-row"><span class="gs-pill g-ex">Expected</span><span>60% - 69%</span></div>
+        <div class="gs-row"><span class="gs-pill g-em">Expected-</span><span>50% - 59%</span></div>
+        <div class="gs-row"><span class="gs-pill g-er">Emerging</span><span>0% - 49%</span></div>
     </div>
-    <div class="action-btns">
-      <button class="btn btn-full btn-retry" onclick="location.reload()">↺ Try again</button>
-    </div>
-    <p class="sec-head">❌ Questions to review</p>
-    <div id="rd-review"></div>
+    
+    <button class="btn-start" style="width:100%" onclick="location.reload()">↺ Try Again</button>
+    <div id="rd-review" style="margin-top:20px"></div>
   </div>
-</div><script>
+</div>
+<script>
 window.GEMINI_API_KEY = 'AIzaSyDQ44QdbO9wWHXPAHyF6F3OLLUAxLs4poo';
 
 const GRADES=[
@@ -262,84 +153,63 @@ const GRADES=[
   {label:'Emerging',  min:0, cls:'g-er'},
 ];
 
-let quiz = {
-  name:'', cls:'', domain:'all', style:'mixed',
-  qIdx:0, score:0, streak:0, history:[],
-  currentQ:null, locked:false
-};
-
-function getGrade(pct){ return GRADES.find(g=>pct>=g.min)||GRADES[4]; }
+let quiz = { name:'', cls:'', domain:'all', qIdx:0, score:0, history:[], currentQ:null, locked:false };
 
 function startQuiz() {
-  quiz.name = document.getElementById('inp-name').value.trim();
+  quiz.name = document.getElementById('inp-name').value;
   quiz.cls = document.getElementById('inp-class').value;
   quiz.domain = document.getElementById('inp-domain').value;
-  quiz.style = document.getElementById('inp-style').value;
   if(!quiz.name || !quiz.cls) return alert("Please enter name and class.");
   
   document.getElementById('s-login').classList.remove('active');
   document.getElementById('s-quiz').classList.add('active');
   document.getElementById('hdr-name').innerText = quiz.name;
-  document.getElementById('hdr-cls').innerText = quiz.cls;
   loadNext();
 }
 
 async function loadNext() {
   quiz.qIdx++;
   quiz.locked = false;
-  updateHeader();
+  document.getElementById('hdr-count').innerText = `Question ${quiz.qIdx}`;
+  document.getElementById('prog').style.width = Math.min((quiz.qIdx * 10), 100) + '%';
+  
   const container = document.getElementById('qbody');
-  container.innerHTML = `<div class="ai-loading show"><div class="spinner"></div><span>AI is thinking...</span></div>`;
+  container.innerHTML = `<div class="ai-loading show"><div class="spinner"></div><span>AI is generating a ${quiz.domain} question...</span></div>`;
   
   try {
     const q = await fetchAIQuestion();
     renderQuestion(q);
   } catch (e) {
-    console.error("AI Error:", e);
-    container.innerHTML = `<p>Error loading question. <button onclick="loadNext()">Retry</button></p>`;
+    container.innerHTML = `<p>AI Connection Error. Please check your API key.</p>`;
   }
 }
 
 async function fetchAIQuestion() {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${window.GEMINI_API_KEY}`;
+  const prompt = `Return ONLY a raw JSON object for a Year 5 Science question on ${quiz.domain}. Structure: {"d":"Biology|Chemistry|Physics|Working Scientifically","q":"question text","o":["A","B","C","D"],"a":0,"e":"explanation"}`;
   
-  const prompt = `Act as a Year 5 Science Teacher. Generate a multiple-choice question about ${quiz.domain} (${quiz.style} style). 
-  Return ONLY a valid JSON object:
-  {"d":"Biology|Chemistry|Physics|Working Scientifically","q":"question text","o":["option A","option B","option C","option D"],"a":0,"e":"short explanation"}
-  where "a" is the index (0-3) of the correct answer. No markdown.`;
-
   const response = await fetch(url, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
   });
-
+  
   const data = await response.json();
-  let rawText = data.candidates[0].content.parts[0].text;
-  // Safety: Remove markdown code blocks if AI included them
-  rawText = rawText.replace(/```json|```/g, '').trim();
-  return JSON.parse(rawText);
+  let text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+  return JSON.parse(text);
 }
 
 function renderQuestion(q) {
   quiz.currentQ = q;
-  const container = document.getElementById('qbody');
   const dClass = q.d.includes('Bio')?'db-bio':q.d.includes('Chem')?'db-chem':q.d.includes('Phys')?'db-phys':'db-ws';
-  
-  container.innerHTML = `
+  document.getElementById('qbody').innerHTML = `
     <div class="dom-badge ${dClass}">${q.d}</div>
     <div class="q-text">${q.q}</div>
     <div class="opts">
-      ${q.o.map((opt, i) => `
-        <div class="opt" onclick="checkAnswer(${i})">
-          <div class="opt-let">${String.fromCharCode(65+i)}</div>
-          <div>${opt}</div>
-        </div>`).join('')}
+      ${q.o.map((opt, i) => `<div class="opt" onclick="checkAnswer(${i})"><div class="opt-let">${String.fromCharCode(65+i)}</div><div>${opt}</div></div>`).join('')}
     </div>
-    <div id="feedback" class="fb"></div>
-    <div id="next-box" style="display:none; margin-top:1.5rem">
-        <button class="btn btn-pri" onclick="loadNext()">Next Question ➔</button>
-    </div>
+    <div id="feedback" style="display:none; margin-top:15px; padding:12px; border-radius:12px; font-size:13px; line-height:1.5"></div>
+    <div id="next-box" style="display:none; margin-top:15px"><button class="btn-start" style="width:auto; padding:8px 20px" onclick="loadNext()">Next Question ➔</button></div>
   `;
 }
 
@@ -347,26 +217,19 @@ function checkAnswer(idx) {
   if (quiz.locked) return;
   quiz.locked = true;
   const isCorrect = idx === quiz.currentQ.a;
-  if (isCorrect) { quiz.score++; quiz.streak++; } else { quiz.streak = 0; }
-  
-  quiz.history.push({ ...quiz.currentQ, user: idx, correct: isCorrect });
+  if (isCorrect) quiz.score++;
+  quiz.history.push({ ...quiz.currentQ, correct: isCorrect });
   
   const opts = document.querySelectorAll('.opt');
   opts[idx].classList.add(isCorrect ? 'correct' : 'wrong');
   opts[quiz.currentQ.a].classList.add('correct');
   
   const fb = document.getElementById('feedback');
-  fb.innerHTML = `<strong>${isCorrect?'Correct!':'Oops.'}</strong> ${quiz.currentQ.e}`;
-  fb.className = `fb show ${isCorrect?'ok':'no'}`;
+  fb.style.display = 'block';
+  fb.style.background = isCorrect ? '#f0fdf4' : '#fef2f2';
+  fb.style.border = isCorrect ? '1px solid #bbf7d0' : '1px solid #fecaca';
+  fb.innerHTML = `<strong>${isCorrect?'Correct!':'Not quite.'}</strong> ${quiz.currentQ.e}`;
   document.getElementById('next-box').style.display = 'block';
-  updateHeader();
-}
-
-function updateHeader() {
-  document.getElementById('hdr-count').innerText = `Question ${quiz.qIdx}`;
-  document.getElementById('prog').style.width = Math.min((quiz.qIdx * 10), 100) + '%';
-  document.getElementById('streak-n').innerText = quiz.streak;
-  document.getElementById('streak').classList.toggle('show', quiz.streak > 1);
 }
 
 function stopAndFinish() {
@@ -374,43 +237,46 @@ function stopAndFinish() {
   document.getElementById('s-results').classList.add('active');
   
   const total = quiz.history.length;
-  const correct = quiz.history.filter(h => h.correct).length;
-  const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
-  const g = getGrade(pct);
+  const pct = total > 0 ? Math.round((quiz.score / total) * 100) : 0;
+  const g = GRADES.find(gr => pct >= gr.min) || GRADES[4];
 
-  document.getElementById('rh-name').innerText = `${quiz.name} · ${quiz.cls}`;
-  document.getElementById('rh-score').innerText = `${correct}/${total}`;
-  document.getElementById('rh-pct').innerText = `${pct}%`;
+  document.getElementById('rh-name').innerText = `${quiz.name} (${quiz.cls})`;
+  document.getElementById('rh-score').innerText = `${quiz.score}/${total}`;
+  document.getElementById('rh-pct').innerText = `${pct}% Overall`;
   document.getElementById('rh-grade').innerText = g.label;
   document.getElementById('rh-grade').className = `rh-grade ${g.cls}`;
 
-  // Domain Breakdown
-  const domains = ['Biology', 'Chemistry', 'Physics', 'Working Scientifically'];
   const domGrid = document.getElementById('rd-domains');
   domGrid.innerHTML = '';
-  
-  domains.forEach(d => {
+  ['Biology', 'Chemistry', 'Physics', 'Working Scientifically'].forEach(d => {
     const dQs = quiz.history.filter(h => h.d.includes(d.split(' ')[0]));
     if(dQs.length === 0) return;
     const dCorrect = dQs.filter(h => h.correct).length;
-    const dPct = Math.round((dCorrect/dQs.length)*100);
     domGrid.innerHTML += `
       <div class="dom-card dca-${d.split(' ')[0].toLowerCase()}">
-        <div class="dom-lbl">${d}</div>
-        <div class="dom-score-big">${dCorrect}<span class="dom-score-den">/${dQs.length}</span></div>
-        <div class="dom-pct">${dPct}% Mastery</div>
+        <div style="font-size:10px; font-weight:700; color:var(--ink3); text-transform:uppercase">${d}</div>
+        <div style="font-size:24px; font-weight:800">${dCorrect}/${dQs.length}</div>
       </div>`;
   });
 
-  // Review List
-  const reviewBox = document.getElementById('rd-review');
+  const review = document.getElementById('rd-review');
   const missed = quiz.history.filter(h => !h.correct);
-  reviewBox.innerHTML = missed.length > 0 ? missed.map(m => `
-    <div class="missed-item">
-      <div class="q-num">${m.d}</div>
-      <div class="missed-q">${m.q}</div>
-      <div class="missed-right">✓ Correct: ${m.o[m.a]}</div>
-    </div>`).join('') : "<p>Perfect! No mistakes to review.</p>";
+  review.innerHTML = missed.length > 0 ? `<p style="font-size:11px; font-weight:700; color:var(--ink3); margin-bottom:10px">QUESTIONS TO REVIEW</p>` + 
+    missed.map(m => `<div style="background:white; border:1px solid var(--border); padding:10px; border-radius:12px; margin-bottom:8px; font-size:13px"><strong>${m.q}</strong><br><span style="color:#16a34a">Correct Answer: ${m.o[m.a]}</span></div>`).join('') 
+    : "<p style='color:var(--bio)'>Perfect score! No mistakes to review.</p>";
+}
+
+// Generate stars for background
+const starsCont = document.getElementById('stars');
+for(let i=0; i<50; i++) {
+  const s = document.createElement('div');
+  s.className = 'star-dot';
+  s.style.left = Math.random()*100+'%';
+  s.style.top = Math.random()*100+'%';
+  s.style.width = s.style.height = (Math.random()*3+1)+'px';
+  s.style.setProperty('--d', (Math.random()*3+2)+'s');
+  s.style.setProperty('--dl', (Math.random()*5)+'s');
+  starsCont.appendChild(s);
 }
 </script>
 </body>
