@@ -43,9 +43,27 @@
 <div id="s-login" class="screen active">
     <div class="login-card">
         <h1>Year 5 Science</h1>
-        <div class="field"><label>Name</label><input type="text" id="inp-name" placeholder="Name"></div>
-        <div class="field"><label>Class</label><select id="inp-class"><option value="">Select...</option><option>5A</option><option>5B</option><option>5C</option></select></div>
-        <div class="field"><label>Focus</label><select id="inp-domain"><option value="all">All</option><option value="Biology">Biology</option><option value="Chemistry">Chemistry</option><option value="Physics">Physics</option></select></div>
+        <div class="field"><label>Name</label><input type="text" id="inp-name" placeholder="Full Name"></div>
+        <div class="field">
+            <label>Class</label>
+            <select id="inp-class">
+                <option value="">Select Class...</option>
+                <option value="5A">5A</option>
+                <option value="5B">5B</option>
+                <option value="5C">5C</option>
+                <option value="5D">5D</option>
+                <option value="5E">5E</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Focus Topic</label>
+            <select id="inp-domain">
+                <option value="all">All Topics</option>
+                <option value="Biology">Biology</option>
+                <option value="Chemistry">Chemistry</option>
+                <option value="Physics">Physics</option>
+            </select>
+        </div>
         <button class="btn-start" onclick="startQuiz()">Start Quiz</button>
     </div>
 </div>
@@ -76,14 +94,15 @@ let state = { name: '', cl: '', domain: 'all', qIdx: 0, score: 0, currentQ: null
 
 const FALLBACK = [
     {d:'Biology', q:'What part of a plant absorbs water?', o:['Leaves','Flowers','Roots','Stem'], a:2, e:'Roots absorb water and nutrients from the soil.'},
-    {d:'Physics', q:'Which force pulls objects toward the Earth?', o:['Friction','Gravity','Magnetism','Air Resistance'], a:1, e:'Gravity is the force that pulls everything toward the center of the Earth.'}
+    {d:'Physics', q:'Which force pulls objects toward the Earth?', o:['Friction','Gravity','Magnetism','Air Resistance'], a:1, e:'Gravity is the force that pulls everything toward the center of the Earth.'},
+    {d:'Chemistry', q:'Which of these is a reversible change?', o:['Burning wood','Melting ice','Cooking an egg','Baking bread'], a:1, e:'Melting is reversible because you can freeze the water back into ice.'}
 ];
 
 function startQuiz() {
     state.name = document.getElementById('inp-name').value;
     state.cl = document.getElementById('inp-class').value;
     state.domain = document.getElementById('inp-domain').value;
-    if(!state.name || !state.cl) return alert("Please enter your name and class!");
+    if(!state.name || !state.cl) return alert("Please enter your name and select your class!");
     document.getElementById('s-login').classList.remove('active');
     document.getElementById('s-quiz').classList.add('active');
     loadNextQuestion();
@@ -122,8 +141,6 @@ async function fetchAI() {
 
     const data = await resp.json();
     let rawText = data.candidates[0].content.parts[0].text;
-    
-    // Clean potential Markdown formatting from AI
     rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
     return JSON.parse(rawText);
 }
@@ -161,7 +178,7 @@ function check(idx) {
 function finishQuiz() {
     document.getElementById('s-quiz').classList.remove('active');
     document.getElementById('s-results').classList.add('active');
-    document.getElementById('res-name').innerText = state.name;
+    document.getElementById('res-name').innerText = state.name + " (" + state.cl + ")";
     document.getElementById('res-score').innerText = `${state.score} / ${state.qIdx}`;
 }
 </script>
