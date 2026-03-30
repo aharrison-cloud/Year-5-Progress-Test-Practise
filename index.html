@@ -36,4 +36,172 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 .field{margin-bottom:.85rem}
 .field label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:5px;text-transform:uppercase}
 .field input, .field select{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;background:var(--paper);color:var(--ink)}
-.btn-start{width:100%;padding:12px;background:linear-gradient(135deg,#1a1a4e
+.btn-start{width:100%;padding:12px;background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:800;cursor:pointer;margin-top:.5rem}
+.qhdr{background:var(--surface);border-bottom:1px solid var(--border);padding:.65rem 1rem;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
+.prog-track{height:5px;background:var(--border);border-radius:3px;flex:1;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#1a1a4e,#0f3460);transition:width .4s}
+.qbody{flex:1;padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%}
+.dom-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-bottom:.6rem}
+.db-bio{background:var(--bio-bg);color:var(--bio)}
+.db-chem{background:var(--chem-bg);color:var(--chem)}
+.db-phys{background:var(--phys-bg);color:var(--phys)}
+.db-ws{background:var(--ws-bg);color:var(--ws)}
+.opt{display:flex;align-items:center;gap:11px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;margin-bottom:8px;background:var(--surface)}
+.opt.correct{border-color:#16a34a;background:#f0fdf4}
+.opt.wrong{border-color:#dc2626;background:#fef2f2}
+.ai-loading{display:none;align-items:center;gap:10px;padding:1.5rem;justify-content:center}
+.ai-loading.show{display:flex}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="s-login" class="screen active">
+  <div class="stars-bg" id="stars"></div>
+  <div class="login-card">
+    <div class="login-logo"><div class="logo-rocket">🚀</div><div><div class="logo-name">Year 5 Science</div><div style="font-size:11px;color:var(--ink3)">NLCS Jeju</div></div></div>
+    <h1>Sign in</h1>
+    <div class="field"><label>Name</label><input type="text" id="inp-name" placeholder="Enter name"/></div>
+    <div class="field"><label>Class</label>
+      <select id="inp-class">
+        <option value="">— select —</option>
+        <option>5A</option><option>5B</option><option>5C</option><option>5D</option><option>5E</option>
+      </select></div>
+    <div class="field"><label>Focus area</label>
+      <select id="inp-domain">
+        <option value="all">All topics</option>
+        <option value="Biology">Biology</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Physics">Physics</option>
+        <option value="Working Scientifically">Working Scientifically</option>
+      </select></div>
+    <button class="btn-start" onclick="startQuiz()">Start Practice 🚀</button>
+  </div>
+</div>
+
+<div id="s-quiz" class="screen">
+  <div class="qhdr">
+    <div id="hdr-name" style="font-size:13px; font-weight:600"></div>
+    <div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+    <button onclick="location.reload()" style="font-size:11px; border:none; background:none; cursor:pointer; color:var(--ink3)">Quit</button>
+  </div>
+  <div class="qbody" id="qbody"></div>
+</div>
+
+<script>
+// --- CORE CONFIGURATION ---
+const API_KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU';
+let quiz = { name:'', cls:'', domain:'all', qIdx:0, score:0, history:[], currentQ:null, locked:false };
+
+function startQuiz() {
+  quiz.name = document.getElementById('inp-name').value.trim();
+  quiz.cls = document.getElementById('inp-class').value;
+  quiz.domain = document.getElementById('inp-domain').value;
+
+  if(!quiz.name || !quiz.cls) {
+    alert("Please enter your name and select a class.");
+    return;
+  }
+
+  document.getElementById('s-login').classList.remove('active');
+  document.getElementById('s-quiz').classList.add('active');
+  document.getElementById('hdr-name').innerText = quiz.name;
+  loadNext();
+}
+
+async function fetchAIQuestion() {
+  // Using the updated Key and stable v1 endpoint to fix 404 errors
+  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+  
+  const prompt = `Generate a Year 5 Science multiple choice question about ${quiz.domain}. 
+  Return ONLY a JSON object: {"d":"Biology|Chemistry|Physics|Working Scientifically","q":"question text","o":["opt1","opt2","opt3","opt4"],"a":0,"e":"explanation"}`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json" }
+    })
+  });
+
+  if(!response.ok) {
+      const errData = await response.json();
+      console.error("API Response Error:", errData);
+      throw new Error(response.status);
+  }
+  
+  const data = await response.json();
+  return JSON.parse(data.candidates[0].content.parts[0].text);
+}
+
+async function loadNext() {
+  quiz.qIdx++;
+  quiz.locked = false;
+  document.getElementById('prog').style.width = Math.min((quiz.qIdx * 10), 100) + '%';
+  
+  const container = document.getElementById('qbody');
+  container.innerHTML = `<div class="ai-loading show"><div class="spinner"></div><span>Generating Question ${quiz.qIdx}...</span></div>`;
+  
+  try {
+    const q = await fetchAIQuestion();
+    quiz.currentQ = q;
+    renderQuestion(q);
+  } catch (err) {
+    console.error("Fetch Error:", err);
+    container.innerHTML = `<div style="text-align:center; padding:2rem">
+      <p style="color:red; margin-bottom:1rem">Connection Error (${err.message}). Check console for details.</p>
+      <button class="btn-start" onclick="loadNext()">Retry Connection</button>
+    </div>`;
+  }
+}
+
+function renderQuestion(q) {
+  const dClass = q.d.includes('Bio')?'db-bio':q.d.includes('Chem')?'db-chem':q.d.includes('Phys')?'db-phys':'db-ws';
+  document.getElementById('qbody').innerHTML = `
+    <div class="dom-badge ${dClass}">${q.d}</div>
+    <div style="font-family:Nunito,sans-serif; font-size:18px; font-weight:700; margin-bottom:1.5rem">${q.q}</div>
+    <div class="opts">
+      ${q.o.map((opt, i) => `<div class="opt" onclick="checkAnswer(${i})">
+        <div style="width:24px; font-weight:800; color:var(--ink3)">${String.fromCharCode(65+i)}</div>
+        <div>${opt}</div>
+      </div>`).join('')}
+    </div>
+    <div id="feedback" style="display:none; margin-top:1.5rem; padding:1rem; border-radius:12px; font-size:14px"></div>
+    <button id="btn-next" class="btn-start" style="display:none; width:auto; padding:8px 24px" onclick="loadNext()">Next Question ➔</button>
+  `;
+}
+
+function checkAnswer(idx) {
+  if(quiz.locked) return;
+  quiz.locked = true;
+  
+  const isCorrect = (idx === quiz.currentQ.a);
+  const opts = document.querySelectorAll('.opt');
+  
+  opts[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  opts[quiz.currentQ.a].classList.add('correct');
+
+  const fb = document.getElementById('feedback');
+  fb.style.display = 'block';
+  fb.style.background = isCorrect ? '#f0fdf4' : '#fef2f2';
+  fb.innerHTML = `<strong>${isCorrect ? 'Correct!' : 'Not quite.'}</strong> ${quiz.currentQ.e}`;
+  document.getElementById('btn-next').style.display = 'block';
+}
+
+// Background Visuals
+const starsCont = document.getElementById('stars');
+for(let i=0; i<40; i++) {
+  const s = document.createElement('div');
+  s.className = 'star-dot';
+  s.style.left = Math.random()*100+'%';
+  s.style.top = Math.random()*100+'%';
+  s.style.width = s.style.height = (Math.random()*3+1)+'px';
+  s.style.setProperty('--d', (Math.random()*3+2)+'s');
+  s.style.setProperty('--dl', (Math.random()*5)+'s');
+  starsCont.appendChild(s);
+}
+</script>
+</body>
+</html>
