@@ -302,7 +302,7 @@ a.ttag:hover{border-color:var(--chem-mid);background:var(--chem-bg);color:var(--
 // ── YOUR GEMINI API KEY — hardcoded here, works behind the scenes ──
 // Get a free key at: https://aistudio.google.com/apikey
 // Replace the value below with your own key
-window.GEMINI_API_KEY = 'PASTE_YOUR_GEMINI_KEY_HERE';
+window.GEMINI_API_KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU';
 
 // Google Sheet endpoint — saves student results
 const SHEETS_ENDPOINT='https://script.google.com/macros/s/AKfycbzJbsGAELB71C0FYnP5NwugHlKj_8fjvg05tiiTvZENQc-c51V7uBVobZKQJ4N0EBrW/exec';
@@ -589,7 +589,39 @@ Reply ONLY with this JSON, nothing else:
 
     if (!resp.ok) {
       const errText = await resp.text();
-      console.warn('Gemini API error', resp.status, errText.substring(0,200));
+      console.warn('Gemini API error', resp.status, errText.substring(0,150));
+      if (resp.status === 429) {
+        // Rate limited — wait 8 seconds and try once more
+        console.warn('Rate limited — retrying in 8s');
+        await new Promise(r => setTimeout(r, 8000));
+        const retry = await fetch(GEMINI_URL, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            contents: [{parts: [{text: prompt}]}],
+            generationConfig: {temperature: 0.8, maxOutputTokens: 500}
+          })
+        });
+        if (!retry.ok) { console.warn('Retry also failed'); return null; }
+        const retryData = await retry.json();
+        const retryText = retryData?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!retryText) return null;
+        // Re-use the parse logic below by reassigning rawText
+        // We break out and re-enter parse — simplest: recurse once
+        // Actually just fall through with retryText
+        const rawText2 = retryText;
+        let clean2 = rawText2.replace(/```json/g,'').replace(/```/g,'').trim();
+        const s2=clean2.indexOf('{'), e2=clean2.lastIndexOf('}');
+        if(s2===-1||e2===-1) return null;
+        try {
+          const p2=JSON.parse(clean2.substring(s2,e2+1));
+          if(!p2.q||!Array.isArray(p2.o)||p2.o.length!==4||p2.a===undefined) return null;
+          const k2=p2.q.slice(0,60).toLowerCase();
+          if(USED_QUESTIONS.has(k2)) return null;
+          USED_QUESTIONS.add(k2);
+          return {d:domain,diff,q:p2.q,context:p2.context||null,o:p2.o,a:parseInt(p2.a),e:p2.e||'',ai:true,ext:diff===4};
+        } catch(e){ return null; }
+      }
       return null;
     }
 
@@ -635,27 +667,25 @@ Reply ONLY with this JSON, nothing else:
   }
 }
 
-// Fill the queue with pre-generated questions (up to 3 ahead)
-// Runs multiple fills in parallel — no lock, Gemini handles it fine
+// Fill queue — strictly ONE request at a time to respect Gemini rate limits
+// Free tier: ~15 requests/min. One at a time with delay is safe.
 async function fillQueue() {
-  if (!S.name) return;
-  const target = 3;
-  const needed = target - QUEUE.length - QUEUE_FILLING;
-  if (needed <= 0) return;
-
-  for (let i = 0; i < needed; i++) {
-    QUEUE_FILLING++;
+  if (!S.name || QUEUE_FILLING > 0 || QUEUE.length >= 2) return;
+  QUEUE_FILLING = 1;
+  try {
     const domains = ['Biology','Chemistry','Physics','Working Scientifically'];
     const domain = S.domainFilter === 'all'
       ? domains[Math.floor(Math.random() * domains.length)]
       : S.domainFilter;
     const diff = targetDiff(S.theta);
-    generateQuestion(domain, diff, S.theta, S.style)
-      .then(q => {
-        QUEUE_FILLING--;
-        if (q) QUEUE.push(q);
-      })
-      .catch(() => { QUEUE_FILLING--; });
+    const q = await generateQuestion(domain, diff, S.theta, S.style);
+    if (q) QUEUE.push(q);
+  } finally {
+    QUEUE_FILLING = 0;
+    // Schedule next fill after 4 seconds — well within rate limits
+    if (QUEUE.length < 2 && S.name) {
+      setTimeout(fillQueue, 4000);
+    }
   }
 }
 
@@ -726,8 +756,8 @@ function startQuiz() {
 
   loadAndRender().then(() => clearInterval(msgTimer));
 
-  // Start pre-filling queue immediately in background
-  fillQueue();
+  // Start pre-filling next question after 5s — gives first question time to load
+  setTimeout(fillQueue, 5000);
 }
 
 async function loadAndRender() {
@@ -756,11 +786,14 @@ async function loadAndRender() {
   S.currentIdx = S.questions.length - 1;
   S.qStartTime = Date.now();
 
-  document.getElementById('first-load').classList.remove('show');
+  // Null-safe — element may not exist if screen changed
+  const firstLoad = document.getElementById('first-load');
+  if (firstLoad) firstLoad.classList.remove('show');
+
   renderQ();
 
-  // Immediately start refilling queue in background
-  fillQueue();
+  // Refill queue in background — delayed to avoid rate limit
+  setTimeout(fillQueue, 2000);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -875,7 +908,8 @@ async function goNext() {
   }
 
   // No cached question — show inline spinner, generate now
-  document.getElementById('qbody').innerHTML = `
+  const qbodyEl = document.getElementById('qbody');
+  if (qbodyEl) qbodyEl.innerHTML = `
     <div style="display:flex;align-items:center;gap:12px;padding:2rem 1rem;color:var(--ink3);font-size:14px">
       <div class="spinner"></div>
       <span>Generating next question with Gemini AI…</span>
