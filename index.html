@@ -34,12 +34,11 @@
 
     <div id="quiz-screen">
         <div class="q-box" id="q-content">
-            <h3 id="status">Connecting to AI...</h3>
+            <h3>Connecting to AI...</h3>
         </div>
     </div>
 
 <script>
-    // YOUR API KEY
     const KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU'; 
 
     function startApp() {
@@ -54,7 +53,7 @@
         container.innerHTML = "<h3>AI is writing your question...</h3>";
 
         try {
-            // FIX: Using v1beta/models/gemini-1.5-flash is the specific path required to avoid 404/400 errors
+            // FIXED URL: Using v1beta and gemini-1.5-flash
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
             
             const response = await fetch(url, {
@@ -69,10 +68,9 @@
                 })
             });
 
-            if(!response.ok) throw new Error("Connection Error: " + response.status);
+            if(!response.ok) throw new Error("API Error: " + response.status);
 
             const data = await response.json();
-            // The v1beta endpoint returns the text inside this specific path
             const q = JSON.parse(data.candidates[0].content.parts[0].text);
             
             container.innerHTML = `
@@ -84,7 +82,7 @@
                 <button id="next-btn" style="display:none; margin-top:20px" onclick="fetchQuestion()">Next Question ➔</button>
             `;
         } catch (err) {
-            container.innerHTML = `<h3 style="color:red">System Error</h3><p>${err.message}</p><button onclick="fetchQuestion()">Try Again</button>`;
+            container.innerHTML = `<h3 style="color:red">Connection Error</h3><p>${err.message}</p><button onclick="fetchQuestion()">Retry</button>`;
         }
     }
 
