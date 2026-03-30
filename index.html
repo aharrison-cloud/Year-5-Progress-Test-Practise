@@ -8,105 +8,116 @@
     <style>
         :root { --p:#1a1a4e; --s:#f0f4ff; --w:#ffffff; --r:12px; }
         body { font-family: 'Nunito', sans-serif; background: var(--s); margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .card { background: var(--w); padding: 2rem; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+        .card { background: var(--w); padding: 2.5rem; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 420px; text-align: center; }
         input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #dde2f0; border-radius: var(--r); font-size: 16px; box-sizing: border-box; }
-        button { background: var(--p); color: white; border: none; padding: 14px; border-radius: var(--r); font-weight: 800; cursor: pointer; width: 100%; }
-        #quiz-screen { display: none; width: 90%; max-width: 600px; background: white; padding: 2rem; border-radius: 24px; }
-        .opt { border: 2px solid #dde2f0; padding: 15px; border-radius: var(--r); margin: 10px 0; cursor: pointer; text-align: left; }
-        .correct { border-color: #22c55e; background: #dcfce7; }
-        .wrong { border-color: #ef4444; background: #fee2e2; }
+        button { background: var(--p); color: white; border: none; padding: 14px; border-radius: var(--r); font-weight: 800; cursor: pointer; width: 100%; transition: 0.2s; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        #quiz-screen { display: none; width: 90%; max-width: 600px; background: white; padding: 2rem; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .opt { border: 2px solid #dde2f0; padding: 15px; border-radius: var(--r); margin: 10px 0; cursor: pointer; text-align: left; font-weight: 500; }
+        .correct { border-color: #22c55e; background: #dcfce7; color: #166534; }
+        .wrong { border-color: #ef4444; background: #fee2e2; color: #991b1b; }
+        .err-msg { background: #fff1f2; color: #be123c; padding: 15px; border-radius: 12px; border: 1px solid #fecdd3; font-size: 13px; margin-top: 10px; text-align: left; }
     </style>
 </head>
 <body>
 
     <div id="login-screen" class="card">
-        <h2 style="margin-top:0">🚀 Year 5 Science</h2>
-        <input type="text" id="u-name" placeholder="Enter Name">
+        <h1 style="margin:0 0 10px 0; font-size: 24px;">🚀 Year 5 Science</h1>
+        <p style="color: #64748b; margin-bottom: 20px;">NLCS Jeju Practice Portal</p>
+        <input type="text" id="u-name" placeholder="Full Name">
         <select id="u-class">
-            <option value="">Select Class</option>
+            <option value="">Select your class</option>
             <option>5A</option><option>5B</option><option>5C</option><option>5D</option><option>5E</option>
         </select>
-        <button onclick="startApp()">Start Practice</button>
+        <button onclick="launch()">Start Practice</button>
     </div>
 
     <div id="quiz-screen">
-        <div id="q-content">
-            <h3>Loading AI Question...</h3>
+        <div id="q-box">
+            <h3>Preparing your question...</h3>
         </div>
     </div>
 
 <script>
     const KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU'; 
 
-    function startApp() {
+    function launch() {
         const name = document.getElementById('u-name').value;
         const cls = document.getElementById('u-class').value;
-        if(!name || !cls) return alert("Please fill in your name and class!");
+        if(!name || !cls) return alert("Please enter your name and class!");
+
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('quiz-screen').style.display = 'block';
-        fetchQuestion();
+        getNext();
     }
 
-    async function fetchQuestion() {
-        const container = document.getElementById('q-content');
-        container.innerHTML = "<h3>AI is writing your question...</h3>";
+    async function getNext() {
+        const box = document.getElementById('q-box');
+        box.innerHTML = "<h3>Generating new question...</h3>";
 
         try {
+            // Updated to the standard v1 endpoint
             const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${KEY}`;
             
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: "Create one Year 5 Science multiple choice question. Return ONLY this JSON format: {\"q\":\"question text\",\"o\":[\"opt1\",\"opt2\",\"opt3\",\"opt4\"],\"a\":0,\"e\":\"explanation\"}" }] }],
+                    contents: [{ parts: [{ text: "Write one Year 5 Science question. Provide the answer in this JSON format only: {\"q\":\"the question\",\"o\":[\"opt1\",\"opt2\",\"opt3\",\"opt4\"],\"a\":0,\"e\":\"explanation\"}" }] }],
                     generationConfig: { 
                         responseMimeType: "application/json",
-                        temperature: 0.5
+                        temperature: 0.7 
                     }
                 })
             });
 
             if(!response.ok) {
-                const errorData = await response.json();
-                console.error("API Error Details:", errorData);
-                throw new Error(errorData.error.message || response.status);
+                const data = await response.json();
+                throw new Error(data.error.message || "Unknown Error");
             }
 
-            const data = await response.json();
-            const rawText = data.candidates[0].content.parts[0].text;
-            const q = JSON.parse(rawText);
+            const result = await response.json();
+            const qData = JSON.parse(result.candidates[0].content.parts[0].text);
             
-            container.innerHTML = `
-                <h2>${q.q}</h2>
-                ${q.o.map((opt, i) => `<div class="opt" onclick="check(${i}, ${q.a}, this, '${q.e.replace(/'/g, "\\'")}')">${opt}</div>`).join('')}
-                <div id="feedback" style="margin-top:20px; font-weight:700; display:none; padding:10px; border-radius:8px"></div>
-                <button id="next-btn" style="display:none; margin-top:20px" onclick="fetchQuestion()">Next Question</button>
+            box.innerHTML = `
+                <h2 style="margin-top:0">${qData.q}</h2>
+                <div id="opts-list">
+                    ${qData.o.map((choice, i) => `
+                        <div class="opt" onclick="verify(${i}, ${qData.a}, this, '${qData.e.replace(/'/g, "\\'")}')">
+                            ${choice}
+                        </div>
+                    `).join('')}
+                </div>
+                <div id="fb-area" style="display:none; margin-top:20px; padding:15px; border-radius:12px; font-weight:700;"></div>
+                <button id="next-btn" style="display:none; margin-top:20px;" onclick="getNext()">Next Question ➔</button>
             `;
         } catch (err) {
-            container.innerHTML = `
-                <h3 style="color:red">System Error</h3>
-                <p style="font-size:12px; background:#eee; padding:10px">${err.message}</p>
-                <button onclick="fetchQuestion()">Try Again</button>
+            box.innerHTML = `
+                <h3 style="color:#e11d48">System Error</h3>
+                <div class="err-msg"><strong>Message:</strong> ${err.message}</div>
+                <button style="margin-top:15px;" onclick="getNext()">Try Again</button>
             `;
         }
     }
 
-    function check(idx, correct, el, explain) {
-        const opts = document.querySelectorAll('.opt');
-        opts.forEach(o => o.style.pointerEvents = 'none');
+    function verify(selected, correct, element, info) {
+        const allOpts = document.querySelectorAll('.opt');
+        allOpts.forEach(o => o.style.pointerEvents = 'none');
         
-        const fb = document.getElementById('feedback');
+        const fb = document.getElementById('fb-area');
         fb.style.display = 'block';
-        
-        if(idx === correct) {
-            el.classList.add('correct');
+
+        if(selected === correct) {
+            element.classList.add('correct');
             fb.style.background = "#dcfce7";
-            fb.innerText = "Correct! " + explain;
+            fb.style.color = "#166534";
+            fb.innerHTML = "✅ Correct! " + info;
         } else {
-            el.classList.add('wrong');
-            opts[correct].classList.add('correct');
+            element.classList.add('wrong');
+            allOpts[correct].classList.add('correct');
             fb.style.background = "#fee2e2";
-            fb.innerText = "Not quite. " + explain;
+            fb.style.color = "#991b1b";
+            fb.innerHTML = "❌ Not quite. " + info;
         }
         
         document.getElementById('next-btn').style.display = 'block';
