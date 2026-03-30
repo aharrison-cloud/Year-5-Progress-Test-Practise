@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Year 5 Science — Adaptive Practice (Gemini AI)</title>
+<title>Year 5 Science — Adaptive Practice</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -13,7 +13,6 @@
   --chem:#1e40af;--chem-bg:#dbeafe;--chem-mid:#3b82f6;
   --phys:#92400e;--phys-bg:#fef3c7;--phys-mid:#f59e0b;
   --ws:#5b21b6;--ws-bg:#ede9fe;--ws-mid:#8b5cf6;
-  --ext:#be185d;--ext-bg:#fce7f3;
   --exc-bg:#d1fae5;--exc-txt:#065f46;--exc-bdr:#6ee7b7;
   --ep-bg:#dbeafe;--ep-txt:#1e40af;--ep-bdr:#93c5fd;
   --ex-bg:#f1f5f9;--ex-txt:#334155;--ex-bdr:#cbd5e1;
@@ -33,44 +32,24 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 .login-logo{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem}
 .logo-rocket{font-size:28px}
 .logo-name{font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:var(--ink)}
-.logo-sub{font-size:11px;color:var(--ink3)}
-.login-card h1{font-family:'Nunito',sans-serif;font-size:21px;font-weight:800;letter-spacing:-.5px;margin-bottom:.3rem}
-.login-card > p{font-size:13px;color:var(--ink3);margin-bottom:1.4rem;line-height:1.5}
+.login-card h1{font-family:'Nunito',sans-serif;font-size:21px;font-weight:800;letter-spacing:-.5px;margin-bottom:1.4rem}
 .field{margin-bottom:.85rem}
-.field label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase}
-.field input, .field select{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;background:var(--paper);color:var(--ink);appearance:none}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:5px;text-transform:uppercase}
+.field input, .field select{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;background:var(--paper);color:var(--ink)}
 .btn-start{width:100%;padding:12px;background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:800;cursor:pointer;margin-top:.5rem}
 .qhdr{background:var(--surface);border-bottom:1px solid var(--border);padding:.65rem 1rem;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
-.qhdr-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .prog-track{height:5px;background:var(--border);border-radius:3px;flex:1;overflow:hidden}
 .prog-fill{height:100%;background:linear-gradient(90deg,#1a1a4e,#0f3460);transition:width .4s}
-.btn-stop{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid #fca5a5;color:#991b1b;cursor:pointer;background:none}
 .qbody{flex:1;padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%}
-.dom-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:.6rem}
+.dom-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-bottom:.6rem}
 .db-bio{background:var(--bio-bg);color:var(--bio)}
 .db-chem{background:var(--chem-bg);color:var(--chem)}
 .db-phys{background:var(--phys-bg);color:var(--phys)}
 .db-ws{background:var(--ws-bg);color:var(--ws)}
-.q-text{font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;line-height:1.5;margin-bottom:1rem}
-.opts{display:flex;flex-direction:column;gap:8px}
-.opt{display:flex;align-items:center;gap:11px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:14px;background:var(--surface)}
-.opt.correct{border-color:#16a34a;background:#f0fdf4;color:#14532d}
-.opt.wrong{border-color:#dc2626;background:#fef2f2;color:#7f1d1d}
-.opt-let{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink3)}
-.opt.correct .opt-let{background:#16a34a;border-color:#16a34a;color:#fff}
-.opt.wrong .opt-let{background:#dc2626;border-color:#dc2626;color:#fff}
-.res-hero{background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 50%,#0f3460 100%);color:white;padding:1.8rem 1.3rem;text-align:center}
-.rh-grade{display:inline-block;padding:6px 22px;border-radius:30px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;margin-bottom:.8rem}
-.rh-score-big{font-family:'Nunito',sans-serif;font-size:52px;font-weight:800;letter-spacing:-3px}
-.res-body{padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%}
-.dom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.5rem}
-.dom-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rl);padding:1rem;position:relative;overflow:hidden}
-.dom-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
-.dca-bio::before{background:var(--bio-mid)}.dca-chem::before{background:var(--chem-mid)}.dca-phys::before{background:var(--phys-mid)}.dca-ws::before{background:var(--ws-mid)}
-.grade-scale{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rl);padding:1rem;margin-bottom:.5rem}
-.gs-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
-.gs-pill{font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;min-width:95px;text-align:center}
-.ai-loading{display:none;align-items:center;gap:10px;padding:1.5rem;justify-content:center;color:var(--ink3);font-size:13px}
+.opt{display:flex;align-items:center;gap:11px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;margin-bottom:8px;background:var(--surface)}
+.opt.correct{border-color:#16a34a;background:#f0fdf4}
+.opt.wrong{border-color:#dc2626;background:#fef2f2}
+.ai-loading{display:none;align-items:center;gap:10px;padding:1.5rem;justify-content:center}
 .ai-loading.show{display:flex}
 .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -81,9 +60,9 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 <div id="s-login" class="screen active">
   <div class="stars-bg" id="stars"></div>
   <div class="login-card">
-    <div class="login-logo"><div class="logo-rocket">🚀</div><div><div class="logo-name">Year 5 Science</div><div class="logo-sub">NLCS Jeju</div></div></div>
-    <h1>Sign in to begin</h1>
-    <div class="field"><label>Your name</label><input type="text" id="inp-name" placeholder="Name"/></div>
+    <div class="login-logo"><div class="logo-rocket">🚀</div><div><div class="logo-name">Year 5 Science</div><div style="font-size:11px;color:var(--ink3)">NLCS Jeju</div></div></div>
+    <h1>Sign in</h1>
+    <div class="field"><label>Name</label><input type="text" id="inp-name" placeholder="Enter name"/></div>
     <div class="field"><label>Class</label>
       <select id="inp-class">
         <option value="">— select —</option>
@@ -103,39 +82,124 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 
 <div id="s-quiz" class="screen">
   <div class="qhdr">
-    <div class="qhdr-name" id="hdr-name"></div>
+    <div id="hdr-name" style="font-size:13px; font-weight:600"></div>
     <div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
-    <div id="hdr-count" style="font-size:11px; font-family:monospace"></div>
-    <button class="btn-stop" onclick="stopAndFinish()">Finish</button>
+    <button onclick="location.reload()" style="font-size:11px; border:none; background:none; cursor:pointer; color:var(--ink3)">Quit</button>
   </div>
   <div class="qbody" id="qbody"></div>
 </div>
 
-<div id="s-results" class="screen">
-  <div class="res-hero">
-    <div id="rh-name" style="opacity:0.7; margin-bottom:10px"></div>
-    <div id="rh-grade"></div>
-    <div class="rh-score-big" id="rh-score"></div>
-    <div id="rh-pct" style="font-size:20px; opacity:0.6"></div>
-  </div>
-  <div class="res-body">
-    <p style="font-size:11px; font-weight:700; color:var(--ink3); margin-bottom:10px">SCORE BY DOMAIN</p>
-    <div class="dom-grid" id="rd-domains"></div>
-    <p style="font-size:11px; font-weight:700; color:var(--ink3); margin:20px 0 10px">GRADE SCALE</p>
-    <div class="grade-scale">
-        <div class="gs-row"><span class="gs-pill" style="background:var(--exc-bg); color:var(--exc-txt); border:1px solid var(--exc-bdr)">Exceeding</span><span>81% - 100%</span></div>
-        <div class="gs-row"><span class="gs-pill" style="background:var(--ep-bg); color:var(--ep-txt); border:1px solid var(--ep-bdr)">Expected+</span><span>70% - 80%</span></div>
-        <div class="gs-row"><span class="gs-pill" style="background:var(--ex-bg); color:var(--ex-txt); border:1px solid var(--ex-bdr)">Expected</span><span>60% - 69%</span></div>
-        <div class="gs-row"><span class="gs-pill" style="background:var(--em-bg); color:var(--em-txt); border:1px solid var(--em-bdr)">Expected-</span><span>50% - 59%</span></div>
-        <div class="gs-row"><span class="gs-pill" style="background:var(--er-bg); color:var(--er-txt); border:1px solid var(--er-bdr)">Emerging</span><span>0% - 49%</span></div>
-    </div>
-    <button class="btn-start" style="width:100%" onclick="location.reload()">↺ Try Again</button>
-    <div id="rd-review" style="margin-top:20px"></div>
-  </div>
-</div>
-
 <script>
+// --- CORE CONFIGURATION ---
 const API_KEY = 'AIzaSyDQ44QdbO9wWHXPAHyF6F3OLLUAxLs4poo';
+let quiz = { name:'', cls:'', domain:'all', qIdx:0, score:0, history:[], currentQ:null, locked:false };
 
-const GRADES=[
-  {label:'Exceeding', min:81, style:'background:var(--exc-
+// --- LOGIN HANDLER ---
+function startQuiz() {
+  quiz.name = document.getElementById('inp-name').value.trim();
+  quiz.cls = document.getElementById('inp-class').value;
+  quiz.domain = document.getElementById('inp-domain').value;
+
+  if(!quiz.name || !quiz.cls) {
+    alert("Please enter your name and select a class.");
+    return;
+  }
+
+  document.getElementById('s-login').classList.remove('active');
+  document.getElementById('s-quiz').classList.add('active');
+  document.getElementById('hdr-name').innerText = quiz.name;
+  loadNext();
+}
+
+// --- AI QUESTION FETCHING ---
+async function fetchAIQuestion() {
+  // Fixed URL construction to prevent 404s
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+  
+  const prompt = `Generate a Year 5 Science multiple choice question about ${quiz.domain}. 
+  Return ONLY a JSON object: {"d":"Biology|Chemistry|Physics|Working Scientifically","q":"question text","o":["opt1","opt2","opt3","opt4"],"a":0,"e":"explanation"}`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json" }
+    })
+  });
+
+  if(!response.ok) throw new Error("API Error: " + response.status);
+  const data = await response.json();
+  return JSON.parse(data.candidates[0].content.parts[0].text);
+}
+
+// --- UI RENDERING ---
+async function loadNext() {
+  quiz.qIdx++;
+  quiz.locked = false;
+  document.getElementById('prog').style.width = (quiz.qIdx * 10) + '%';
+  
+  const container = document.getElementById('qbody');
+  container.innerHTML = `<div class="ai-loading show"><div class="spinner"></div><span>Generating Question ${quiz.qIdx}...</span></div>`;
+  
+  try {
+    const q = await fetchAIQuestion();
+    quiz.currentQ = q;
+    renderQuestion(q);
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<div style="text-align:center; padding:2rem">
+      <p style="color:red; margin-bottom:1rem">Connection Error (404/429)</p>
+      <button class="btn-start" onclick="loadNext()">Try Again</button>
+    </div>`;
+  }
+}
+
+function renderQuestion(q) {
+  const dClass = q.d.includes('Bio')?'db-bio':q.d.includes('Chem')?'db-chem':q.d.includes('Phys')?'db-phys':'db-ws';
+  document.getElementById('qbody').innerHTML = `
+    <div class="dom-badge ${dClass}">${q.d}</div>
+    <div style="font-family:Nunito,sans-serif; font-size:18px; font-weight:700; margin-bottom:1.5rem">${q.q}</div>
+    <div class="opts">
+      ${q.o.map((opt, i) => `<div class="opt" onclick="checkAnswer(${i})">
+        <div style="width:24px; font-weight:800; color:var(--ink3)">${String.fromCharCode(65+i)}</div>
+        <div>${opt}</div>
+      </div>`).join('')}
+    </div>
+    <div id="feedback" style="display:none; margin-top:1.5rem; padding:1rem; border-radius:12px; font-size:14px"></div>
+    <button id="btn-next" class="btn-start" style="display:none; width:auto; padding:8px 24px" onclick="loadNext()">Next Question ➔</button>
+  `;
+}
+
+function checkAnswer(idx) {
+  if(quiz.locked) return;
+  quiz.locked = true;
+  
+  const isCorrect = (idx === quiz.currentQ.a);
+  const opts = document.querySelectorAll('.opt');
+  
+  opts[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  opts[quiz.currentQ.a].classList.add('correct');
+
+  const fb = document.getElementById('feedback');
+  fb.style.display = 'block';
+  fb.style.background = isCorrect ? '#f0fdf4' : '#fef2f2';
+  fb.innerHTML = `<strong>${isCorrect ? 'Correct!' : 'Not quite.'}</strong> ${quiz.currentQ.e}`;
+  document.getElementById('btn-next').style.display = 'block';
+}
+
+// Background Visuals
+const starsCont = document.getElementById('stars');
+for(let i=0; i<40; i++) {
+  const s = document.createElement('div');
+  s.className = 'star-dot';
+  s.style.left = Math.random()*100+'%';
+  s.style.top = Math.random()*100+'%';
+  s.style.width = s.style.height = (Math.random()*3+1)+'px';
+  s.style.setProperty('--d', (Math.random()*3+2)+'s');
+  s.style.setProperty('--dl', (Math.random()*5)+'s');
+  starsCont.appendChild(s);
+}
+</script>
+</body>
+</html>
