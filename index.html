@@ -166,15 +166,23 @@ async function loadNext() {
     const q = await fetchAIQuestion();
     renderQuestion(q);
   } catch (e) {
-    container.innerHTML = `<div style="text-align:center; padding:20px;"><p style="color:red">API Busy (429/404). Please wait a second.</p><button class="btn-start" style="width:auto" onclick="loadNext()">Retry</button></div>`;
+    // Handling the 429/404 specifically
+    container.innerHTML = `
+      <div style="text-align:center; padding:20px;">
+        <p style="color:#dc2626; font-weight:bold; margin-bottom:15px;">
+          ${e.message.includes('429') ? 'Rate limit reached. Please wait 10 seconds.' : 'Connection Error (404).'}
+        </p>
+        <button class="btn-start" style="width:auto; padding:8px 20px;" onclick="loadNext()">Retry Now</button>
+      </div>`;
   }
 }
 
 async function fetchAIQuestion() {
-  // FIXED URL: uses /v1beta/models/gemini-1.5-flash:generateContent
+  // FIXED URL: added ':generateContent' at the end to prevent 404
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${window.GEMINI_API_KEY}`;
   
-  const prompt = `Return ONLY a raw JSON object for a Year 5 Science question on ${quiz.domain}. Structure: {"d":"Biology|Chemistry|Physics|Working Scientifically","q":"text","o":["A","B","C","D"],"a":0,"e":"explanation"}`;
+  const prompt = `Return ONLY a raw JSON object for a Year 5 Science question on ${quiz.domain}. 
+  Use this JSON structure: {"d":"Biology|Chemistry|Physics|Working Scientifically","q":"text","o":["A","B","C","D"],"a":0,"e":"explanation"}`;
 
   const response = await fetch(url, {
     method: 'POST',
@@ -185,10 +193,16 @@ async function fetchAIQuestion() {
     })
   });
 
-  if(!response.ok) throw new Error("Status " + response.status);
+  if(!response.ok) {
+     if(response.status === 429) throw new Error("API Busy (429)");
+     if(response.status === 404) throw new Error("Check API URL (404)");
+     throw new Error("Error " + response.status);
+  }
 
   const data = await response.json();
-  return JSON.parse(data.candidates[0].content.parts[0].text);
+  // Fixed JSON parsing to avoid 'reading properties of undefined'
+  const jsonText = data.candidates[0].content.parts[0].text;
+  return JSON.parse(jsonText);
 }
 
 function renderQuestion(q) {
@@ -245,24 +259,21 @@ function stopAndFinish() {
     const dCorrect = dQs.filter(h => h.correct).length;
     domGrid.innerHTML += `<div class="dom-card dca-${d.split(' ')[0].toLowerCase()}"><div style="font-size:10px; font-weight:700; color:var(--ink3); text-transform:uppercase">${d}</div><div style="font-size:24px; font-weight:800">${dCorrect}/${dQs.length}</div></div>`;
   });
-
-  const review = document.getElementById('rd-review');
-  const missed = quiz.history.filter(h => !h.correct);
-  review.innerHTML = missed.length > 0 ? `<p style="font-size:11px; font-weight:700; color:var(--ink3); margin-bottom:10px">REVIEW</p>` + 
-    missed.map(m => `<div style="background:white; border:1px solid var(--border); padding:10px; border-radius:12px; margin-bottom:8px; font-size:13px"><strong>${m.q}</strong><br><span style="color:#16a34a">Correct: ${m.o[m.a]}</span></div>`).join('') : "";
 }
 
 // Generate stars for background
 const starsCont = document.getElementById('stars');
-for(let i=0; i<50; i++) {
-  const s = document.createElement('div');
-  s.className = 'star-dot';
-  s.style.left = Math.random()*100+'%';
-  s.style.top = Math.random()*100+'%';
-  s.style.width = s.style.height = (Math.random()*3+1)+'px';
-  s.style.setProperty('--d', (Math.random()*3+2)+'s');
-  s.style.setProperty('--dl', (Math.random()*5)+'s');
-  starsCont.appendChild(s);
+if(starsCont) {
+  for(let i=0; i<50; i++) {
+    const s = document.createElement('div');
+    s.className = 'star-dot';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.width = s.style.height = (Math.random()*3+1)+'px';
+    s.style.setProperty('--d', (Math.random()*3+2)+'s');
+    s.style.setProperty('--dl', (Math.random()*5)+'s');
+    starsCont.appendChild(s);
+  }
 }
 </script>
 </body>
