@@ -341,7 +341,7 @@ a.ttag:hover{border-color:var(--chem-mid);background:var(--chem-bg);color:var(--
 // ═══════════════════════════════════════════════════════
 // CONFIG — edit these two lines only
 // ═══════════════════════════════════════════════════════
-const GEMINI_KEY      = 'AIzaSyCRsFGb0fdA1gWBLvgoQGjWyESAwgh19MM';
+const GEMINI_KEY      = 'AIzaSyCC0Af2Tw-ZUNZ1pYwFf3qODP6OK9vDJvk';
 const SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzJbsGAELB71C0FYnP5NwugHlKj_8fjvg05tiiTvZENQc-c51V7uBVobZKQJ4N0EBrW/exec';
 
 // ═══════════════════════════════════════════════════════
@@ -441,7 +441,7 @@ const TOPICS = {
 };
 
 async function callGemini(domain, diff, theta, style) {
-  if (!GEMINI_KEY || GEMINI_KEY === 'AIzaSyCRsFGb0fdA1gWBLvgoQGjWyESAwgh19MM') return null;
+  if (!GEMINI_KEY || GEMINI_KEY === 'AIzaSyCC0Af2Tw-ZUNZ1pYwFf3qODP6OK9vDJvk') return null;
 
   const topicList = TOPICS[domain] || TOPICS.Biology;
   const topic = topicList[Math.floor(Math.random() * topicList.length)];
