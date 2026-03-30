@@ -25,8 +25,6 @@
 body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
 .screen{display:none;min-height:100vh;flex-direction:column}
 .screen.active{display:flex}
-
-/* LOGIN SCREEN */
 #s-login{align-items:center;justify-content:center;background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 50%,#24243e 100%);position:relative;overflow:hidden}
 .stars-bg{position:absolute;inset:0;pointer-events:none}
 .star-dot{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d) ease-in-out infinite var(--dl)}
@@ -40,35 +38,30 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 .login-card > p{font-size:13px;color:var(--ink3);margin-bottom:1.4rem;line-height:1.5}
 .field{margin-bottom:.85rem}
 .field label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase}
-.field input, .field select{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;background:var(--paper);color:var(--ink);appearance:none;transition:border-color .15s}
-.btn-start{width:100%;padding:12px;background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:800;cursor:pointer;margin-top:.5rem;letter-spacing:.3px}
-
-/* QUIZ UI */
+.field input, .field select{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;background:var(--paper);color:var(--ink);appearance:none}
+.btn-start{width:100%;padding:12px;background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:800;cursor:pointer;margin-top:.5rem}
 .qhdr{background:var(--surface);border-bottom:1px solid var(--border);padding:.65rem 1rem;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
 .qhdr-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .prog-track{height:5px;background:var(--border);border-radius:3px;flex:1;overflow:hidden}
-.prog-fill{height:100%;background:linear-gradient(90deg,#1a1a4e,#0f3460);transition:width .4s cubic-bezier(.4,0,.2,1)}
-.btn-stop{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid #fca5a5;color:#991b1b;cursor:pointer;background:none;transition:all .12s}
-
+.prog-fill{height:100%;background:linear-gradient(90deg,#1a1a4e,#0f3460);transition:width .4s}
+.btn-stop{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid #fca5a5;color:#991b1b;cursor:pointer;background:none}
 .qbody{flex:1;padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%}
 .dom-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:.6rem}
 .db-bio{background:var(--bio-bg);color:var(--bio)}
 .db-chem{background:var(--chem-bg);color:var(--chem)}
 .db-phys{background:var(--phys-bg);color:var(--phys)}
 .db-ws{background:var(--ws-bg);color:var(--ws)}
-.q-text{font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;line-height:1.5;color:var(--ink);margin-bottom:1rem}
+.q-text{font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;line-height:1.5;margin-bottom:1rem}
 .opts{display:flex;flex-direction:column;gap:8px}
-.opt{display:flex;align-items:center;gap:11px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:14px;background:var(--surface);transition:all .12s}
+.opt{display:flex;align-items:center;gap:11px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:14px;background:var(--surface)}
 .opt.correct{border-color:#16a34a;background:#f0fdf4;color:#14532d}
 .opt.wrong{border-color:#dc2626;background:#fef2f2;color:#7f1d1d}
 .opt-let{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink3)}
 .opt.correct .opt-let{background:#16a34a;border-color:#16a34a;color:#fff}
 .opt.wrong .opt-let{background:#dc2626;border-color:#dc2626;color:#fff}
-
-/* RESULTS DASHBOARD */
 .res-hero{background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 50%,#0f3460 100%);color:white;padding:1.8rem 1.3rem;text-align:center}
 .rh-grade{display:inline-block;padding:6px 22px;border-radius:30px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;margin-bottom:.8rem}
-.rh-score-big{font-family:'Nunito',sans-serif;font-size:52px;font-weight:800;letter-spacing:-3px;line-height:1}
+.rh-score-big{font-family:'Nunito',sans-serif;font-size:52px;font-weight:800;letter-spacing:-3px}
 .res-body{padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%}
 .dom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.5rem}
 .dom-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rl);padding:1rem;position:relative;overflow:hidden}
@@ -84,7 +77,6 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 </style>
 </head>
 <body>
-
 <div id="s-login" class="screen active">
   <div class="stars-bg" id="stars"></div>
   <div class="login-card">
@@ -107,7 +99,6 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
     <button class="btn-start" onclick="startQuiz()">Start Practice 🚀</button>
   </div>
 </div>
-
 <div id="s-quiz" class="screen">
   <div class="qhdr">
     <div class="qhdr-name" id="hdr-name"></div>
@@ -117,7 +108,6 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
   </div>
   <div class="qbody" id="qbody"></div>
 </div>
-
 <div id="s-results" class="screen">
   <div class="res-hero">
     <div id="rh-name" style="opacity:0.7; margin-bottom:10px"></div>
@@ -128,7 +118,6 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
   <div class="res-body">
     <p style="font-size:11px; font-weight:700; color:var(--ink3); margin-bottom:10px">SCORE BY DOMAIN</p>
     <div class="dom-grid" id="rd-domains"></div>
-    
     <p style="font-size:11px; font-weight:700; color:var(--ink3); margin:20px 0 10px">GRADE SCALE</p>
     <div class="grade-scale">
         <div class="gs-row"><span class="gs-pill g-exc">Exceeding</span><span>81% - 100%</span></div>
@@ -137,7 +126,6 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
         <div class="gs-row"><span class="gs-pill g-em">Expected-</span><span>50% - 59%</span></div>
         <div class="gs-row"><span class="gs-pill g-er">Emerging</span><span>0% - 49%</span></div>
     </div>
-    
     <button class="btn-start" style="width:100%" onclick="location.reload()">↺ Try Again</button>
     <div id="rd-review" style="margin-top:20px"></div>
   </div>
@@ -160,7 +148,6 @@ function startQuiz() {
   quiz.cls = document.getElementById('inp-class').value;
   quiz.domain = document.getElementById('inp-domain').value;
   if(!quiz.name || !quiz.cls) return alert("Please enter name and class.");
-  
   document.getElementById('s-login').classList.remove('active');
   document.getElementById('s-quiz').classList.add('active');
   document.getElementById('hdr-name').innerText = quiz.name;
@@ -172,38 +159,44 @@ async function loadNext() {
   quiz.locked = false;
   document.getElementById('hdr-count').innerText = `Question ${quiz.qIdx}`;
   document.getElementById('prog').style.width = Math.min((quiz.qIdx * 10), 100) + '%';
-  
   const container = document.getElementById('qbody');
-  container.innerHTML = `<div class="ai-loading show"><div class="spinner"></div><span>AI is generating a ${quiz.domain} question...</span></div>`;
+  container.innerHTML = `<div class="ai-loading show"><div class="spinner"></div><span>AI is writing a ${quiz.domain} question...</span></div>`;
   
   try {
     const q = await fetchAIQuestion();
     renderQuestion(q);
   } catch (e) {
-    container.innerHTML = `<p>AI Connection Error. Please check your API key.</p>`;
+    container.innerHTML = `<div style="text-align:center; padding:20px;"><p style="color:red">API Busy (429/404). Please wait a second.</p><button class="btn-start" style="width:auto" onclick="loadNext()">Retry</button></div>`;
   }
 }
 
 async function fetchAIQuestion() {
+  // FIXED URL: uses /v1beta/models/gemini-1.5-flash:generateContent
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${window.GEMINI_API_KEY}`;
-  const prompt = `Return ONLY a raw JSON object for a Year 5 Science question on ${quiz.domain}. Structure: {"d":"Biology|Chemistry|Physics|Working Scientifically","q":"question text","o":["A","B","C","D"],"a":0,"e":"explanation"}`;
   
+  const prompt = `Return ONLY a raw JSON object for a Year 5 Science question on ${quiz.domain}. Structure: {"d":"Biology|Chemistry|Physics|Working Scientifically","q":"text","o":["A","B","C","D"],"a":0,"e":"explanation"}`;
+
   const response = await fetch(url, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    body: JSON.stringify({ 
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json" } 
+    })
   });
-  
+
+  if(!response.ok) throw new Error("Status " + response.status);
+
   const data = await response.json();
-  let text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
-  return JSON.parse(text);
+  return JSON.parse(data.candidates[0].content.parts[0].text);
 }
 
 function renderQuestion(q) {
   quiz.currentQ = q;
-  const dClass = q.d.includes('Bio')?'db-bio':q.d.includes('Chem')?'db-chem':q.d.includes('Phys')?'db-phys':'db-ws';
+  const d = q.d || "Science";
+  const dClass = d.includes('Bio')?'db-bio':d.includes('Chem')?'db-chem':d.includes('Phys')?'db-phys':'db-ws';
   document.getElementById('qbody').innerHTML = `
-    <div class="dom-badge ${dClass}">${q.d}</div>
+    <div class="dom-badge ${dClass}">${d}</div>
     <div class="q-text">${q.q}</div>
     <div class="opts">
       ${q.o.map((opt, i) => `<div class="opt" onclick="checkAnswer(${i})"><div class="opt-let">${String.fromCharCode(65+i)}</div><div>${opt}</div></div>`).join('')}
@@ -227,7 +220,6 @@ function checkAnswer(idx) {
   const fb = document.getElementById('feedback');
   fb.style.display = 'block';
   fb.style.background = isCorrect ? '#f0fdf4' : '#fef2f2';
-  fb.style.border = isCorrect ? '1px solid #bbf7d0' : '1px solid #fecaca';
   fb.innerHTML = `<strong>${isCorrect?'Correct!':'Not quite.'}</strong> ${quiz.currentQ.e}`;
   document.getElementById('next-box').style.display = 'block';
 }
@@ -235,7 +227,6 @@ function checkAnswer(idx) {
 function stopAndFinish() {
   document.getElementById('s-quiz').classList.remove('active');
   document.getElementById('s-results').classList.add('active');
-  
   const total = quiz.history.length;
   const pct = total > 0 ? Math.round((quiz.score / total) * 100) : 0;
   const g = GRADES.find(gr => pct >= gr.min) || GRADES[4];
@@ -249,21 +240,16 @@ function stopAndFinish() {
   const domGrid = document.getElementById('rd-domains');
   domGrid.innerHTML = '';
   ['Biology', 'Chemistry', 'Physics', 'Working Scientifically'].forEach(d => {
-    const dQs = quiz.history.filter(h => h.d.includes(d.split(' ')[0]));
+    const dQs = quiz.history.filter(h => h.d && h.d.includes(d.split(' ')[0]));
     if(dQs.length === 0) return;
     const dCorrect = dQs.filter(h => h.correct).length;
-    domGrid.innerHTML += `
-      <div class="dom-card dca-${d.split(' ')[0].toLowerCase()}">
-        <div style="font-size:10px; font-weight:700; color:var(--ink3); text-transform:uppercase">${d}</div>
-        <div style="font-size:24px; font-weight:800">${dCorrect}/${dQs.length}</div>
-      </div>`;
+    domGrid.innerHTML += `<div class="dom-card dca-${d.split(' ')[0].toLowerCase()}"><div style="font-size:10px; font-weight:700; color:var(--ink3); text-transform:uppercase">${d}</div><div style="font-size:24px; font-weight:800">${dCorrect}/${dQs.length}</div></div>`;
   });
 
   const review = document.getElementById('rd-review');
   const missed = quiz.history.filter(h => !h.correct);
-  review.innerHTML = missed.length > 0 ? `<p style="font-size:11px; font-weight:700; color:var(--ink3); margin-bottom:10px">QUESTIONS TO REVIEW</p>` + 
-    missed.map(m => `<div style="background:white; border:1px solid var(--border); padding:10px; border-radius:12px; margin-bottom:8px; font-size:13px"><strong>${m.q}</strong><br><span style="color:#16a34a">Correct Answer: ${m.o[m.a]}</span></div>`).join('') 
-    : "<p style='color:var(--bio)'>Perfect score! No mistakes to review.</p>";
+  review.innerHTML = missed.length > 0 ? `<p style="font-size:11px; font-weight:700; color:var(--ink3); margin-bottom:10px">REVIEW</p>` + 
+    missed.map(m => `<div style="background:white; border:1px solid var(--border); padding:10px; border-radius:12px; margin-bottom:8px; font-size:13px"><strong>${m.q}</strong><br><span style="color:#16a34a">Correct: ${m.o[m.a]}</span></div>`).join('') : "";
 }
 
 // Generate stars for background
