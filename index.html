@@ -36,15 +36,12 @@
     </div>
 
 <script>
-    // YOUR NEW KEY
     const KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU'; 
 
     function startApp() {
         const name = document.getElementById('u-name').value;
         const cls = document.getElementById('u-class').value;
-        
         if(!name || !cls) return alert("Please fill in your name and class!");
-
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('quiz-screen').style.display = 'block';
         fetchQuestion();
@@ -52,34 +49,45 @@
 
     async function fetchQuestion() {
         const container = document.getElementById('q-content');
-        container.innerHTML = "<h3>Generating Question...</h3>";
+        container.innerHTML = "<h3>AI is writing your question...</h3>";
 
         try {
-            // Updated to the most stable v1 endpoint to prevent 404s
             const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${KEY}`;
             
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: "Provide a Year 5 Science question in JSON format: {\"q\":\"question\",\"o\":[\"A\",\"B\",\"C\",\"D\"],\"a\":0,\"e\":\"explanation\"}" }] }],
-                    generationConfig: { responseMimeType: "application/json" }
+                    contents: [{ parts: [{ text: "Create one Year 5 Science multiple choice question. Return ONLY this JSON format: {\"q\":\"question text\",\"o\":[\"opt1\",\"opt2\",\"opt3\",\"opt4\"],\"a\":0,\"e\":\"explanation\"}" }] }],
+                    generationConfig: { 
+                        responseMimeType: "application/json",
+                        temperature: 0.5
+                    }
                 })
             });
 
-            if(!response.ok) throw new Error("API Error: " + response.status);
+            if(!response.ok) {
+                const errorData = await response.json();
+                console.error("API Error Details:", errorData);
+                throw new Error(errorData.error.message || response.status);
+            }
 
             const data = await response.json();
-            const q = JSON.parse(data.candidates[0].content.parts[0].text);
+            const rawText = data.candidates[0].content.parts[0].text;
+            const q = JSON.parse(rawText);
             
             container.innerHTML = `
                 <h2>${q.q}</h2>
                 ${q.o.map((opt, i) => `<div class="opt" onclick="check(${i}, ${q.a}, this, '${q.e.replace(/'/g, "\\'")}')">${opt}</div>`).join('')}
-                <div id="feedback" style="margin-top:20px; font-weight:700; display:none"></div>
+                <div id="feedback" style="margin-top:20px; font-weight:700; display:none; padding:10px; border-radius:8px"></div>
                 <button id="next-btn" style="display:none; margin-top:20px" onclick="fetchQuestion()">Next Question</button>
             `;
         } catch (err) {
-            container.innerHTML = `<h3 style="color:red">Error: ${err.message}</h3><button onclick="fetchQuestion()">Retry</button>`;
+            container.innerHTML = `
+                <h3 style="color:red">System Error</h3>
+                <p style="font-size:12px; background:#eee; padding:10px">${err.message}</p>
+                <button onclick="fetchQuestion()">Try Again</button>
+            `;
         }
     }
 
@@ -87,16 +95,20 @@
         const opts = document.querySelectorAll('.opt');
         opts.forEach(o => o.style.pointerEvents = 'none');
         
+        const fb = document.getElementById('feedback');
+        fb.style.display = 'block';
+        
         if(idx === correct) {
             el.classList.add('correct');
+            fb.style.background = "#dcfce7";
+            fb.innerText = "Correct! " + explain;
         } else {
             el.classList.add('wrong');
             opts[correct].classList.add('correct');
+            fb.style.background = "#fee2e2";
+            fb.innerText = "Not quite. " + explain;
         }
         
-        const fb = document.getElementById('feedback');
-        fb.style.display = 'block';
-        fb.innerText = explain;
         document.getElementById('next-btn').style.display = 'block';
     }
 </script>
