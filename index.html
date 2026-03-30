@@ -175,7 +175,6 @@ async function loadNext() {
 }
 
 async function fetchAIQuestion() {
-  // FINAL URL CONSTRUCTION FIX
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
   
   const prompt = `Return ONLY a raw JSON object for a Year 5 Science question on ${quiz.domain}. Structure: {"d":"Biology|Chemistry|Physics|Working Scientifically","q":"text","o":["A","B","C","D"],"a":0,"e":"explanation"}`;
