@@ -34,15 +34,19 @@
 
     <div id="quiz-screen">
         <div class="q-box" id="q-content">
-            <h3 id="status">Generating Question...</h3>
+            <h3 id="status">Preparing AI...</h3>
         </div>
     </div>
 
 <script>
+    // YOUR API KEY
     const KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU'; 
 
     function startApp() {
-        if(!document.getElementById('u-name').value || !document.getElementById('u-class').value) return alert("Enter details!");
+        const name = document.getElementById('u-name').value;
+        const cls = document.getElementById('u-class').value;
+        if(!name || !cls) return alert("Please fill in your details!");
+        
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('quiz-screen').style.display = 'block';
         fetchQuestion();
@@ -50,17 +54,17 @@
 
     async function fetchQuestion() {
         const container = document.getElementById('q-content');
-        container.innerHTML = "<h3>AI is writing your question...</h3>";
+        container.innerHTML = "<h3>Generating Year 5 Science question...</h3>";
 
         try {
-            // THE FIX: Changed URL to v1beta to solve the 404 error
+            // FIX: Using v1beta and the precise model path to avoid 404/400 errors
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
             
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: "Generate one Year 5 Science question. Return ONLY JSON: {\"q\":\"question\",\"o\":[\"A\",\"B\",\"C\",\"D\"],\"a\":0,\"e\":\"explanation\"}" }] }],
+                    contents: [{ parts: [{ text: "Generate one Year 5 Science multiple choice question. Return ONLY raw JSON: {\"q\":\"question\",\"o\":[\"A\",\"B\",\"C\",\"D\"],\"a\":0,\"e\":\"explanation\"}" }] }],
                     generationConfig: { 
                         responseMimeType: "application/json",
                         temperature: 0.7 
@@ -68,7 +72,7 @@
                 })
             });
 
-            if(!response.ok) throw new Error("API Error: " + response.status);
+            if(!response.ok) throw new Error("API Error " + response.status);
 
             const data = await response.json();
             const q = JSON.parse(data.candidates[0].content.parts[0].text);
@@ -76,7 +80,7 @@
             container.innerHTML = `
                 <h2 style="margin-top:0">${q.q}</h2>
                 <div id="options-list">
-                    ${q.o.map((opt, i) => `<div class="opt" onclick="check(${i}, ${q.a}, this, '${q.e.replace(/'/g, "\\'")}')">${opt}</div>`).join('')}
+                    ${q.o.map((opt, i) => `<div class="opt" onclick="checkAnswer(${i}, ${q.a}, this, '${q.e.replace(/'/g, "\\'")}')">${opt}</div>`).join('')}
                 </div>
                 <div id="feedback"></div>
                 <button id="next-btn" style="display:none; margin-top:20px" onclick="fetchQuestion()">Next Question ➔</button>
@@ -86,18 +90,23 @@
         }
     }
 
-    function check(idx, correct, el, explain) {
+    function checkAnswer(idx, correct, el, explain) {
         const opts = document.querySelectorAll('.opt');
         opts.forEach(o => o.style.pointerEvents = 'none');
         const fb = document.getElementById('feedback');
         fb.style.display = 'block';
+        
         if(idx === correct) {
             el.classList.add('correct');
-            fb.style.background = "#dcfce7"; fb.innerHTML = "✅ " + explain;
+            fb.style.background = "#dcfce7";
+            fb.style.color = "#166534";
+            fb.innerHTML = "✅ Correct! " + explain;
         } else {
             el.classList.add('wrong');
             opts[correct].classList.add('correct');
-            fb.style.background = "#fee2e2"; fb.innerHTML = "❌ " + explain;
+            fb.style.background = "#fee2e2";
+            fb.style.color = "#991b1b";
+            fb.innerHTML = "❌ Not quite. " + explain;
         }
         document.getElementById('next-btn').style.display = 'block';
     }
