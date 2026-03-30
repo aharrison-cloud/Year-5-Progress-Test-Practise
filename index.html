@@ -1,166 +1,1102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Year 5 Science - NLCS Jeju</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root { --p:#1a1a4e; --s:#f0f4ff; --w:#ffffff; --b:#dde2f0; --r:12px; }
-        body { font-family: 'Nunito', sans-serif; background: #0f0c29; color: #1a1a2e; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .card { background: var(--w); padding: 2.5rem; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 90%; max-width: 420px; text-align: center; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1.5px solid var(--b); border-radius: var(--r); font-size: 16px; box-sizing: border-box; }
-        button { background: var(--p); color: white; border: none; padding: 15px; border-radius: var(--r); font-weight: 800; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.3s; }
-        button:hover { opacity: 0.9; transform: scale(0.98); }
-        #quiz-screen { display: none; width: 90%; max-width: 600px; background: var(--s); padding: 2rem; border-radius: 24px; }
-        .q-box { background: white; padding: 2rem; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .opt { border: 2px solid var(--b); padding: 15px; border-radius: var(--r); margin: 10px 0; cursor: pointer; text-align: left; font-weight: 600; background: white; transition: 0.2s; }
-        .opt:hover { border-color: var(--p); background: #f8faff; }
-        .correct { border-color: #22c55e !important; background: #dcfce7 !important; color: #166534; }
-        .wrong { border-color: #ef4444 !important; background: #fee2e2 !important; color: #991b1b; }
-        #feedback { margin-top: 15px; padding: 15px; border-radius: 12px; display: none; font-weight: 700; line-height: 1.4; }
-        #loading { font-weight: bold; color: var(--p); margin: 20px 0; }
-        .err-msg { color: #be123c; background: #fff1f2; padding: 15px; border-radius: 12px; border: 1px solid #fecdd3; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Year 5 Science — Adaptive Practice (Gemini AI)</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1a2e;--ink2:#4a4a6a;--ink3:#8888aa;--ink4:#c0c0d8;
+  --paper:#f0f4ff;--surface:#ffffff;--border:#dde2f0;--border2:#bec5e0;
+  --bio:#166534;--bio-bg:#dcfce7;--bio-mid:#22c55e;
+  --chem:#1e40af;--chem-bg:#dbeafe;--chem-mid:#3b82f6;
+  --phys:#92400e;--phys-bg:#fef3c7;--phys-mid:#f59e0b;
+  --ws:#5b21b6;--ws-bg:#ede9fe;--ws-mid:#8b5cf6;
+  --ext:#be185d;--ext-bg:#fce7f3;
+  --exc-bg:#d1fae5;--exc-txt:#065f46;--exc-bdr:#6ee7b7;
+  --ep-bg:#dbeafe;--ep-txt:#1e40af;--ep-bdr:#93c5fd;
+  --ex-bg:#f1f5f9;--ex-txt:#334155;--ex-bdr:#cbd5e1;
+  --em-bg:#fef3c7;--em-txt:#92400e;--em-bdr:#fcd34d;
+  --er-bg:#fee2e2;--er-txt:#991b1b;--er-bdr:#fca5a5;
+  --r:12px;--rl:18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* LOGIN */
+#s-login{align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 50%,#24243e 100%);
+  position:relative;overflow:hidden}
+.stars-bg{position:absolute;inset:0;pointer-events:none}
+.star-dot{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d) ease-in-out infinite var(--dl)}
+@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.9}}
+.login-card{background:var(--surface);border-radius:24px;padding:2.2rem 2rem;
+  width:min(420px,92vw);box-shadow:0 32px 80px rgba(0,0,0,.5);position:relative;z-index:1}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem}
+.logo-rocket{font-size:28px}
+.logo-name{font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:var(--ink)}
+.logo-sub{font-size:11px;color:var(--ink3)}
+.login-card h1{font-family:'Nunito',sans-serif;font-size:21px;font-weight:800;letter-spacing:-.5px;margin-bottom:.3rem}
+.login-card > p{font-size:13px;color:var(--ink3);margin-bottom:1.4rem;line-height:1.5}
+.field{margin-bottom:.85rem}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase}
+.field input,.field select{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--ink);appearance:none;transition:border-color .15s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(26,26,46,.07)}
+.btn-start{width:100%;padding:12px;background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;margin-top:.5rem;letter-spacing:.3px;transition:opacity .15s}
+.btn-start:hover{opacity:.88}
+.login-note{font-size:11px;color:var(--ink4);text-align:center;margin-top:.8rem;line-height:1.5}
+
+/* QUIZ HEADER */
+#s-quiz{background:var(--paper)}
+.qhdr{background:var(--surface);border-bottom:1px solid var(--border);padding:.65rem 1rem;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;flex-wrap:wrap}
+.qhdr-info{min-width:0}
+.qhdr-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qhdr-cls{font-size:10px;color:var(--ink3);font-family:monospace}
+.qhdr-prog{flex:1;min-width:80px}
+.prog-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#1a1a4e,#0f3460);transition:width .4s cubic-bezier(.4,0,.2,1)}
+.qhdr-count{font-size:11px;color:var(--ink3);font-family:monospace;white-space:nowrap}
+.diff-chip{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.dc-easy{background:#dcfce7;color:#166534}
+.dc-medium{background:#fef3c7;color:#92400e}
+.dc-hard{background:#fee2e2;color:#991b1b}
+.dc-ext{background:#fce7f3;color:#be185d}
+.streak-chip{display:none;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#92400e;background:#fef3c7;padding:3px 9px;border-radius:20px}
+.streak-chip.show{display:flex}
+/* Stop button */
+.btn-stop{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Nunito',sans-serif;background:transparent;border:1.5px solid #fca5a5;color:#991b1b;cursor:pointer;white-space:nowrap;transition:all .12s}
+.btn-stop:hover{background:#fee2e2}
+
+/* QUESTION BODY */
+.qbody{flex:1;padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%;padding-bottom:2rem}
+.q-num{font-size:11px;color:var(--ink3);font-family:monospace;margin-bottom:.4rem}
+.dom-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:.6rem}
+.db-bio{background:var(--bio-bg);color:var(--bio)}
+.db-chem{background:var(--chem-bg);color:var(--chem)}
+.db-phys{background:var(--phys-bg);color:var(--phys)}
+.db-ws{background:var(--ws-bg);color:var(--ws)}
+.db-ext{background:var(--ext-bg);color:var(--ext)}
+.ai-chip{font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:#ede9fe;color:#5b21b6;margin-left:5px;vertical-align:middle}
+.ext-badge{font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--ext-bg);color:var(--ext);margin-left:5px;vertical-align:middle;text-transform:uppercase;letter-spacing:.4px}
+/* Context box — Cambridge/PTS style */
+.q-context{background:var(--surface);border:1.5px solid var(--border2);border-left:4px solid var(--chem-mid);border-radius:var(--r);padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--ink2);line-height:1.6}
+.q-context-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:4px}
+.q-image{margin-bottom:1rem;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--border);background:#f8f8fc}
+.q-image img{width:100%;display:block;max-height:240px;object-fit:contain;padding:8px}
+.q-image-cap{font-size:11px;color:var(--ink3);padding:4px 10px;background:var(--paper);border-top:1px solid var(--border);font-style:italic}
+.q-hint{background:#fffbeb;border:1px solid #fcd34d;border-radius:var(--r);padding:8px 12px;font-size:12px;color:#78350f;margin-bottom:1rem;line-height:1.5}
+.q-text{font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;line-height:1.5;color:var(--ink);margin-bottom:1rem;letter-spacing:-.15px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:center;gap:11px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:14px;font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--surface);text-align:left;transition:border-color .12s,background .12s}
+.opt:hover:not(.locked){border-color:var(--border2);background:var(--paper)}
+.opt.locked{cursor:default}
+.opt.correct{border-color:#16a34a;background:#f0fdf4;color:#14532d}
+.opt.wrong{border-color:#dc2626;background:#fef2f2;color:#7f1d1d}
+.opt.reveal{border-color:#16a34a;background:#f0fdf4;color:#14532d}
+.opt-let{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:monospace;flex-shrink:0;color:var(--ink3);transition:all .12s}
+.opt.correct .opt-let{background:#16a34a;border-color:#16a34a;color:#fff}
+.opt.wrong .opt-let{background:#dc2626;border-color:#dc2626;color:#fff}
+.opt.reveal .opt-let{background:#16a34a;border-color:#16a34a;color:#fff}
+.fb{margin-top:.9rem;padding:10px 13px;border-radius:var(--r);font-size:13px;line-height:1.6;display:none}
+.fb.show{display:block}
+.fb.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#14532d}
+.fb.no{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+.ext-tip{margin-top:.75rem;padding:9px 12px;background:var(--ext-bg);border:1px solid #f9a8d4;border-radius:var(--r);font-size:12px;color:var(--ext);line-height:1.55;display:none}
+.ext-tip.show{display:block}
+/* Loading spinner */
+.ai-loading{display:none;align-items:center;gap:10px;padding:1.5rem;justify-content:center;color:var(--ink3);font-size:13px}
+.ai-loading.show{display:flex}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.qnav{display:flex;justify-content:space-between;align-items:center;margin-top:1.3rem;padding-top:1.1rem;border-top:1px solid var(--border)}
+.btn{padding:8px 18px;border-radius:var(--r);font-size:13px;font-weight:600;font-family:'Nunito',sans-serif;cursor:pointer;transition:all .12s;border:1.5px solid transparent}
+.btn-out{background:var(--surface);border-color:var(--border2);color:var(--ink2)}
+.btn-out:hover{border-color:var(--ink);color:var(--ink)}
+.btn-pri{background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white}
+.btn-pri:hover{opacity:.88}
+.btn:disabled{opacity:.35;cursor:default}
+
+/* RESULTS */
+#s-results{background:var(--paper)}
+.res-hero{background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 50%,#0f3460 100%);color:white;padding:1.8rem 1.3rem 1.5rem;text-align:center;position:relative;overflow:hidden}
+.res-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,rgba(34,197,94,.1),transparent 55%),radial-gradient(circle at 70% 30%,rgba(59,130,246,.1),transparent 55%)}
+.rh-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;opacity:.5;margin-bottom:.4rem;font-family:monospace}
+.rh-name{font-size:15px;opacity:.7;margin-bottom:1rem}
+.rh-grade{display:inline-block;padding:6px 22px;border-radius:30px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;margin-bottom:.8rem}
+.g-exc{background:var(--exc-bg);color:var(--exc-txt)}
+.g-ep{background:var(--ep-bg);color:var(--ep-txt)}
+.g-ex{background:var(--ex-bg);color:var(--ex-txt)}
+.g-em{background:var(--em-bg);color:var(--em-txt)}
+.g-er{background:var(--er-bg);color:var(--er-txt)}
+.rh-score-row{display:flex;justify-content:center;align-items:baseline;gap:8px;margin-bottom:.25rem}
+.rh-score-big{font-family:'Nunito',sans-serif;font-size:52px;font-weight:800;letter-spacing:-3px;line-height:1}
+.rh-score-pct{font-size:20px;opacity:.6}
+.rh-tagline{font-size:13px;opacity:.55}
+.rh-meta{display:flex;justify-content:center;gap:14px;margin-top:.8rem;font-size:11px;opacity:.4;font-family:monospace;flex-wrap:wrap}
+.res-body{padding:1.2rem 1.1rem;max-width:660px;margin:0 auto;width:100%;padding-bottom:2rem}
+.sec-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ink3);margin:1.3rem 0 .65rem}
+.dom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.5rem}
+.dom-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rl);padding:1rem;position:relative;overflow:hidden}
+.dom-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.dca-bio::before{background:var(--bio-mid)}.dca-chem::before{background:var(--chem-mid)}
+.dca-phys::before{background:var(--phys-mid)}.dca-ws::before{background:var(--ws-mid)}
+.dom-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:.4rem}
+.dom-score-big{font-family:'Nunito',sans-serif;font-size:26px;font-weight:800;letter-spacing:-1px;color:var(--ink);line-height:1}
+.dom-score-den{font-size:13px;color:var(--ink3)}
+.dom-pct{font-size:12px;color:var(--ink3);margin:.2rem 0 .5rem}
+.dom-bar{height:5px;border-radius:3px;background:var(--border)}
+.dom-bar-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.dba-bio .dom-bar-fill{background:var(--bio-mid)}.dba-chem .dom-bar-fill{background:var(--chem-mid)}
+.dba-phys .dom-bar-fill{background:var(--phys-mid)}.dba-ws .dom-bar-fill{background:var(--ws-mid)}
+.grade-scale{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rl);padding:1rem;margin-bottom:.5rem}
+.gs-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.gs-row:last-child{border-bottom:none}
+.gs-pill{font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;min-width:95px;text-align:center;font-family:'Nunito',sans-serif}
+.gs-range{color:var(--ink3);font-family:monospace;font-size:11px;flex:1}
+.gs-yours{font-size:11px;font-weight:600;color:#16a34a}
+.ext-section{background:linear-gradient(135deg,#fdf4ff,#fce7f3);border:1.5px solid #f9a8d4;border-radius:var(--rl);padding:1.1rem;margin-bottom:.5rem}
+.ext-section-head{display:flex;align-items:center;gap:8px;margin-bottom:.75rem}
+.ext-topic{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #fbcfe8}
+.ext-topic:last-child{border-bottom:none;padding-bottom:0}
+.ext-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.ext-topic-name{font-weight:600;color:var(--ext);font-size:13px;margin-bottom:2px}
+.ext-topic-desc{font-size:12px;color:#9d174d;line-height:1.45}
+.ext-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--ext);text-decoration:none;margin-top:4px;padding:2px 8px;background:#fce7f3;border-radius:20px;border:1px solid #f9a8d4}
+.study-dom{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rl);margin-bottom:10px;overflow:hidden}
+.study-dom-hdr{display:flex;align-items:center;gap:8px;padding:.8rem 1rem;border-bottom:1px solid var(--border)}
+.study-dom-score{font-size:11px;color:var(--ink3);font-family:monospace}
+.p-high{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#fee2e2;color:#991b1b;text-transform:uppercase}
+.p-med{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#fef3c7;color:#92400e;text-transform:uppercase}
+.p-good{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#dcfce7;color:#166534;text-transform:uppercase}
+.study-body{padding:.85rem 1rem}
+.study-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:.5rem}
+.topic-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.85rem}
+.ttag{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--paper);border:1.5px solid var(--border2);color:var(--ink2);text-decoration:none;transition:all .1s}
+a.ttag:hover{border-color:var(--chem-mid);background:var(--chem-bg);color:var(--chem)}
+.res-links{display:flex;flex-direction:column;gap:5px}
+.rlink{display:flex;align-items:center;gap:9px;padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--r);text-decoration:none;color:var(--ink);background:var(--paper);transition:border-color .12s;font-size:12px}
+.rlink:hover{border-color:var(--ink);background:var(--surface)}
+.rlink-icon{font-size:14px;flex-shrink:0}
+.rlink-body{flex:1}
+.rlink-name{font-weight:600;font-size:12px}
+.rlink-desc{font-size:11px;color:var(--ink3);margin-top:1px}
+.rtag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;text-transform:uppercase;flex-shrink:0}
+.rt-free{background:#dcfce7;color:#166534}
+.rt-video{background:#dbeafe;color:#1e40af}
+.rt-read{background:#fef3c7;color:#92400e}
+.missed-item{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:.8rem 1rem;margin-bottom:7px;font-size:12px}
+.missed-q{font-size:13px;color:var(--ink2);margin:.3rem 0;line-height:1.4}
+.missed-wrong{color:#dc2626;font-size:11px}
+.missed-right{color:#16a34a;font-weight:600;font-size:11px;margin-top:2px}
+.action-btns{display:flex;flex-direction:column;gap:8px;margin:1.2rem 0}
+.btn-full{width:100%;padding:11px;font-size:13px;text-align:center;border-radius:var(--r);font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;border:none;transition:opacity .12s}
+.btn-dl{background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white}
+.btn-dl:hover{opacity:.87}
+.btn-retry{background:var(--surface);color:var(--ink);border:1.5px solid var(--border2)!important}
+.btn-retry:hover{border-color:var(--ink)!important}
+.sent-note{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:var(--r);padding:.85rem 1rem;font-size:12px;color:#14532d;line-height:1.55}
+.sent-note strong{display:block;margin-bottom:.2rem;font-size:13px}
+@media(max-width:480px){.dom-grid{grid-template-columns:1fr}}
+.fade-in{animation:fi .22s ease}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+</style>
 </head>
 <body>
 
-    <!-- SCREEN 1: LOGIN -->
-    <div id="login-screen" class="card">
-        <h1 style="margin:0; font-size: 26px;">🚀 Year 5 Science</h1>
-        <p style="color: #666; margin-bottom: 20px;">NLCS Jeju Practice</p>
-        <input type="text" id="u-name" placeholder="Enter Full Name">
-        <select id="u-class">
-            <option value="">Select Class</option>
-            <option>5A</option><option>5B</option><option>5C</option><option>5D</option><option>5E</option>
-        </select>
-        <button onclick="startApp()">Start Learning</button>
+<!-- ── LOGIN ── -->
+<div id="s-login" class="screen active">
+  <div class="stars-bg" id="stars"></div>
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-rocket">🚀</div>
+      <div>
+        <div class="logo-name">Year 5 Science</div>
+        <div class="logo-sub">NLCS Jeju · Adaptive Practice</div>
+      </div>
     </div>
+    <h1>Sign in to begin</h1>
+    <p>AI generates fresh questions just for you. Stop whenever you like — your results are saved automatically.</p>
+    <div class="field"><label>Your name</label><input type="text" id="inp-name" placeholder="e.g. Claire Kim" autocomplete="name"/></div>
+    <div class="field"><label>Class</label>
+      <select id="inp-class">
+        <option value="">— select your class —</option>
+        <option>5A</option><option>5B</option><option>5C</option><option>5D</option><option>5E</option>
+      </select></div>
+    <div class="field"><label>Focus area</label>
+      <select id="inp-domain">
+        <option value="all">All topics (mixed)</option>
+        <option value="Biology">Biology — Life cycles, Adaptations, Reproduction</option>
+        <option value="Chemistry">Chemistry — Materials, Changes, Separation</option>
+        <option value="Physics">Physics — Forces, Space, Solar System</option>
+        <option value="Working Scientifically">Working Scientifically — Experiments, Data, Graphs</option>
+      </select></div>
+    <div class="field"><label>Question style</label>
+      <select id="inp-style">
+        <option value="mixed">Mixed styles</option>
+        <option value="pts">PTS format — short, scenario-based</option>
+        <option value="cambridge">Cambridge style — data, diagrams, longer contexts</option>
+      </select></div>
+    <button class="btn-start" onclick="startQuiz()">Start — AI generates questions for you 🚀</button>
+    <p class="login-note">Questions adapt to your level. Stop any time — your score is saved automatically.</p>
+  </div>
+</div>
 
-    <!-- SCREEN 2: QUIZ -->
-    <div id="quiz-screen">
-        <div class="q-box" id="q-content">
-            <div id="loading">Initializing AI...</div>
-        </div>
+<!-- ── QUIZ ── -->
+<div id="s-quiz" class="screen">
+  <div class="qhdr">
+    <div class="qhdr-info">
+      <div class="qhdr-name" id="hdr-name"></div>
+      <div class="qhdr-cls" id="hdr-cls"></div>
     </div>
+    <div class="qhdr-prog"><div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div></div>
+    <div class="qhdr-count" id="hdr-count"></div>
+    <div class="diff-chip" id="hdr-diff"></div>
+    <div class="streak-chip" id="streak">🔥 <span id="streak-n">0</span></div>
+    <button class="btn-stop" onclick="stopAndFinish()">Finish &amp; see results</button>
+  </div>
+  <div class="qbody fade-in" id="qbody">
+    <div class="ai-loading show" id="first-load">
+      <div class="spinner"></div>
+      <span id="load-msg">Connecting to Gemini AI…</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── RESULTS ── -->
+<div id="s-results" class="screen">
+  <div class="res-hero">
+    <div class="rh-label">Practice Complete</div>
+    <div class="rh-name" id="rh-name"></div>
+    <div class="rh-grade" id="rh-grade"></div>
+    <div class="rh-score-row">
+      <div class="rh-score-big" id="rh-score"></div>
+      <div class="rh-score-pct" id="rh-pct"></div>
+    </div>
+    <div class="rh-tagline" id="rh-tag"></div>
+    <div class="rh-meta" id="rh-meta"></div>
+  </div>
+  <div class="res-body">
+    <p class="sec-head">📊 Score by domain</p>
+    <div class="dom-grid" id="rd-domains"></div>
+    <p class="sec-head">🎯 Grade scale</p>
+    <div class="grade-scale" id="rd-gradescale"></div>
+    <div class="action-btns">
+      <button class="btn btn-full btn-dl" onclick="downloadCSV()">⬇ Download my results (optional)</button>
+      <button class="btn btn-full btn-retry" onclick="retryQuiz()">↺ Try again</button>
+    </div>
+    <div class="sent-note"><strong>✅ Results sent to your teacher</strong>Your score, grade and domain breakdown have been recorded automatically.</div>
+    <p class="sec-head" style="margin-top:1.3rem">🚀 Extension challenges</p>
+    <div id="rd-extensions"></div>
+    <p class="sec-head">📖 What to study next</p>
+    <div id="rd-study"></div>
+    <p class="sec-head">❌ Questions to review</p>
+    <div id="rd-review"></div>
+  </div>
+</div>
 
 <script>
-    // The environment provides the key at runtime
-    const apiKey = ""; 
+// ═══════════════════════════════════════════════════════════════════
+// ── YOUR GEMINI API KEY — hardcoded here, works behind the scenes ──
+// Get a free key at: https://aistudio.google.com/apikey
+// Replace the value below with your own key
+window.GEMINI_API_KEY = 'AIzaSyDQ44QdbO9wWHXPAHyF6F3OLLUAxLs4poo';
 
-    function startApp() {
-        const name = document.getElementById('u-name').value;
-        const cls = document.getElementById('u-class').value;
-        if(!name || !cls) return alert("Please enter your name and class!");
-        
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('quiz-screen').style.display = 'block';
-        fetchQuestion();
+// Google Sheet endpoint — saves student results
+const SHEETS_ENDPOINT='https://script.google.com/macros/s/AKfycbzJbsGAELB71C0FYnP5NwugHlKj_8fjvg05tiiTvZENQc-c51V7uBVobZKQJ4N0EBrW/exec';
+
+// ── GRADES ───────────────────────────────────────────────────────
+const GRADES=[
+  {label:'Exceeding', min:81,cls:'g-exc',bg:'var(--exc-bg)',txt:'var(--exc-txt)',bdr:'var(--exc-bdr)'},
+  {label:'Expected+', min:70,cls:'g-ep', bg:'var(--ep-bg)', txt:'var(--ep-txt)', bdr:'var(--ep-bdr)'},
+  {label:'Expected',  min:60,cls:'g-ex', bg:'var(--ex-bg)', txt:'var(--ex-txt)', bdr:'var(--ex-bdr)'},
+  {label:'Expected\u2212',min:50,cls:'g-em',bg:'var(--em-bg)',txt:'var(--em-txt)',bdr:'var(--em-bdr)'},
+  {label:'Emerging',  min:0, cls:'g-er', bg:'var(--er-bg)', txt:'var(--er-txt)', bdr:'var(--er-bdr)'},
+];
+function getGrade(pct){return GRADES.find(g=>pct>=g.min)||GRADES[4];}
+function gradePill(pct){const g=getGrade(pct);return`<span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;background:${g.bg};color:${g.txt};border:1px solid ${g.bdr};font-family:'Nunito',sans-serif">${g.label}</span>`;}
+
+// ── STATIC FALLBACK BANK (used when AI unavailable) ──────────────
+// 30 diverse questions — ensures app works offline
+const FALLBACK=[
+  {d:'Biology',diff:1,q:'What is the correct order of a frog\'s life cycle?',o:['Egg → Frog → Tadpole','Egg → Tadpole → Froglet → Frog','Tadpole → Egg → Frog','Frog → Tadpole → Egg'],a:1,e:'Frogs hatch from eggs into tadpoles, develop legs to become froglets, then become adult frogs.'},
+  {d:'Biology',diff:1,q:'Which type of metamorphosis do butterflies undergo?',o:['Incomplete (3 stages)','Complete (4 stages: egg, larva, pupa, adult)','No metamorphosis','Partial (2 stages)'],a:1,e:'Complete metamorphosis has four distinct stages. The pupa (chrysalis) stage, where the caterpillar transforms, is what makes it "complete".'},
+  {d:'Biology',diff:2,q:'A cactus has a thick waxy stem and spines instead of leaves. How does the thick stem help it survive?',o:['It stores water during dry periods','It produces more oxygen','It attracts pollinating insects','It absorbs sunlight more efficiently'],a:0,e:'The thick fleshy stem stores large amounts of water, allowing the cactus to survive long dry periods in desert environments.'},
+  {d:'Biology',diff:2,q:'What is the difference between pollination and fertilisation in flowering plants?',o:['They are the same process','Pollination is pollen transfer to the stigma; fertilisation is when pollen joins the ovule','Fertilisation happens before pollination','Pollination only happens underwater'],a:1,e:'Pollination (pollen reaching the stigma) must happen before fertilisation (pollen joining the ovule to form a seed) can occur.'},
+  {d:'Biology',diff:3,q:'Two groups of the same plant are grown in different soils. Group A grows tall with dark green leaves; Group B has yellow leaves and grows slowly. What explains the difference?',o:['Group B receives less sunlight','Group B\'s soil lacks nutrients needed for healthy growth','Group A was planted first','Temperature differences only'],a:1,e:'Yellow leaves (chlorosis) indicate nutrient deficiency, particularly nitrogen needed for chlorophyll production.'},
+  {d:'Biology',diff:3,q:'Why might animals that live in very cold environments have smaller ears than related species in warm environments?',o:['Cold animals don\'t need to hear well','Smaller ears lose less body heat — less surface area means less heat loss','Large ears would freeze','Cold animals grow more slowly'],a:1,e:'Allen\'s Rule: Smaller extremities in cold climates reduce surface area and heat loss, helping the animal maintain body temperature.'},
+  {d:'Chemistry',diff:1,q:'Which of these is a reversible change?',o:['Burning wood','Cooking an egg','Dissolving salt in water','Baking a cake'],a:2,e:'Dissolving salt is reversible — evaporate the water and the salt returns. Burning, cooking and baking create new substances that cannot be unchanged.'},
+  {d:'Chemistry',diff:1,q:'Which material would make the best thermal insulator for keeping a drink warm?',o:['Metal cup','Glass cup','Polystyrene cup','Ceramic cup with no handle'],a:2,e:'Polystyrene traps air in its structure. Air is a very poor conductor of heat, making polystyrene an excellent thermal insulator.'},
+  {d:'Chemistry',diff:2,q:'A student has a mixture of sand, salt and water. Which sequence correctly separates all three?',o:['Evaporate → filter → magnet','Filter (remove sand) → evaporate (recover salt) → you now have water vapour','Sieve → dissolve → filter','Just heat the whole mixture'],a:1,e:'Filter to remove insoluble sand; evaporate to remove water leaving salt crystals behind. Simple and effective use of two separation techniques.'},
+  {d:'Chemistry',diff:2,q:'Which of these is NOT a sign that a chemical (irreversible) reaction has happened?',o:['Bubbles of gas forming','A permanent colour change','Ice melting at room temperature','An unexpected temperature change'],a:2,e:'Ice melting is a physical change of state — reversible and no new substance is formed. The other options all suggest new substances have been created.'},
+  {d:'Chemistry',diff:3,q:'A student dissolves as much salt as possible in warm water. When cooled slowly, crystals appear. Why?',o:['The salt was destroyed by cooling','Hot water holds more dissolved salt; as it cools the excess salt crystallises out','The water evaporated','Salt always forms crystals at room temperature'],a:1,e:'Solubility of most solids increases with temperature. Cooling a saturated solution causes the excess to crystallise — this is crystallisation, a reversible process.'},
+  {d:'Chemistry',diff:3,q:'Iron reacts with oxygen and water to form rust. Why is this an irreversible change?',o:['Because rust is red','Iron oxide (rust) is a new substance — it cannot naturally revert to iron and oxygen','Because water is involved','Because it happens slowly'],a:1,e:'Rusting is a chemical reaction creating iron oxide, a completely different substance. Irreversible changes produce new substances that cannot simply be converted back.'},
+  {d:'Physics',diff:1,q:'What causes day and night on Earth?',o:['The Sun moving around the Earth','The Moon blocking the Sun\'s light','The Earth rotating on its own axis every 24 hours','Clouds covering the Sun'],a:2,e:'Earth rotates (spins) on its axis once every 24 hours. The side facing the Sun has daytime; the side facing away has night.'},
+  {d:'Physics',diff:1,q:'What is the unit used to measure force?',o:['Kilogram (kg)','Metre (m)','Newton (N)','Second (s)'],a:2,e:'Forces are measured in Newtons (N), named after Sir Isaac Newton. A force meter (Newton meter) measures forces.'},
+  {d:'Physics',diff:2,q:'The Moon appears to have different shapes throughout the month. What causes these "phases"?',o:['The Earth\'s shadow falls on the Moon','The Moon produces different amounts of light','We see different amounts of the sunlit side of the Moon as it orbits Earth','The Moon spins very fast'],a:2,e:'The Moon reflects sunlight. As it orbits Earth, we see different portions of its sunlit side — giving us the phases from new moon to full moon.'},
+  {d:'Physics',diff:2,q:'What is the difference between mass and weight?',o:['They are exactly the same thing','Mass is the amount of matter (kg); weight is the gravitational force acting on it (N)','Weight stays the same everywhere; mass changes on the Moon','Mass is measured in Newtons'],a:1,e:'Mass (kg) measures amount of matter — constant everywhere. Weight (N) is the gravitational force on that mass — it would be less on the Moon where gravity is weaker.'},
+  {d:'Physics',diff:3,q:'An astronaut has a mass of 60 kg. On the Moon (gravity = 1.6 N/kg), what is their weight?',o:['60 N','96 N','588 N','600 N'],a:1,e:'Weight = mass × gravitational field strength. On the Moon: 60 × 1.6 = 96 N. On Earth (9.8 N/kg): 60 × 9.8 = 588 N. Same mass, very different weight.'},
+  {d:'Physics',diff:3,q:'Earth takes 365.25 days to orbit the Sun. Why do we have a leap year every four years?',o:['To add an extra school day','The 0.25 days accumulates — after 4 years that\'s 1 extra day, added as 29th February','The Moon causes it','Calendar makers made a mistake'],a:1,e:'365.25 × 4 = 1461 days. Four normal years = 1460 days. The extra day is added as February 29th in a leap year to keep calendars aligned with Earth\'s orbit.'},
+  {d:'Working Scientifically',diff:1,q:'What do we call the variable that you deliberately change in a fair test?',o:['The dependent variable','The control variable','The independent variable','The anomalous variable'],a:2,e:'The independent variable is what you change. The dependent variable is what you measure. Control variables are kept the same to ensure the test is fair.'},
+  {d:'Working Scientifically',diff:1,q:'Why should an experiment be repeated several times?',o:['To use more equipment','To make results more reliable and spot anomalous readings','Because one result is always wrong','To make the write-up longer'],a:1,e:'Repeating experiments improves reliability. Consistent results give confidence they are accurate; repeating also helps identify anomalies that may be errors.'},
+  {d:'Working Scientifically',diff:2,q:'A student tests friction on five surfaces and records how far a car travels (cm): carpet 12, tiles 45, rubber 8, wood 30, ice 82. Which surface has the MOST friction?',o:['Ice (82 cm)','Tiles (45 cm)','Wood (30 cm)','Rubber (8 cm)'],a:3,e:'Most friction = shortest distance travelled. Rubber at 8 cm slows the car most. Ice at 82 cm has least friction — the car slides furthest.'},
+  {d:'Working Scientifically',diff:2,q:'Results: 23, 24, 22, 45, 23 seconds. What should you do with the result of 45?',o:['Use it — it is the most important result','Note it as anomalous and exclude it from the mean calculation','Use all five to calculate the mean','Repeat the whole experiment from scratch'],a:1,e:'45 is clearly anomalous — far outside the cluster of 22-24. Note and exclude it: mean = (23+24+22+23)÷4 = 23 seconds.'},
+  {d:'Working Scientifically',diff:3,q:'Ramp height vs distance car travels: 10cm→22cm, 20cm→44cm, 30cm→65cm, 40cm→88cm. What pattern do you notice?',o:['No pattern','As ramp height increases by 10cm, distance increases by approximately 22-24cm (approximately proportional)','Distance always doubles','The car travels the same distance regardless of height'],a:1,e:'Each 10cm increase in height adds about 22-24cm of distance — a near-proportional relationship. Higher ramps give more gravitational potential energy, which converts to kinetic energy.'},
+  {d:'Working Scientifically',diff:3,q:'A student concludes: "Fertiliser always makes plants grow taller." What is wrong with this conclusion?',o:['Nothing — it is correct','It overclaims — one experiment with one plant type cannot justify "always". Should say "in this investigation..."','The student should not mention fertiliser','Conclusions should use shorter words'],a:1,e:'Scientific conclusions must reflect only what was tested. "Always" is an unjustified absolute. A better conclusion: "In this investigation, plants given fertiliser X grew taller than the control group."'},
+  {d:'Biology',diff:1,q:'What is an adaptation?',o:['A type of food','A feature that helps an organism survive in its environment','A change in the weather','A scientific experiment'],a:1,e:'Adaptations are features (physical or behavioural) that improve an organism\'s chances of surviving and reproducing in its particular environment.'},
+  {d:'Biology',diff:2,q:'A salmon is born in a river, lives in the ocean, then returns to the same river to reproduce. What is this behaviour called?',o:['Hibernation','Migration for reproduction','Complete metamorphosis','Dormancy'],a:1,e:'Salmon migration is a remarkable reproductive behaviour. They return to their birth river to spawn, using Earth\'s magnetic field and smell to navigate.'},
+  {d:'Chemistry',diff:1,q:'What does "soluble" mean?',o:['Cannot be bent or stretched','Dissolves in a liquid (usually water)','Burns easily','Is see-through'],a:1,e:'A soluble substance dissolves in a solvent to form a solution. Salt and sugar are soluble in water. Sand is insoluble.'},
+  {d:'Physics',diff:1,q:'Which planet is closest to the Sun?',o:['Venus','Earth','Mars','Mercury'],a:3,e:'Mercury is closest to the Sun. Order: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune. Mnemonic: My Very Educated Mother Just Served Us Noodles.'},
+  {d:'Working Scientifically',diff:1,q:'Which type of graph is best for showing how temperature changes over time?',o:['Pie chart','Bar chart','Line graph','Tally chart'],a:2,e:'Temperature over time involves two continuous variables. A line graph shows trends clearly and allows you to read values between measurements.'},
+  {d:'Physics',diff:2,q:'How does a lever make it easier to lift a heavy load?',o:['It increases the weight of the load','A longer effort arm means a smaller force can lift a heavier load','It removes friction entirely','It increases Earth\'s gravity at the pivot point'],a:1,e:'Mechanical advantage: the longer the distance from pivot to where you push (effort arm), the less force needed. This is why tools have long handles.'},
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// AI QUESTION GENERATION — PTS & Cambridge Year 5 Style
+// ═══════════════════════════════════════════════════════════════════
+const DOMAIN_TOPICS = {
+  Biology: {
+    topics: ['life cycles of frogs, insects (complete/incomplete metamorphosis), birds and plants',
+             'adaptations of animals and plants to their environments (desert, arctic, forest, ocean)',
+             'plant reproduction — pollination, fertilisation, seed dispersal, flower parts',
+             'animal reproduction — sexual reproduction in mammals, gestation, offspring',
+             'human life cycle — infancy, childhood, adolescence, adulthood',
+             'asexual reproduction — runners, cuttings, bulbs'],
+    pts_contexts: ['A student observes…', 'Look at the diagram showing…', 'A scientist is investigating…', 'The table shows data about…'],
+    cambridge_contexts: ['The diagram shows the life cycle of…', 'A student collected data about…', 'The table below shows the results of an investigation into…']
+  },
+  Chemistry: {
+    topics: ['physical properties of materials — hardness, flexibility, transparency, thermal conductivity',
+             'thermal insulation — comparing materials, fair test design',
+             'solubility — soluble vs insoluble, saturated solutions, factors affecting dissolving',
+             'separating mixtures — filtration, evaporation, distillation, magnetism, sieving',
+             'reversible changes — dissolving, melting, freezing, boiling, condensation',
+             'irreversible changes — burning, cooking, rusting, signs of chemical reactions',
+             'crystallisation — growing crystals from saturated solutions'],
+    pts_contexts: ['A student investigates…', 'Which of these is…', 'A scientist tests…'],
+    cambridge_contexts: ['The table shows the results of testing different materials…', 'A student heated…', 'Look at the diagram of the apparatus…']
+  },
+  Physics: {
+    topics: ['the solar system — planets, order from the Sun, relative sizes',
+             'Earth, Moon and Sun — orbits, day/night caused by rotation, year caused by orbit',
+             'Moon phases — caused by different amounts of sunlit side visible from Earth',
+             'forces — pushes and pulls, contact and non-contact forces',
+             'measuring forces in Newtons using a force meter',
+             'gravity — pulls towards Earth\'s centre, gives objects weight, keeps planets in orbit',
+             'mass vs weight — mass constant everywhere; weight depends on gravity',
+             'friction — opposes motion, depends on surface roughness',
+             'levers — pivot, effort, load; mechanical advantage; examples in everyday life',
+             'pulleys — change direction of force, can reduce effort needed'],
+    pts_contexts: ['A student uses a force meter…', 'Which diagram shows…', 'A planet orbits…'],
+    cambridge_contexts: ['The diagram shows the apparatus a student used…', 'The table shows the results of an investigation into friction…', 'Look at the diagram of the solar system…']
+  },
+  'Working Scientifically': {
+    topics: ['planning fair tests — independent, dependent and control variables',
+             'writing hypotheses and predictions',
+             'identifying and dealing with anomalous results',
+             'calculating and using means',
+             'choosing and drawing appropriate graphs',
+             'writing valid conclusions — not overclaiming',
+             'accuracy and reliability — repeating experiments',
+             'interpreting data tables and graphs',
+             'designing investigations to test a specific question'],
+    pts_contexts: ['A student plans an investigation…', 'Look at the results in the table…', 'A student draws a graph showing…'],
+    cambridge_contexts: ['The table shows the results of…', 'A student investigates whether…', 'Look at the graph below…']
+  }
+};
+
+const EXTENSIONS = {
+  Biology:[
+    {icon:'🧬',name:'Natural selection & evolution',desc:'Why do species change over millions of years? Charles Darwin\'s big idea explained for Year 5.',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr'},
+    {icon:'🔬',name:'Why do you look like your parents?',desc:'Introduction to genes and inheritance — the science behind family resemblances.',url:'https://www.khanacademy.org/science/ap-biology/heredity'},
+    {icon:'🌿',name:'Photosynthesis in detail',desc:'The chemical process plants use to make food — going beyond Year 5.',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr'},
+  ],
+  Chemistry:[
+    {icon:'⚗️',name:'Atoms and elements',desc:'What everything is made of — introduction to atomic theory for curious students.',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr'},
+    {icon:'🧪',name:'Acids, alkalis and the pH scale',desc:'Why do things taste sour? The chemistry of acids and bases.',url:'https://senecalearning.com/en-GB/revision-notes/ks2/science'},
+    {icon:'💎',name:'Crystal growing at home',desc:'Grow your own crystals and understand crystallisation first-hand.',url:'https://www.science-sparks.com/crystal-growing/'},
+  ],
+  Physics:[
+    {icon:'🌌',name:'Newton\'s Laws in depth',desc:'All three of Newton\'s Laws with real examples — stretching beyond KS2.',url:'https://cognitoedu.org/course/b1-ks3-default'},
+    {icon:'🚀',name:'How rockets work in space',desc:'Action and reaction — why rockets work where there is nothing to push against.',url:'https://www.nasa.gov/learning-resources/for-kids-and-students/'},
+    {icon:'⭐',name:'Stars and the lifecycle of the universe',desc:'What are stars made of? How do they form and die?',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr'},
+  ],
+  'Working Scientifically':[
+    {icon:'📊',name:'Statistics in science',desc:'Mean, median and mode — how scientists really analyse data.',url:'https://www.khanacademy.org/math/statistics-probability'},
+    {icon:'🔭',name:'Famous science experiments',desc:'How Galileo, Pasteur and others designed brilliant experiments.',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr'},
+    {icon:'🧠',name:'Correlation vs causation',desc:'Why finding a pattern doesn\'t prove one thing CAUSES another.',url:'https://www.khanacademy.org/science'},
+  ],
+};
+
+const RESOURCES = {
+  Biology:[
+    {name:'BBC Bitesize — KS2 Science',desc:'Life cycles, adaptations, plants and reproduction',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr',icon:'📚',tag:'read'},
+    {name:'Oak National Academy — KS2 Science',desc:'Free video lessons with activities for Year 5 Biology',url:'https://www.thenational.academy/teachers/programmes/science-primary-ks2/units',icon:'🏫',tag:'free'},
+    {name:'Seneca Learning — KS2 Science',desc:'Free adaptive quizzes for all Year 5 Biology topics',url:'https://senecalearning.com/en-GB/revision-notes/ks2/science',icon:'⚡',tag:'free'},
+    {name:'PhET — Life Science simulations',desc:'Interactive virtual experiments: ecosystems, natural selection',url:'https://phet.colorado.edu/en/simulations/filter?subjects=biology&type=html',icon:'🔬',tag:'free'},
+  ],
+  Chemistry:[
+    {name:'BBC Bitesize — KS2 Materials',desc:'Properties, reversible and irreversible changes',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr',icon:'📚',tag:'read'},
+    {name:'Oak National Academy — KS2 Chemistry',desc:'Structured lessons on materials, reactions and separating',url:'https://www.thenational.academy/teachers/programmes/science-primary-ks2/units',icon:'🏫',tag:'free'},
+    {name:'Seneca Learning — KS2 Science',desc:'Free quizzes on materials and chemical changes',url:'https://senecalearning.com/en-GB/revision-notes/ks2/science',icon:'⚡',tag:'free'},
+    {name:'PhET — States of Matter',desc:'Explore how particles behave in solids, liquids and gases',url:'https://phet.colorado.edu/en/simulations/states-of-matter',icon:'🔬',tag:'free'},
+  ],
+  Physics:[
+    {name:'BBC Bitesize — KS2 Physics',desc:'Space, forces, Earth and beyond',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr',icon:'📚',tag:'read'},
+    {name:'Oak National Academy — KS2 Physics',desc:'Free video lessons on forces, gravity and space',url:'https://www.thenational.academy/teachers/programmes/science-primary-ks2/units',icon:'🏫',tag:'free'},
+    {name:'NASA Kids Club',desc:'Explore space and planets with NASA\'s student resources',url:'https://www.nasa.gov/learning-resources/for-kids-and-students/',icon:'🚀',tag:'free'},
+    {name:'PhET — Forces and Motion',desc:'Interactive: explore how forces affect movement',url:'https://phet.colorado.edu/en/simulations/forces-and-motion-basics',icon:'🔬',tag:'free'},
+  ],
+  'Working Scientifically':[
+    {name:'BBC Bitesize — Scientific Skills',desc:'Variables, graphs, fair testing and conclusions',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr',icon:'📚',tag:'read'},
+    {name:'Oak National Academy — Science Skills',desc:'Planning experiments and analysing data',url:'https://www.thenational.academy/teachers/programmes/science-primary-ks2/units',icon:'🏫',tag:'free'},
+    {name:'Science Sparks — Experiments',desc:'Fun hands-on experiments to practise scientific skills',url:'https://www.science-sparks.com',icon:'🔬',tag:'free'},
+    {name:'Khan Academy — Scientific Method',desc:'Videos on hypotheses, fair tests and conclusions',url:'https://www.khanacademy.org/science/ap-biology/science-of-biology',icon:'▶️',tag:'free'},
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// ADAPTIVE ENGINE
+// ═══════════════════════════════════════════════════════════════════
+let S = {};
+let QUEUE = [];              // pre-fetched AI questions ready to serve
+let QUEUE_FILLING = 0;       // count of in-flight fill requests
+let USED_QUESTIONS = new Set();
+let FALLBACK_USED = [];
+
+const DIFF_LABELS = {1:'Easy — KS2 core level',2:'Medium — KS2 expected',3:'Hard — KS2 mastery',4:'Extension — KS2/KS3 bridge'};
+const DIFF_CHIPS  = {1:'dc-easy',2:'dc-medium',3:'dc-hard',4:'dc-ext'};
+
+function targetDiff(theta) {
+  if (theta < -0.8) return 1;
+  if (theta < 0)    return 2;
+  if (theta < 0.8)  return 2;
+  if (theta < 1.5)  return 3;
+  return 4; // extension
+}
+
+function updateTheta(theta, correct, diff) {
+  const step = 0.45;
+  const dv = {1:-1,2:0,3:0.5,4:1}[diff] || 0;
+  return correct
+    ? Math.min(3,  theta + step * (1 + dv * 0.3))
+    : Math.max(-3, theta - step * (1 - dv * 0.2));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// AI GENERATION — PTS + Cambridge style prompt
+// ═══════════════════════════════════════════════════════════════════
+async function generateQuestion(domain, diff, theta, style) {
+  // Calls Google Gemini API directly from the browser
+  // Gemini supports CORS — no proxy needed
+  const apiKey = window.GEMINI_API_KEY;
+  if (!apiKey) return null;
+
+  const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey;
+
+  const topicsByDomain = {
+    Biology: [
+      'life cycles of frogs (egg, tadpole, froglet, adult), butterflies (complete metamorphosis: egg, larva, pupa, adult), grasshoppers (incomplete metamorphosis)',
+      'adaptations: polar bear white fur for camouflage, cactus thick stem stores water, fish streamlined shape, duck waterproof feathers',
+      'plant reproduction: parts of a flower (stamen produces pollen, stigma receives pollen), pollination by insects or wind, seed dispersal methods',
+      'human life cycle stages: infancy, childhood, adolescence, adulthood, old age and key changes at each stage',
+      'asexual reproduction in plants: runners in strawberries, bulbs in daffodils, cuttings, tubers in potatoes',
+      'mammal reproduction: live birth, gestation periods, comparing animals like elephants, mice and humans'
+    ],
+    Chemistry: [
+      'physical properties of materials: hardness, flexibility, transparency, thermal conductivity and matching to everyday uses',
+      'thermal insulation: which materials keep heat in or out best, how to design a fair test',
+      'solubility: salt and sugar dissolve (soluble), sand and chalk do not (insoluble), temperature and stirring speed up dissolving',
+      'separating mixtures: filtration for insoluble solids, evaporation for dissolved solids, magnetism for iron, sieving by size',
+      'reversible changes: melting, freezing, dissolving, condensation — original substance can be recovered',
+      'irreversible changes: burning, cooking, rusting — new substances formed, signs include bubbles, colour change, temperature change'
+    ],
+    Physics: [
+      'solar system: 8 planets in order from Sun (Mercury Venus Earth Mars Jupiter Saturn Uranus Neptune), relative sizes',
+      'day and night: caused by Earth rotating on its axis every 24 hours — the Sun does not move around Earth',
+      'year: caused by Earth orbiting the Sun once every 365.25 days; leap year adds February 29th every 4 years',
+      'Moon phases: Moon orbits Earth in 28 days, we see different amounts of its lit side — new moon to full moon',
+      'forces: pushes and pulls measured in Newtons using a force meter; contact forces like friction, non-contact like gravity',
+      'gravity: pulls objects toward Earth, gives objects weight in Newtons, keeps Moon orbiting Earth and planets orbiting Sun',
+      'mass vs weight: mass in kg stays same everywhere; weight in Newtons depends on gravity — less weight on the Moon',
+      'friction: opposes motion, rough surfaces create more friction, smooth surfaces less; friction converts energy to heat',
+      'levers: pivot point, effort arm, load arm — longer effort arm needs less force to lift the load'
+    ],
+    'Working Scientifically': [
+      'variables: independent (what you change), dependent (what you measure), control variables (kept the same for a fair test)',
+      'hypotheses: a testable prediction written before the experiment based on prior knowledge',
+      'anomalous results: a reading that does not fit the pattern, exclude from mean and note in evaluation',
+      'calculating the mean: add all values and divide by how many (excluding anomalies)',
+      'graphs: line graphs for continuous data over time, bar charts for separate categories; label axes with units',
+      'conclusions: refer to specific data, state whether hypothesis was supported, write "in this investigation" not "always"'
+    ]
+  };
+
+  const topics = topicsByDomain[domain] || topicsByDomain.Biology;
+  const topic  = topics[Math.floor(Math.random() * topics.length)];
+
+  const diffGuide = {
+    1: 'EASY — direct recall, one clear concept, short simple question for age 9-10',
+    2: 'MEDIUM — requires understanding and simple application, may include a brief scenario',
+    3: 'HARD — requires analysis or applying knowledge to a new situation, interpreting data (KS2 mastery, NOT KS3)',
+    4: 'EXTENSION — bridge from KS2 to KS3 for high-ability students, start explanation with 🚀'
+  }[diff] || 'MEDIUM';
+
+  const styleGuide = style === 'pts'
+    ? 'PTS style: 1-2 sentence scenario, test ONE concept, plausible misconceptions as wrong options. Stems: "Which of these...", "A student finds...", "What is...", "Why does..."'
+    : style === 'cambridge'
+    ? 'Cambridge style: write a 2-3 sentence experiment context or data table in the "context" field, then ask a question that needs the context to answer'
+    : (Math.random() > 0.5
+        ? 'PTS style: short scenario, one concept, misconception distractors'
+        : 'Cambridge style: include a brief experiment context or data in the context field, then question about it');
+
+  const prompt = `Generate ONE Year 5 science question (age 9-10) for NLCS Jeju International School.
+
+Domain: ${domain}
+Topic: ${topic}
+Difficulty: ${diffGuide}
+Style: ${styleGuide}
+Student ability (theta=${theta.toFixed(1)}): ${theta > 0.8 ? 'above average — make it challenging within KS2' : theta < -0.5 ? 'below average — keep accessible' : 'average Year 5 level'}
+
+RULES:
+- KS2 science only (no KS3 unless diff=4)
+- Exactly 4 options, ONE correct answer
+- Wrong options must be plausible misconceptions
+- Explanation: 1-2 sentences explaining WHY the answer is correct
+- Clear friendly language for age 9-10
+
+Reply ONLY with this JSON, nothing else:
+{"q":"question","context":"scenario if Cambridge style — leave out if PTS style","o":["A","B","C","D"],"a":0,"e":"explanation"}
+
+"a" is 0-based index of correct answer.`;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const resp = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        contents: [{parts: [{text: prompt}]}],
+        generationConfig: {temperature: 0.8, maxOutputTokens: 500}
+      }),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      console.warn('Gemini API error', resp.status, errText.substring(0,200));
+      return null;
     }
 
-    async function fetchQuestion() {
-        const container = document.getElementById('q-content');
-        container.innerHTML = `<div id="loading">AI is generating a Science question...</div>`;
+    const data = await resp.json();
+    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!rawText) { console.warn('No text from Gemini'); return null; }
 
-        // Updated to use the supported preview model and v1beta endpoint
-        const model = 'gemini-2.5-flash-preview-09-2025';
-        let retries = 0;
-        const maxRetries = 5;
+    // Extract JSON — Gemini sometimes wraps in ```json ... ```
+    let clean = rawText.replace(/```json/g,'').replace(/```/g,'').trim();
+    const jsonStart = clean.indexOf('{');
+    const jsonEnd   = clean.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) { console.warn('No JSON in response:', clean.substring(0,100)); return null; }
+    clean = clean.substring(jsonStart, jsonEnd + 1);
 
-        async function makeRequest() {
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-                
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ 
-                            parts: [{ 
-                                text: "Act as a Year 5 Science teacher. Generate one multiple choice question suitable for a 10-year-old. Return ONLY this format:\nQUESTION: [Text]\nA) [Opt]\nB) [Opt]\nC) [Opt]\nD) [Opt]\nANSWER: [Letter]\nEXPLANATION: [Text]" 
-                            }] 
-                        }]
-                    })
-                });
+    let parsed;
+    try { parsed = JSON.parse(clean); }
+    catch(e) { console.warn('JSON parse failed:', clean.substring(0,100)); return null; }
 
-                if (!response.ok) {
-                    if (response.status === 404) throw new Error("Endpoint not found (404). Check model name.");
-                    throw new Error(`API Error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                
-                if (!text) throw new Error("Empty response from AI.");
-                
-                parseAndDisplay(text, container);
-
-            } catch (err) {
-                if (retries < maxRetries) {
-                    const delay = Math.pow(2, retries) * 1000;
-                    retries++;
-                    setTimeout(makeRequest, delay);
-                } else {
-                    container.innerHTML = `
-                        <div class="err-msg">
-                            <h3>Connection Failed</h3>
-                            <p>${err.message}</p>
-                            <button onclick="fetchQuestion()">Retry Connection</button>
-                        </div>`;
-                }
-            }
-        }
-
-        makeRequest();
+    if (!parsed.q || !Array.isArray(parsed.o) || parsed.o.length !== 4 || parsed.a === undefined) {
+      console.warn('Invalid question structure'); return null;
     }
 
-    function parseAndDisplay(text, container) {
-        const lines = text.split('\n').filter(l => l.trim() !== "");
-        const qText = lines.find(l => l.toUpperCase().includes('QUESTION:'))?.split(':').slice(1).join(':').trim() || "Science Question";
-        const optA = lines.find(l => l.startsWith('A)'))?.replace('A)', '').trim();
-        const optB = lines.find(l => l.startsWith('B)'))?.replace('B)', '').trim();
-        const optC = lines.find(l => l.startsWith('C)'))?.replace('C)', '').trim();
-        const optD = lines.find(l => l.startsWith('D)'))?.replace('D)', '').trim();
-        const answerChar = lines.find(l => l.toUpperCase().includes('ANSWER:'))?.split(':').slice(1).join(':').trim().toUpperCase().charAt(0);
-        const explain = lines.find(l => l.toUpperCase().includes('EXPLANATION:'))?.split(':').slice(1).join(':').trim() || "Well done!";
+    // Avoid duplicate questions
+    const key = parsed.q.slice(0,60).toLowerCase();
+    if (USED_QUESTIONS.has(key)) return null;
+    USED_QUESTIONS.add(key);
 
-        const charToIndex = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
-        const correctIndex = charToIndex[answerChar] ?? 0;
+    return {
+      d: domain, diff,
+      q: parsed.q,
+      context: parsed.context || null,
+      o: parsed.o,
+      a: parseInt(parsed.a),
+      e: parsed.e || '',
+      ai: true,
+      ext: diff === 4
+    };
 
-        container.innerHTML = `
-            <h2 style="margin-top:0; font-size:20px;">${qText}</h2>
-            <div id="options-list">
-                <div class="opt" onclick="verify(0, ${correctIndex}, this, '${explain.replace(/'/g, "\\'")}')">${optA}</div>
-                <div class="opt" onclick="verify(1, ${correctIndex}, this, '${explain.replace(/'/g, "\\'")}')">${optB}</div>
-                <div class="opt" onclick="verify(2, ${correctIndex}, this, '${explain.replace(/'/g, "\\'")}')">${optC}</div>
-                <div class="opt" onclick="verify(3, ${correctIndex}, this, '${explain.replace(/'/g, "\\'")}')">${optD}</div>
-            </div>
-            <div id="feedback"></div>
-            <button id="next-btn" style="display:none; margin-top:20px" onclick="fetchQuestion()">Next Question ➔</button>
-        `;
+  } catch(err) {
+    clearTimeout(timeout);
+    console.warn('generateQuestion error:', err.name === 'AbortError' ? 'timeout' : err.message);
+    return null;
+  }
+}
+
+// Fill the queue with pre-generated questions (up to 3 ahead)
+// Runs multiple fills in parallel — no lock, Gemini handles it fine
+async function fillQueue() {
+  if (!S.name) return;
+  const target = 3;
+  const needed = target - QUEUE.length - QUEUE_FILLING;
+  if (needed <= 0) return;
+
+  for (let i = 0; i < needed; i++) {
+    QUEUE_FILLING++;
+    const domains = ['Biology','Chemistry','Physics','Working Scientifically'];
+    const domain = S.domainFilter === 'all'
+      ? domains[Math.floor(Math.random() * domains.length)]
+      : S.domainFilter;
+    const diff = targetDiff(S.theta);
+    generateQuestion(domain, diff, S.theta, S.style)
+      .then(q => {
+        QUEUE_FILLING--;
+        if (q) QUEUE.push(q);
+      })
+      .catch(() => { QUEUE_FILLING--; });
+  }
+}
+
+function getFallback() {
+  const pool = FALLBACK.filter((q,i) => {
+    if (FALLBACK_USED.includes(i)) return false;
+    if (S.domainFilter !== 'all' && q.d !== S.domainFilter) return false;
+    return true;
+  });
+  if (!pool.length) {
+    // Reset fallback pool
+    FALLBACK_USED = [];
+    return FALLBACK[Math.floor(Math.random() * FALLBACK.length)];
+  }
+  const td = targetDiff(S.theta);
+  // Try to match difficulty
+  const match = pool.filter(q => q.diff === td);
+  const chosen = match.length ? match[Math.floor(Math.random() * match.length)] : pool[Math.floor(Math.random() * pool.length)];
+  FALLBACK_USED.push(FALLBACK.indexOf(chosen));
+  return chosen;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SESSION
+// ═══════════════════════════════════════════════════════════════════
+function startQuiz() {
+  const name = document.getElementById('inp-name').value.trim();
+  const cls  = document.getElementById('inp-class').value;
+  if (!name) { document.getElementById('inp-name').focus(); return; }
+  if (!cls)  { document.getElementById('inp-class').focus(); return; }
+
+  S = {
+    name, cls,
+    domainFilter: document.getElementById('inp-domain').value,
+    style: document.getElementById('inp-style').value,
+    theta: 0, streak: 0, maxStreak: 0,
+    questions: [], currentIdx: 0,
+    startTime: Date.now(), qStartTime: Date.now(),
+  };
+
+  QUEUE = []; USED_QUESTIONS = new Set(); FALLBACK_USED = []; GENERATING = false;
+
+  // Add stars to login bg
+  const sb = document.getElementById('stars');
+  for (let i=0; i<80; i++) {
+    const s = document.createElement('div'); s.className='star-dot';
+    const sz = Math.random()*2.5+.5;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${(Math.random()*3+1).toFixed(1)}s;--dl:${(Math.random()*3).toFixed(1)}s`;
+    sb.appendChild(s);
+  }
+
+  showScreen('quiz');
+
+  // Load first question — update message as time passes
+  document.getElementById('first-load').classList.add('show');
+  const loadMsgs = [
+    'Connecting to Gemini AI…',
+    'Generating your first question…',
+    'Almost ready — Gemini is thinking…',
+    'Taking a moment — will use a backup question if needed…'
+  ];
+  let msgIdx = 0;
+  const msgTimer = setInterval(() => {
+    msgIdx = Math.min(msgIdx+1, loadMsgs.length-1);
+    const el = document.getElementById('load-msg');
+    if (el) el.textContent = loadMsgs[msgIdx];
+  }, 3000);
+
+  loadAndRender().then(() => clearInterval(msgTimer));
+
+  // Start pre-filling queue immediately in background
+  fillQueue();
+}
+
+async function loadAndRender() {
+  let q = null;
+
+  // Use queued question if one is ready
+  if (QUEUE.length > 0) {
+    q = QUEUE.shift();
+  } else {
+    // Generate directly — nothing pre-cached yet
+    const domains = ['Biology','Chemistry','Physics','Working Scientifically'];
+    const domain = S.domainFilter === 'all'
+      ? domains[Math.floor(Math.random() * domains.length)]
+      : S.domainFilter;
+    const diff = targetDiff(S.theta);
+    q = await generateQuestion(domain, diff, S.theta, S.style);
+  }
+
+  // Fallback to static bank if AI failed
+  if (!q) {
+    q = getFallback();
+    q._fallback = true;
+  }
+
+  S.questions.push({q, answered:false, correct:null, chosen:null, timeMs:0});
+  S.currentIdx = S.questions.length - 1;
+  S.qStartTime = Date.now();
+
+  document.getElementById('first-load').classList.remove('show');
+  renderQ();
+
+  // Immediately start refilling queue in background
+  fillQueue();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER QUESTION
+// ═══════════════════════════════════════════════════════════════════
+function renderQ() {
+  const entry = S.questions[S.currentIdx];
+  const q = entry.q;
+  const n = S.currentIdx + 1;
+
+  // Header
+  document.getElementById('hdr-name').textContent = S.name;
+  document.getElementById('hdr-cls').textContent = S.cls;
+  document.getElementById('hdr-count').textContent = `Q${n}`;
+  // Indeterminate progress — waves since no fixed total
+  const progPct = Math.min(95, 10 + (n-1) * 4);
+  document.getElementById('prog').style.width = progPct + '%';
+
+  const dEl = document.getElementById('hdr-diff');
+  dEl.textContent = q.ext ? '★ Extension' : ['','Easy','Medium','Hard'][q.diff] || 'Medium';
+  dEl.className = 'diff-chip ' + (q.ext ? 'dc-ext' : DIFF_CHIPS[q.diff] || 'dc-medium');
+
+  const stEl = document.getElementById('streak');
+  if (S.streak >= 3) { stEl.classList.add('show'); document.getElementById('streak-n').textContent = S.streak; }
+  else stEl.classList.remove('show');
+
+  const dcb = {Biology:'db-bio',Chemistry:'db-chem',Physics:'db-phys','Working Scientifically':'db-ws'};
+  const done = entry.answered;
+  const letters = ['A','B','C','D'];
+
+  // Context box (Cambridge-style)
+  const ctxHtml = q.context
+    ? `<div class="q-context"><div class="q-context-label">📋 Read this first</div>${q.context}</div>`
+    : '';
+
+  // Hint for extension
+  const hintHtml = q.ext && !done
+    ? `<div class="q-hint">🚀 <strong>Extension challenge</strong> — this goes beyond Year 5. Give it your best try!</div>`
+    : '';
+
+  // AI badge
+  const aiBadge = q.ai && !q._fallback ? '<span class="ai-chip">AI</span>' : (q._fallback ? '<span class="ai-chip" style="background:#fef3c7;color:#92400e">Static</span>' : '');
+  const extBadge = q.ext ? '<span class="ext-badge">★ Extension</span>' : '';
+
+  const opts = q.o.map((o,i) => {
+    let cls = 'opt' + (done ? ' locked' : '');
+    let dot = letters[i];
+    if (done) {
+      if (i === q.a)                           { cls += ' correct'; dot = '✓'; }
+      else if (i === entry.chosen && i !== q.a){ cls += ' wrong';   dot = '✗'; }
     }
+    return `<button class="${cls}" onclick="pick(${i})">
+      <span class="opt-let">${dot}</span><span>${o}</span>
+    </button>`;
+  }).join('');
 
-    function verify(selected, correct, el, info) {
-        const allOpts = document.querySelectorAll('.opt');
-        allOpts.forEach(o => o.style.pointerEvents = 'none');
-        
-        const fb = document.getElementById('feedback');
-        fb.style.display = 'block';
+  const fbHtml = done
+    ? `<div class="fb ${entry.correct?'ok':'no'} show">${entry.correct?'✓ Correct! ':'✗ Not quite — '}${q.e}</div>`
+    : '';
+  const extTipHtml = done && q.ext
+    ? `<div class="ext-tip show"><strong>🚀 Want to explore further?</strong>Check the Extension Challenges section in your results.</div>`
+    : '';
 
-        if(selected === correct) {
-            el.classList.add('correct');
-            fb.style.background = "#dcfce7";
-            fb.style.color = "#166534";
-            fb.innerHTML = "✅ Correct! " + info;
-        } else {
-            el.classList.add('wrong');
-            allOpts[correct].classList.add('correct');
-            fb.style.background = "#fee2e2";
-            fb.style.color = "#991b1b";
-            fb.innerHTML = "❌ Not quite. " + info;
-        }
-        document.getElementById('next-btn').style.display = 'block';
-    }
+  // Loading state for "Next →"
+  const nextLabel = done ? (S.questions.length > S.currentIdx + 1 ? 'Next →' : 'Next →') : 'Choose an answer';
+
+  document.getElementById('qbody').innerHTML = `
+    <div class="fade-in">
+      <div class="q-num">Question ${n}</div>
+      <div class="dom-badge ${dcb[q.d]||'db-bio'}">${q.d}${aiBadge}${extBadge}</div>
+      ${ctxHtml}
+      <div class="q-text">${q.q}</div>
+      ${hintHtml}
+      <div class="opts">${opts}</div>
+      ${fbHtml}${extTipHtml}
+      ${done ? `
+        <div class="ai-loading" id="next-loading"><div class="spinner"></div><span>Generating next question…</span></div>
+        <div class="qnav">
+          <button class="btn btn-out" onclick="goBack()" ${S.currentIdx===0?'disabled':''}>← Back</button>
+          <button class="btn btn-pri" id="btn-next" onclick="goNext()">Next → </button>
+        </div>` : `
+        <div class="qnav">
+          <button class="btn btn-out" onclick="goBack()" ${S.currentIdx===0?'disabled':''}>← Back</button>
+          <button class="btn btn-out" disabled>Choose an answer</button>
+        </div>`}
+    </div>`;
+}
+
+function pick(i) {
+  const entry = S.questions[S.currentIdx];
+  if (entry.answered) return;
+  entry.answered = true;
+  entry.chosen = i;
+  entry.correct = (i === entry.q.a);
+  entry.timeMs = Date.now() - S.qStartTime;
+
+  S.theta = updateTheta(S.theta, entry.correct, entry.q.diff);
+  if (entry.correct) { S.streak++; S.maxStreak = Math.max(S.maxStreak, S.streak); }
+  else S.streak = 0;
+
+  renderQ();
+}
+
+async function goNext() {
+  // If we already have a queued next question — show it instantly
+  if (S.currentIdx < S.questions.length - 1) {
+    S.currentIdx++;
+    S.qStartTime = Date.now();
+    renderQ();
+    fillQueue(); // top up queue
+    return;
+  }
+
+  // No cached question — show inline spinner, generate now
+  document.getElementById('qbody').innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;padding:2rem 1rem;color:var(--ink3);font-size:14px">
+      <div class="spinner"></div>
+      <span>Generating next question with Gemini AI…</span>
+    </div>`;
+
+  await loadAndRender();
+}
+
+function goBack() {
+  if (S.currentIdx > 0) { S.currentIdx--; renderQ(); }
+}
+
+function stopAndFinish() {
+  if (S.questions.filter(e=>e.answered).length === 0) {
+    alert('Answer at least one question first!');
+    return;
+  }
+  showResults();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RESULTS DASHBOARD
+// ═══════════════════════════════════════════════════════════════════
+function showResults() {
+  showScreen('results');
+  const done  = S.questions.filter(e=>e.answered);
+  const right = done.filter(e=>e.correct).length;
+  const total = done.length;
+  const pct   = total > 0 ? Math.round(right/total*100) : 0;
+  const elapsed = Math.round((Date.now()-S.startTime)/1000);
+  const mins = Math.floor(elapsed/60), secs = elapsed%60;
+  const grade = getGrade(pct);
+  const aiCount = done.filter(e=>e.q.ai).length;
+
+  // Hero
+  document.getElementById('rh-name').textContent = S.name+' · '+S.cls;
+  const gel = document.getElementById('rh-grade');
+  gel.textContent = grade.label; gel.className = 'rh-grade '+grade.cls;
+  document.getElementById('rh-score').textContent = `${right}/${total}`;
+  document.getElementById('rh-pct').textContent = `${pct}%`;
+  const tags = [[81,'Fantastic — you\'re Exceeding!'],[70,'Great work — above expected!'],[60,'Working at expected level'],[50,'Getting there — keep practising!'],[0,'Keep going — every question helps']];
+  document.getElementById('rh-tag').textContent = tags.find(([t])=>pct>=t)[1];
+  document.getElementById('rh-meta').innerHTML =
+    `<span>${mins}m ${secs}s</span><span>·</span><span>Streak: ${S.maxStreak}</span><span>·</span><span>${aiCount} AI questions</span><span>·</span><span>θ ${S.theta.toFixed(2)}</span>`;
+
+  // Domain cards
+  const domains = ['Biology','Chemistry','Physics','Working Scientifically'];
+  const dInfo = {Biology:{ac:'dca-bio',ba:'dba-bio'},Chemistry:{ac:'dca-chem',ba:'dba-chem'},Physics:{ac:'dca-phys',ba:'dba-phys'},'Working Scientifically':{ac:'dca-ws',ba:'dba-ws'}};
+  document.getElementById('rd-domains').innerHTML = domains.map(dm=>{
+    const dqs = done.filter(e=>e.q.d===dm);
+    if (!dqs.length) return '';
+    const dc=dqs.filter(e=>e.correct).length, dp=Math.round(dc/dqs.length*100);
+    const dg=getGrade(dp); const {ac,ba}=dInfo[dm];
+    return `<div class="dom-card ${ac} ${ba}">
+      <div class="dom-lbl">${dm}</div>
+      <div style="display:flex;align-items:baseline;gap:4px">
+        <div class="dom-score-big">${dc}</div><div class="dom-score-den">/ ${dqs.length}</div>
+      </div>
+      <div class="dom-pct">${dp}% correct</div>
+      <div class="dom-bar"><div class="dom-bar-fill" style="width:${dp}%"></div></div>
+      ${gradePill(dp)}
+    </div>`;
+  }).join('');
+
+  // Grade scale
+  document.getElementById('rd-gradescale').innerHTML = GRADES.map(g=>{
+    const isYours = grade.label===g.label;
+    const range = g===GRADES[0]?'above 80%':g===GRADES[1]?'70–80%':g===GRADES[2]?'60–69%':g===GRADES[3]?'50–59%':'below 50%';
+    return `<div class="gs-row">
+      <span class="gs-pill" style="background:${g.bg};color:${g.txt};border:1px solid ${g.bdr};font-family:'Nunito',sans-serif;font-weight:700">${g.label}</span>
+      <span class="gs-range">${range}</span>
+      ${isYours?`<span class="gs-yours">← your score (${pct}%)</span>`:''}
+    </div>`;
+  }).join('');
+
+  // Extensions
+  buildExtensions(done, pct);
+  // Study
+  buildStudy(done);
+  // Missed
+  const missed = done.filter(e=>!e.correct);
+  const dcb = {Biology:'db-bio',Chemistry:'db-chem',Physics:'db-phys','Working Scientifically':'db-ws'};
+  document.getElementById('rd-review').innerHTML = missed.length===0
+    ? '<p style="font-size:13px;color:var(--ink3);padding:.5rem 0">All correct — nothing to review! 🌟</p>'
+    : missed.map(e=>`<div class="missed-item">
+        <div><span class="dom-badge ${dcb[e.q.d]||'db-bio'}" style="font-size:10px;padding:1px 7px;margin-bottom:0">${e.q.d}</span>${e.q.ai?'<span class="ai-chip" style="margin-left:4px">AI</span>':''}</div>
+        <div class="missed-q">${e.q.q}</div>
+        <div class="missed-wrong">Your answer: ${e.q.o[e.chosen]||'—'}</div>
+        <div class="missed-right">✓ ${e.q.o[e.q.a]} — ${e.q.e}</div>
+      </div>`).join('');
+
+  // Send to Sheets
+  sendToSheets(done, right, total, pct, elapsed, grade.label);
+}
+
+function buildExtensions(done, pct) {
+  const domains=['Biology','Chemistry','Physics','Working Scientifically'];
+  let topDomain='Biology', topPct=0;
+  domains.forEach(dm=>{
+    const dqs=done.filter(e=>e.q.d===dm);
+    if (!dqs.length) return;
+    const dp=Math.round(dqs.filter(e=>e.correct).length/dqs.length*100);
+    if (dp>topPct){topPct=dp;topDomain=dm;}
+  });
+  const exts = EXTENSIONS[topDomain]||EXTENSIONS.Biology;
+  document.getElementById('rd-extensions').innerHTML=`
+    <div class="ext-section">
+      <div class="ext-section-head">
+        <div style="font-size:20px">🚀</div>
+        <div>
+          <div style="font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:var(--ext)">Ready for a challenge?</div>
+          <div style="font-size:12px;color:#9d174d;margin-top:1px">Your strongest area is ${topDomain} (${topPct}%) — here are KS3 topics to explore</div>
+        </div>
+      </div>
+      ${exts.map(ex=>`<div class="ext-topic">
+        <div class="ext-icon">${ex.icon}</div>
+        <div>
+          <div class="ext-topic-name">${ex.name}</div>
+          <div class="ext-topic-desc">${ex.desc}</div>
+          <a class="ext-link" href="${ex.url}" target="_blank" rel="noopener">Explore ↗</a>
+        </div>
+      </div>`).join('')}
+    </div>`;
+}
+
+function buildStudy(done) {
+  const domains=['Biology','Chemistry','Physics','Working Scientifically'];
+  const dcb={Biology:'db-bio',Chemistry:'db-chem',Physics:'db-phys','Working Scientifically':'db-ws'};
+  const tagHtml={free:'<span class="rtag rt-free">Free</span>',video:'<span class="rtag rt-video">Video</span>',read:'<span class="rtag rt-read">Read</span>'};
+
+  const domData = domains.map(dm=>{
+    const dqs=done.filter(e=>e.q.d===dm);
+    if (!dqs.length) return null;
+    const dc=dqs.filter(e=>e.correct).length, dp=Math.round(dc/dqs.length*100);
+    return {dm, dc, total:dqs.length, dp, missed:dqs.filter(e=>!e.correct)};
+  }).filter(Boolean).sort((a,b)=>a.dp-b.dp);
+
+  document.getElementById('rd-study').innerHTML = domData.map(({dm,dc,total,dp,missed})=>{
+    const r=RESOURCES[dm];
+    const [priority,pCls]=dp<50?['High priority','p-high']:dp<70?['Needs work','p-med']:['Looking good','p-good'];
+    // Topic tags from missed question text
+    const seenLabels=new Set();
+    const topicTagsHtml = missed.length===0
+      ? '<span class="ttag" style="color:#16a34a">✓ All correct here!</span>'
+      : missed.slice(0,5).map(e=>{
+          // Extract topic from question — use first 6 words as search term
+          const words = e.q.q.replace(/[^a-zA-Z\s]/g,'').split(/\s+/).slice(0,5).join(' ');
+          const label = e.q.q.length>55 ? e.q.q.substring(0,52)+'...' : e.q.q;
+          if (seenLabels.has(label)) return '';
+          seenLabels.add(label);
+          const url='https://www.bbc.co.uk/bitesize/search?q='+encodeURIComponent(words);
+          return `<a class="ttag" href="${url}" target="_blank" rel="noopener" title="Search BBC Bitesize">${label} ↗</a>`;
+        }).filter(Boolean).join('');
+    const resToShow = dp>=70?r.slice(0,3):r;
+    return `<div class="study-dom">
+      <div class="study-dom-hdr">
+        <span class="dom-badge ${dcb[dm]}" style="margin:0">${dm}</span>
+        <span style="flex:1"></span>
+        <span class="study-dom-score">${dc}/${total} · ${dp}%</span>
+        <span class="${pCls}">${priority}</span>
+      </div>
+      <div class="study-body">
+        <div class="study-lbl">Topics to revise <span style="font-weight:400;color:var(--ink3)">(click to search BBC Bitesize)</span></div>
+        <div class="topic-tags">${topicTagsHtml}</div>
+        <div class="study-lbl">Recommended resources</div>
+        <div class="res-links">${resToShow.map(l=>`<a class="rlink" href="${l.url}" target="_blank" rel="noopener"><span class="rlink-icon">${l.icon}</span><span class="rlink-body"><div class="rlink-name">${l.name}</div><div class="rlink-desc">${l.desc}</div></span>${tagHtml[l.tag]||''}</a>`).join('')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function sendToSheets(done,right,total,pct,elapsed,gradeLabel){
+  if(!SHEETS_ENDPOINT) return;
+  const domains=['Biology','Chemistry','Physics','Working Scientifically'];
+  const domScores=domains.map(dm=>{
+    const dqs=done.filter(e=>e.q.d===dm);
+    if(!dqs.length) return '\u2014';
+    return dqs.filter(e=>e.correct).length+'/'+dqs.length;
+  });
+  let worst='\u2014', worstPct=101;
+  domains.forEach((dm,i)=>{
+    const dqs=done.filter(e=>e.q.d===dm); if(!dqs.length) return;
+    const p=Math.round(dqs.filter(e=>e.correct).length/dqs.length*100);
+    if(p<worstPct){worstPct=p;worst=dm;}
+  });
+  const aiCount=done.filter(e=>e.q.ai).length;
+  const params=new URLSearchParams({
+    name:S.name,cls:S.cls,year:'Year 5',
+    score:`${right}/${total}`,pct,grade:gradeLabel,
+    bio:domScores[0],chem:domScores[1],phys:domScores[2],ws:domScores[3],
+    duration:elapsed,maxStreak:S.maxStreak,theta:S.theta.toFixed(2),
+    weakDomain:worst,aiQuestions:aiCount,style:S.style
+  });
+  const img=new Image(); img.src=SHEETS_ENDPOINT+'?'+params.toString();
+}
+
+function downloadCSV(){
+  const done=S.questions.filter(e=>e.answered);
+  const right=done.filter(e=>e.correct).length;
+  const elapsed=Math.round((Date.now()-S.startTime)/1000);
+  const ts=new Date().toISOString().slice(0,16).replace('T',' ');
+  const domains=['Biology','Chemistry','Physics','Working Scientifically'];
+  const domScores=domains.map(dm=>{const dqs=done.filter(e=>e.q.d===dm);if(!dqs.length)return'\u2014';return dqs.filter(e=>e.correct).length+'/'+dqs.length;});
+  let csv=`Timestamp,Name,Class,Year,Score,Pct,Grade,Biology,Chemistry,Physics,Working Sci,Duration,MaxStreak,Theta,AI Questions,Style\n`;
+  csv+=`"${ts}","${S.name}","${S.cls}","Year 5",${right}/${done.length},${Math.round(right/done.length*100)}%,${getGrade(Math.round(right/done.length*100)).label},${domScores.join(',')},${elapsed}s,${S.maxStreak},${S.theta.toFixed(2)},${done.filter(e=>e.q.ai).length},${S.style}\n\n`;
+  csv+=`Q#,Domain,Diff,AI?,Context?,Question,Correct Answer,Student Answer,Result,Time(s)\n`;
+  done.forEach((e,i)=>{
+    const dif={1:'Easy',2:'Medium',3:'Hard',4:'Extension'}[e.q.diff]||'Med';
+    csv+=`${i+1},"${e.q.d}",${dif},${e.q.ai?'Yes':'No'},${e.q.context?'Yes':'No'},"${(e.q.q||'').replace(/"/g,'""')}","${(e.q.o[e.q.a]||'').replace(/"/g,'""')}","${(e.q.o[e.chosen]||'\u2014').replace(/"/g,'""')}",${e.correct?'Correct':'Wrong'},${(e.timeMs/1000).toFixed(1)}\n`;
+  });
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`Y5Science_${S.cls}_${S.name.replace(/\s+/g,'-')}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function retryQuiz(){ showScreen('login'); }
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+}
 </script>
 </body>
 </html>
