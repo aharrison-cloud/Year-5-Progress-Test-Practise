@@ -66,7 +66,6 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 .dc-ext{background:#fce7f3;color:#be185d}
 .streak-chip{display:none;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#92400e;background:#fef3c7;padding:3px 9px;border-radius:20px}
 .streak-chip.show{display:flex}
-/* Stop button */
 .btn-stop{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Nunito',sans-serif;background:transparent;border:1.5px solid #fca5a5;color:#991b1b;cursor:pointer;white-space:nowrap;transition:all .12s}
 .btn-stop:hover{background:#fee2e2}
 
@@ -81,7 +80,6 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 .db-ext{background:var(--ext-bg);color:var(--ext)}
 .ai-chip{font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:#ede9fe;color:#5b21b6;margin-left:5px;vertical-align:middle}
 .ext-badge{font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--ext-bg);color:var(--ext);margin-left:5px;vertical-align:middle;text-transform:uppercase;letter-spacing:.4px}
-/* Context box — Cambridge/PTS style */
 .q-context{background:var(--surface);border:1.5px solid var(--border2);border-left:4px solid var(--chem-mid);border-radius:var(--r);padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--ink2);line-height:1.6}
 .q-context-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:4px}
 .q-image{margin-bottom:1rem;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--border);background:#f8f8fc}
@@ -106,7 +104,6 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 .fb.no{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
 .ext-tip{margin-top:.75rem;padding:9px 12px;background:var(--ext-bg);border:1px solid #f9a8d4;border-radius:var(--r);font-size:12px;color:var(--ext);line-height:1.55;display:none}
 .ext-tip.show{display:block}
-/* Loading spinner */
 .ai-loading{display:none;align-items:center;gap:10px;padding:1.5rem;justify-content:center;color:var(--ink3);font-size:13px}
 .ai-loading.show{display:flex}
 .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
@@ -122,7 +119,6 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 /* RESULTS */
 #s-results{background:var(--paper)}
 .res-hero{background:linear-gradient(135deg,#0f0c29 0%,#1a1a4e 50%,#0f3460 100%);color:white;padding:1.8rem 1.3rem 1.5rem;text-align:center;position:relative;overflow:hidden}
-.res-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 60%,rgba(34,197,94,.1),transparent 55%),radial-gradient(circle at 70% 30%,rgba(59,130,246,.1),transparent 55%)}
 .rh-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;opacity:.5;margin-bottom:.4rem;font-family:monospace}
 .rh-name{font-size:15px;opacity:.7;margin-bottom:1rem}
 .rh-grade{display:inline-block;padding:6px 22px;border-radius:30px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;margin-bottom:.8rem}
@@ -164,42 +160,18 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 .ext-icon{font-size:14px;flex-shrink:0;margin-top:1px}
 .ext-topic-name{font-weight:600;color:var(--ext);font-size:13px;margin-bottom:2px}
 .ext-topic-desc{font-size:12px;color:#9d174d;line-height:1.45}
-.ext-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--ext);text-decoration:none;margin-top:4px;padding:2px 8px;background:#fce7f3;border-radius:20px;border:1px solid #f9a8d4}
 .study-dom{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rl);margin-bottom:10px;overflow:hidden}
 .study-dom-hdr{display:flex;align-items:center;gap:8px;padding:.8rem 1rem;border-bottom:1px solid var(--border)}
-.study-dom-score{font-size:11px;color:var(--ink3);font-family:monospace}
-.p-high{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#fee2e2;color:#991b1b;text-transform:uppercase}
-.p-med{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#fef3c7;color:#92400e;text-transform:uppercase}
-.p-good{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:#dcfce7;color:#166534;text-transform:uppercase}
 .study-body{padding:.85rem 1rem}
-.study-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:.5rem}
 .topic-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.85rem}
-.ttag{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--paper);border:1.5px solid var(--border2);color:var(--ink2);text-decoration:none;transition:all .1s}
-a.ttag:hover{border-color:var(--chem-mid);background:var(--chem-bg);color:var(--chem)}
-.res-links{display:flex;flex-direction:column;gap:5px}
-.rlink{display:flex;align-items:center;gap:9px;padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--r);text-decoration:none;color:var(--ink);background:var(--paper);transition:border-color .12s;font-size:12px}
-.rlink:hover{border-color:var(--ink);background:var(--surface)}
-.rlink-icon{font-size:14px;flex-shrink:0}
-.rlink-body{flex:1}
-.rlink-name{font-weight:600;font-size:12px}
-.rlink-desc{font-size:11px;color:var(--ink3);margin-top:1px}
-.rtag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;text-transform:uppercase;flex-shrink:0}
-.rt-free{background:#dcfce7;color:#166534}
-.rt-video{background:#dbeafe;color:#1e40af}
-.rt-read{background:#fef3c7;color:#92400e}
+.ttag{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--paper);border:1.5px solid var(--border2);color:var(--ink2);text-decoration:none}
 .missed-item{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:.8rem 1rem;margin-bottom:7px;font-size:12px}
 .missed-q{font-size:13px;color:var(--ink2);margin:.3rem 0;line-height:1.4}
-.missed-wrong{color:#dc2626;font-size:11px}
 .missed-right{color:#16a34a;font-weight:600;font-size:11px;margin-top:2px}
 .action-btns{display:flex;flex-direction:column;gap:8px;margin:1.2rem 0}
-.btn-full{width:100%;padding:11px;font-size:13px;text-align:center;border-radius:var(--r);font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;border:none;transition:opacity .12s}
+.btn-full{width:100%;padding:11px;font-size:13px;text-align:center;border-radius:var(--r);font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;border:none}
 .btn-dl{background:linear-gradient(135deg,#1a1a4e,#0f3460);color:white}
-.btn-dl:hover{opacity:.87}
 .btn-retry{background:var(--surface);color:var(--ink);border:1.5px solid var(--border2)!important}
-.btn-retry:hover{border-color:var(--ink)!important}
-.sent-note{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:var(--r);padding:.85rem 1rem;font-size:12px;color:#14532d;line-height:1.55}
-.sent-note strong{display:block;margin-bottom:.2rem;font-size:13px}
-@media(max-width:480px){.dom-grid{grid-template-columns:1fr}}
 .fade-in{animation:fi .22s ease}
 @keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 </style>
@@ -218,7 +190,7 @@ a.ttag:hover{border-color:var(--chem-mid);background:var(--chem-bg);color:var(--
     </div>
     <h1>Sign in to begin</h1>
     <p>AI generates fresh questions just for you. Stop whenever you like — your results are saved automatically.</p>
-    <div class="field"><label>Your name</label><input type="text" id="inp-name" placeholder="e.g. Claire Kim" autocomplete="name"/></div>
+    <div class="field"><label>Your name</label><input type="text" id="inp-name" placeholder="e.g. Claire Kim"/></div>
     <div class="field"><label>Class</label>
       <select id="inp-class">
         <option value="">— select your class —</option>
@@ -227,39 +199,31 @@ a.ttag:hover{border-color:var(--chem-mid);background:var(--chem-bg);color:var(--
     <div class="field"><label>Focus area</label>
       <select id="inp-domain">
         <option value="all">All topics (mixed)</option>
-        <option value="Biology">Biology — Life cycles, Adaptations, Reproduction</option>
-        <option value="Chemistry">Chemistry — Materials, Changes, Separation</option>
-        <option value="Physics">Physics — Forces, Space, Solar System</option>
-        <option value="Working Scientifically">Working Scientifically — Experiments, Data, Graphs</option>
+        <option value="Biology">Biology</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Physics">Physics</option>
+        <option value="Working Scientifically">Working Scientifically</option>
       </select></div>
     <div class="field"><label>Question style</label>
       <select id="inp-style">
         <option value="mixed">Mixed styles</option>
-        <option value="pts">PTS format — short, scenario-based</option>
-        <option value="cambridge">Cambridge style — data, diagrams, longer contexts</option>
+        <option value="pts">PTS format</option>
+        <option value="cambridge">Cambridge style</option>
       </select></div>
-    <button class="btn-start" onclick="startQuiz()">Start — AI generates questions for you 🚀</button>
-    <p class="login-note">Questions adapt to your level. Stop any time — your score is saved automatically.</p>
+    <button class="btn-start" onclick="startQuiz()">Start — AI generates questions 🚀</button>
   </div>
 </div>
 
 <div id="s-quiz" class="screen">
   <div class="qhdr">
-    <div class="qhdr-info">
-      <div class="qhdr-name" id="hdr-name"></div>
-      <div class="qhdr-cls" id="hdr-cls"></div>
-    </div>
+    <div class="qhdr-info"><div class="qhdr-name" id="hdr-name"></div><div class="qhdr-cls" id="hdr-cls"></div></div>
     <div class="qhdr-prog"><div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div></div>
     <div class="qhdr-count" id="hdr-count"></div>
-    <div class="diff-chip" id="hdr-diff"></div>
     <div class="streak-chip" id="streak">🔥 <span id="streak-n">0</span></div>
-    <button class="btn-stop" onclick="stopAndFinish()">Finish &amp; see results</button>
+    <button class="btn-stop" onclick="stopAndFinish()">Finish & Results</button>
   </div>
   <div class="qbody fade-in" id="qbody">
-    <div class="ai-loading show" id="first-load">
-      <div class="spinner"></div>
-      <span id="load-msg">Connecting to Gemini AI…</span>
-    </div>
+    <div class="ai-loading show" id="first-load"><div class="spinner"></div><span>Connecting to Gemini AI...</span></div>
   </div>
 </div>
 
@@ -268,74 +232,55 @@ a.ttag:hover{border-color:var(--chem-mid);background:var(--chem-bg);color:var(--
     <div class="rh-label">Practice Complete</div>
     <div class="rh-name" id="rh-name"></div>
     <div class="rh-grade" id="rh-grade"></div>
-    <div class="rh-score-row">
-      <div class="rh-score-big" id="rh-score"></div>
-      <div class="rh-score-pct" id="rh-pct"></div>
-    </div>
-    <div class="rh-tagline" id="rh-tag"></div>
-    <div class="rh-meta" id="rh-meta"></div>
+    <div class="rh-score-row"><div class="rh-score-big" id="rh-score"></div><div class="rh-score-pct" id="rh-pct"></div></div>
   </div>
   <div class="res-body">
     <p class="sec-head">📊 Score by domain</p>
     <div class="dom-grid" id="rd-domains"></div>
     <p class="sec-head">🎯 Grade scale</p>
-    <div class="grade-scale" id="rd-gradescale"></div>
-    <div class="action-btns">
-      <button class="btn btn-full btn-dl" onclick="downloadCSV()">⬇ Download my results (optional)</button>
-      <button class="btn btn-full btn-retry" onclick="retryQuiz()">↺ Try again</button>
+    <div class="grade-scale">
+        <div class="gs-row"><span class="gs-pill g-exc">Exceeding</span><span class="gs-range">81% - 100%</span></div>
+        <div class="gs-row"><span class="gs-pill g-ep">Expected+</span><span class="gs-range">70% - 80%</span></div>
+        <div class="gs-row"><span class="gs-pill g-ex">Expected</span><span class="gs-range">60% - 69%</span></div>
+        <div class="gs-row"><span class="gs-pill g-em">Expected-</span><span class="gs-range">50% - 59%</span></div>
+        <div class="gs-row"><span class="gs-pill g-er">Emerging</span><span class="gs-range">0% - 49%</span></div>
     </div>
-    <div class="sent-note"><strong>✅ Results sent to your teacher</strong>Your score, grade and domain breakdown have been recorded automatically.</div>
-    <p class="sec-head" style="margin-top:1.3rem">🚀 Extension challenges</p>
-    <div id="rd-extensions"></div>
-    <p class="sec-head">📖 What to study next</p>
-    <div id="rd-study"></div>
+    <div class="action-btns">
+      <button class="btn btn-full btn-retry" onclick="location.reload()">↺ Try again</button>
+    </div>
     <p class="sec-head">❌ Questions to review</p>
     <div id="rd-review"></div>
   </div>
-</div>
-
-<script>
+</div><script>
 window.GEMINI_API_KEY = 'AIzaSyDQ44QdbO9wWHXPAHyF6F3OLLUAxLs4poo';
-const SHEETS_ENDPOINT='https://script.google.com/macros/s/AKfycbzJbsGAELB71C0FYnP5NwugHlKj_8fjvg05tiiTvZENQc-c51V7uBVobZKQJ4N0EBrW/exec';
 
 const GRADES=[
-  {label:'Exceeding', min:81,cls:'g-exc',bg:'var(--exc-bg)',txt:'var(--exc-txt)',bdr:'var(--exc-bdr)'},
-  {label:'Expected+', min:70,cls:'g-ep', bg:'var(--ep-bg)', txt:'var(--ep-txt)', bdr:'var(--ep-bdr)'},
-  {label:'Expected',  min:60,cls:'g-ex', bg:'var(--ex-bg)', txt:'var(--ex-txt)', bdr:'var(--ex-bdr)'},
-  {label:'Expected\u2212',min:50,cls:'g-em',bg:'var(--em-bg)',txt:'var(--em-txt)',bdr:'var(--em-bdr)'},
-  {label:'Emerging',  min:0, cls:'g-er', bg:'var(--er-bg)', txt:'var(--er-txt)', bdr:'var(--er-bdr)'},
+  {label:'Exceeding', min:81,cls:'g-exc'},
+  {label:'Expected+', min:70,cls:'g-ep'},
+  {label:'Expected',  min:60,cls:'g-ex'},
+  {label:'Expected\u2212',min:50,cls:'g-em'},
+  {label:'Emerging',  min:0, cls:'g-er'},
 ];
 
-function getGrade(pct){return GRADES.find(g=>pct>=g.min)||GRADES[4];}
-function gradePill(pct){const g=getGrade(pct);return`<span style="display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;background:${g.bg};color:${g.txt};border:1px solid ${g.bdr};font-family:'Nunito',sans-serif">${g.label}</span>`;}
-
-const FALLBACK=[
-  {d:'Biology',diff:1,q:'What is the correct order of a frog\'s life cycle?',o:['Egg → Frog → Tadpole','Egg → Tadpole → Froglet → Frog','Tadpole → Egg → Frog','Frog → Tadpole → Egg'],a:1,e:'Frogs hatch from eggs into tadpoles, develop legs to become froglets, then become adult frogs.'},
-  {d:'Chemistry',diff:1,q:'Which of these is a reversible change?',o:['Burning wood','Cooking an egg','Dissolving salt in water','Baking a cake'],a:2,e:'Dissolving salt is reversible — evaporate the water and the salt returns.'},
-  {d:'Physics',diff:1,q:'What causes day and night on Earth?',o:['The Sun moving around the Earth','The Moon blocking the Sun','The Earth rotating on its own axis','Clouds'],a:2,e:'Earth rotates on its axis once every 24 hours.'},
-  {d:'Working Scientifically',diff:1,q:'What do we call the variable that you change in a fair test?',o:['Dependent','Control','Independent','Anomalous'],a:2,e:'The independent variable is what you change.'}
-];
-
-// QUIZ STATE
 let quiz = {
   name:'', cls:'', domain:'all', style:'mixed',
-  qIdx:0, score:0, streak:0, history:[], startTime:null,
+  qIdx:0, score:0, streak:0, history:[],
   currentQ:null, locked:false
 };
+
+function getGrade(pct){ return GRADES.find(g=>pct>=g.min)||GRADES[4]; }
 
 function startQuiz() {
   quiz.name = document.getElementById('inp-name').value.trim();
   quiz.cls = document.getElementById('inp-class').value;
   quiz.domain = document.getElementById('inp-domain').value;
   quiz.style = document.getElementById('inp-style').value;
-  if(!quiz.name || !quiz.cls) return alert("Please enter your name and class.");
-
-  quiz.startTime = new Date();
+  if(!quiz.name || !quiz.cls) return alert("Please enter name and class.");
+  
   document.getElementById('s-login').classList.remove('active');
   document.getElementById('s-quiz').classList.add('active');
   document.getElementById('hdr-name').innerText = quiz.name;
   document.getElementById('hdr-cls').innerText = quiz.cls;
-  
   loadNext();
 }
 
@@ -345,19 +290,23 @@ async function loadNext() {
   updateHeader();
   const container = document.getElementById('qbody');
   container.innerHTML = `<div class="ai-loading show"><div class="spinner"></div><span>AI is thinking...</span></div>`;
-
+  
   try {
     const q = await fetchAIQuestion();
     renderQuestion(q);
   } catch (e) {
-    console.warn("AI failed, using fallback", e);
-    renderQuestion(FALLBACK[Math.floor(Math.random()*FALLBACK.length)]);
+    console.error("AI Error:", e);
+    container.innerHTML = `<p>Error loading question. <button onclick="loadNext()">Retry</button></p>`;
   }
 }
 
 async function fetchAIQuestion() {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${window.GEMINI_API_KEY}`;
-  const prompt = `Generate a Year 5 Science question about ${quiz.domain}. Style: ${quiz.style}. Return ONLY JSON: {"d":"Biology|Chemistry|Physics|Working Scientifically","diff":1|2|3,"q":"Question text","o":["A","B","C","D"],"a":0,"e":"Explanation text"}`;
+  
+  const prompt = `Act as a Year 5 Science Teacher. Generate a multiple-choice question about ${quiz.domain} (${quiz.style} style). 
+  Return ONLY a valid JSON object:
+  {"d":"Biology|Chemistry|Physics|Working Scientifically","q":"question text","o":["option A","option B","option C","option D"],"a":0,"e":"short explanation"}
+  where "a" is the index (0-3) of the correct answer. No markdown.`;
 
   const response = await fetch(url, {
     method: 'POST',
@@ -365,16 +314,17 @@ async function fetchAIQuestion() {
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
   });
 
-  if (!response.ok) throw new Error("API Error");
   const data = await response.json();
-  const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
-  return JSON.parse(text);
+  let rawText = data.candidates[0].content.parts[0].text;
+  // Safety: Remove markdown code blocks if AI included them
+  rawText = rawText.replace(/```json|```/g, '').trim();
+  return JSON.parse(rawText);
 }
 
 function renderQuestion(q) {
   quiz.currentQ = q;
   const container = document.getElementById('qbody');
-  const dClass = q.d === 'Biology' ? 'db-bio' : q.d === 'Chemistry' ? 'db-chem' : q.d === 'Physics' ? 'db-phys' : 'db-ws';
+  const dClass = q.d.includes('Bio')?'db-bio':q.d.includes('Chem')?'db-chem':q.d.includes('Phys')?'db-phys':'db-ws';
   
   container.innerHTML = `
     <div class="dom-badge ${dClass}">${q.d}</div>
@@ -384,12 +334,11 @@ function renderQuestion(q) {
         <div class="opt" onclick="checkAnswer(${i})">
           <div class="opt-let">${String.fromCharCode(65+i)}</div>
           <div>${opt}</div>
-        </div>
-      `).join('')}
+        </div>`).join('')}
     </div>
     <div id="feedback" class="fb"></div>
-    <div id="next-box" style="display:none; margin-top:20px;">
-      <button class="btn btn-pri" onclick="loadNext()">Next Question ➔</button>
+    <div id="next-box" style="display:none; margin-top:1.5rem">
+        <button class="btn btn-pri" onclick="loadNext()">Next Question ➔</button>
     </div>
   `;
 }
@@ -401,14 +350,14 @@ function checkAnswer(idx) {
   if (isCorrect) { quiz.score++; quiz.streak++; } else { quiz.streak = 0; }
   
   quiz.history.push({ ...quiz.currentQ, user: idx, correct: isCorrect });
-
+  
   const opts = document.querySelectorAll('.opt');
   opts[idx].classList.add(isCorrect ? 'correct' : 'wrong');
   opts[quiz.currentQ.a].classList.add('correct');
-
+  
   const fb = document.getElementById('feedback');
-  fb.innerHTML = `<strong>${isCorrect ? 'Correct!' : 'Not quite.'}</strong> ${quiz.currentQ.e}`;
-  fb.className = `fb show ${isCorrect ? 'ok' : 'no'}`;
+  fb.innerHTML = `<strong>${isCorrect?'Correct!':'Oops.'}</strong> ${quiz.currentQ.e}`;
+  fb.className = `fb show ${isCorrect?'ok':'no'}`;
   document.getElementById('next-box').style.display = 'block';
   updateHeader();
 }
@@ -423,28 +372,46 @@ function updateHeader() {
 function stopAndFinish() {
   document.getElementById('s-quiz').classList.remove('active');
   document.getElementById('s-results').classList.add('active');
-  showResults();
-  saveToSheets();
-}
-
-function showResults() {
-  const pct = Math.round((quiz.score / quiz.qIdx) * 100);
+  
+  const total = quiz.history.length;
+  const correct = quiz.history.filter(h => h.correct).length;
+  const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
   const g = getGrade(pct);
-  document.getElementById('rh-name').innerText = quiz.name + " · " + quiz.cls;
+
+  document.getElementById('rh-name').innerText = `${quiz.name} · ${quiz.cls}`;
+  document.getElementById('rh-score').innerText = `${correct}/${total}`;
+  document.getElementById('rh-pct').innerText = `${pct}%`;
   document.getElementById('rh-grade').innerText = g.label;
-  document.getElementById('rh-grade').className = "rh-grade " + g.cls;
-  document.getElementById('rh-score').innerText = `${quiz.score}/${quiz.qIdx}`;
-  document.getElementById('rh-pct').innerText = pct + "%";
-}
+  document.getElementById('rh-grade').className = `rh-grade ${g.cls}`;
 
-async function saveToSheets() {
-  const pct = Math.round((quiz.score / quiz.qIdx) * 100);
-  const payload = { name: quiz.name, class: quiz.cls, score: quiz.score, total: quiz.qIdx, percent: pct };
-  try { await fetch(SHEETS_ENDPOINT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); } 
-  catch(e) { console.error("Sheets save failed", e); }
-}
+  // Domain Breakdown
+  const domains = ['Biology', 'Chemistry', 'Physics', 'Working Scientifically'];
+  const domGrid = document.getElementById('rd-domains');
+  domGrid.innerHTML = '';
+  
+  domains.forEach(d => {
+    const dQs = quiz.history.filter(h => h.d.includes(d.split(' ')[0]));
+    if(dQs.length === 0) return;
+    const dCorrect = dQs.filter(h => h.correct).length;
+    const dPct = Math.round((dCorrect/dQs.length)*100);
+    domGrid.innerHTML += `
+      <div class="dom-card dca-${d.split(' ')[0].toLowerCase()}">
+        <div class="dom-lbl">${d}</div>
+        <div class="dom-score-big">${dCorrect}<span class="dom-score-den">/${dQs.length}</span></div>
+        <div class="dom-pct">${dPct}% Mastery</div>
+      </div>`;
+  });
 
-function retryQuiz() { location.reload(); }
+  // Review List
+  const reviewBox = document.getElementById('rd-review');
+  const missed = quiz.history.filter(h => !h.correct);
+  reviewBox.innerHTML = missed.length > 0 ? missed.map(m => `
+    <div class="missed-item">
+      <div class="q-num">${m.d}</div>
+      <div class="missed-q">${m.q}</div>
+      <div class="missed-right">✓ Correct: ${m.o[m.a]}</div>
+    </div>`).join('') : "<p>Perfect! No mistakes to review.</p>";
+}
 </script>
 </body>
 </html>
