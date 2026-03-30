@@ -14,7 +14,7 @@
         input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1.5px solid var(--b); border-radius: var(--r); font-size: 16px; box-sizing: border-box; }
         button { background: var(--p); color: white; border: none; padding: 15px; border-radius: var(--r); font-weight: 800; cursor: pointer; width: 100%; margin-top: 10px; }
         #quiz-screen { background: var(--s); }
-        .q-container { background: white; padding: 2rem; border-radius: 24px; width: 90%; max-width: 600px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .q-container { background: white; padding: 2.5rem; border-radius: 24px; width: 90%; max-width: 600px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .opt { border: 2px solid var(--b); padding: 15px; border-radius: var(--r); margin: 10px 0; cursor: pointer; text-align: left; transition: 0.2s; font-weight: 600; }
         .opt:hover { background: #f8faff; border-color: var(--p); }
         .correct { border-color: #22c55e !important; background: #dcfce7 !important; color: #166534; }
@@ -28,7 +28,7 @@
         <div class="card">
             <h1 style="margin:0; font-size: 26px;">🚀 Science Practice</h1>
             <p style="color: #666; margin-bottom: 20px;">NLCS Jeju Year 5</p>
-            <input type="text" id="u-name" placeholder="Enter Your Name">
+            <input type="text" id="u-name" placeholder="Full Name">
             <select id="u-class">
                 <option value="">Select Class</option>
                 <option>5A</option><option>5B</option><option>5C</option><option>5D</option><option>5E</option>
@@ -39,12 +39,12 @@
 
     <div id="quiz-screen" class="screen">
         <div class="q-container" id="q-box">
-            <h3>Generating Year 5 Science question...</h3>
+            <h3>Preparing your first question...</h3>
         </div>
     </div>
 
 <script>
-    const API_KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU';
+    const KEY = 'AIzaSyDFT2a5BMzlpRNKOEIKtsMHK2vu8P6KYAU';
 
     function startApp() {
         const name = document.getElementById('u-name').value;
@@ -58,17 +58,17 @@
 
     async function fetchNext() {
         const box = document.getElementById('q-box');
-        box.innerHTML = `<h3 style="color:#1a1a4e">AI is writing a new question...</h3>`;
+        box.innerHTML = `<h3 style="color:#1a1a4e">AI is generating a question...</h3>`;
 
         try {
-            // Using v1beta to ensure responseMimeType is supported and avoid 400 errors
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+            // FIXED: Using v1beta endpoint to ensure support for JSON mime type and the model
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`;
             
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: "Generate one Year 5 Science multiple choice question. Return ONLY raw JSON in this format: {\"q\":\"question text\",\"o\":[\"option1\",\"option2\",\"option3\",\"option4\"],\"a\":0,\"e\":\"explanation text\"}" }] }],
+                    contents: [{ parts: [{ text: "Generate one Year 5 Science question. Return ONLY a JSON object: {\"q\":\"question\",\"o\":[\"A\",\"B\",\"C\",\"D\"],\"a\":0,\"e\":\"explanation\"}" }] }],
                     generationConfig: { 
                         responseMimeType: "application/json",
                         temperature: 0.7 
@@ -76,39 +76,40 @@
                 })
             });
 
-            if (!response.ok) throw new Error("Connection Error (" + response.status + ")");
+            if (!response.ok) throw new Error("Connection Failed (" + response.status + ")");
 
             const data = await response.json();
-            const qData = JSON.parse(data.candidates[0].content.parts[0].text);
+            const q = JSON.parse(data.candidates[0].content.parts[0].text);
             
             box.innerHTML = `
-                <h2 style="margin-top:0; font-size:20px;">${qData.q}</h2>
+                <h2 style="margin-top:0; font-size:20px;">${q.q}</h2>
                 <div id="options">
-                    ${qData.o.map((opt, i) => `<div class="opt" onclick="check(${i}, ${qData.a}, this, '${qData.e.replace(/'/g, "\\'")}')">${opt}</div>`).join('')}
+                    ${q.o.map((opt, i) => `<div class="opt" onclick="verify(${i}, ${q.a}, this, '${q.e.replace(/'/g, "\\'")}')">${opt}</div>`).join('')}
                 </div>
                 <div id="feedback"></div>
-                <button id="next-btn" style="display:none; margin-top:15px;" onclick="fetchNext()">Next Question ➔</button>
+                <button id="next-btn" style="display:none; margin-top:20px;" onclick="fetchNext()">Next Question ➔</button>
             `;
         } catch (err) {
             box.innerHTML = `<h3 style="color:red">System Error</h3><p>${err.message}</p><button onclick="fetchNext()">Try Again</button>`;
         }
     }
 
-    function check(idx, correct, el, explain) {
-        const opts = document.querySelectorAll('.opt');
-        opts.forEach(o => o.style.pointerEvents = 'none');
+    function verify(selected, correct, el, info) {
+        const options = document.querySelectorAll('.opt');
+        options.forEach(o => o.style.pointerEvents = 'none');
+        
         const fb = document.getElementById('feedback');
         fb.style.display = 'block';
 
-        if (idx === correct) {
+        if (selected === correct) {
             el.classList.add('correct');
             fb.style.background = "#dcfce7";
-            fb.innerHTML = "✅ Correct! " + explain;
+            fb.innerHTML = "✅ Correct! " + info;
         } else {
             el.classList.add('wrong');
-            opts[correct].classList.add('correct');
+            options[correct].classList.add('correct');
             fb.style.background = "#fee2e2";
-            fb.innerHTML = "❌ Not quite. " + explain;
+            fb.innerHTML = "❌ Not quite. " + info;
         }
         document.getElementById('next-btn').style.display = 'block';
     }
