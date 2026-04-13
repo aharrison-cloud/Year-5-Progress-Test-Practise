@@ -74,10 +74,18 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 .dc-medium{background:#fef3c7;color:#92400e}
 .dc-hard{background:#fee2e2;color:#991b1b}
 .dc-ext{background:#fce7f3;color:#be185d}
+
+/* MOD 1: Finish button states */
 .btn-stop{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;
   font-family:'Nunito',sans-serif;background:transparent;
-  border:1.5px solid #fca5a5;color:#991b1b;cursor:pointer;white-space:nowrap}
+  border:1.5px solid #fca5a5;color:#991b1b;cursor:pointer;white-space:nowrap;
+  transition:all .2s}
 .btn-stop:hover{background:#fee2e2}
+.btn-stop.hidden{display:none}
+.btn-stop-locked{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;
+  font-family:'Nunito',sans-serif;background:var(--paper);
+  border:1.5px solid var(--border);color:var(--ink3);white-space:nowrap;cursor:default}
+
 .streak-chip{display:none;align-items:center;gap:4px;font-size:11px;font-weight:600;
   color:#92400e;background:#fef3c7;padding:3px 9px;border-radius:20px}
 .streak-chip.show{display:flex}
@@ -299,7 +307,13 @@ a.ttag:hover{border-color:var(--chem-mid);background:var(--chem-bg);color:var(--
     <div class="qhdr-count" id="hdr-count">Q1</div>
     <div class="diff-chip dc-medium" id="hdr-diff">Medium</div>
     <div class="streak-chip" id="streak">🔥 <span id="streak-n">0</span></div>
-    <button class="btn-stop" onclick="finishNow()">Finish &amp; see results</button>
+    <!--
+      MOD 1: Finish button is replaced by a locked indicator until Q20 is answered.
+      btn-stop-locked: shown for Q1–Q19, not clickable.
+      btn-stop: the real finish button, hidden until Q20+ is answered.
+    -->
+    <span class="btn-stop-locked" id="btn-stop-locked" title="Complete 20 questions to unlock">🔒 <span id="q-floor-count">0</span>/20</span>
+    <button class="btn-stop hidden" id="btn-stop" onclick="finishNow()">Finish &amp; see results</button>
   </div>
   <div class="qwrap" id="qwrap"></div>
 </div>
@@ -315,6 +329,10 @@ a.ttag:hover{border-color:var(--chem-mid);background:var(--chem-bg);color:var(--
       <div class="rh-pct" id="rh-pct"></div>
     </div>
     <div class="rh-tag" id="rh-tag"></div>
+    <!--
+      MOD 2: rh-meta shows student-facing stats only.
+      Engagement score is NOT rendered here — it is teacher-only, sent to Sheets only.
+    -->
     <div class="rh-meta" id="rh-meta"></div>
   </div>
   <div class="res-body">
@@ -345,6 +363,89 @@ const GEMINI_KEY      = 'AIzaSyCC0Af2Tw-ZUNZ1pYwFf3qODP6OK9vDJvk';
 const SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzJbsGAELB71C0FYnP5NwugHlKj_8fjvg05tiiTvZENQc-c51V7uBVobZKQJ4N0EBrW/exec';
 
 // ═══════════════════════════════════════════════════════
+// MOD 1: MINIMUM QUESTION FLOOR
+// ═══════════════════════════════════════════════════════
+const MIN_QUESTIONS = 20;
+
+/**
+ * Called after each answered question.
+ * Shows the real Finish button once MIN_QUESTIONS are answered;
+ * until then shows the locked indicator with a counter.
+ */
+function updateFinishButton(answeredCount) {
+  const lockEl  = document.getElementById('btn-stop-locked');
+  const stopBtn = document.getElementById('btn-stop');
+  const countEl = document.getElementById('q-floor-count');
+
+  if (answeredCount >= MIN_QUESTIONS) {
+    lockEl.style.display  = 'none';
+    stopBtn.classList.remove('hidden');
+  } else {
+    countEl.textContent   = answeredCount;
+    lockEl.style.display  = '';
+    stopBtn.classList.add('hidden');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// MOD 2: ENGAGEMENT SCORE (1–4, teacher-only)
+// ═══════════════════════════════════════════════════════
+
+/**
+ * Calculates an engagement score on the school's 1–4 AtL scale.
+ *
+ * Criteria aligned to NLCS Jeju AtL descriptors:
+ *   4 — 35+ questions, consistent response times, no erratic patterns,
+ *       attempted harder questions
+ *   3 — 25–34 questions, mostly consistent, minor irregularities
+ *   2 — 20–24 questions, some inconsistency suggesting low effort
+ *   1 — stopped at minimum, very fast responses or erratic patterns
+ *
+ * @param {Array}  qs           - answered question log from S.qs
+ * @param {number} totalAnswered
+ * @returns {number} score 1–4
+ */
+function calcEngagementScore(qs, totalAnswered) {
+  if (totalAnswered < MIN_QUESTIONS) return 1; // safety — should not reach results below floor
+
+  // --- Response time analysis ---
+  const times = qs.map(e => e.timeMs);
+  const meanTime = times.reduce((a,b)=>a+b,0) / times.length;
+
+  // Very fast responses: median under 4 seconds suggests guessing
+  const sorted = [...times].sort((a,b)=>a-b);
+  const medianTime = sorted[Math.floor(sorted.length/2)];
+
+  // Erratic pattern: coefficient of variation > 1.5 signals highly inconsistent pacing
+  const stdDev = Math.sqrt(times.map(t=>(t-meanTime)**2).reduce((a,b)=>a+b,0)/times.length);
+  const cv = meanTime > 0 ? stdDev / meanTime : 0;
+
+  const isVeryFast   = medianTime < 4000;   // median response < 4 s
+  const isErratic    = cv > 1.5;            // coefficient of variation > 1.5
+  const attemptedHard = qs.some(e => e.q.diff >= 3); // tried hard/extension questions
+
+  // --- Scoring ---
+  if (totalAnswered >= 35 && !isVeryFast && !isErratic && attemptedHard) {
+    return 4;
+  }
+  if (totalAnswered >= 35 && !isVeryFast) {
+    return 3; // high count but minor irregularities
+  }
+  if (totalAnswered >= 25 && totalAnswered <= 34 && !isVeryFast) {
+    return 3;
+  }
+  if (totalAnswered >= 25 && totalAnswered <= 34 && (isVeryFast || isErratic)) {
+    return 2;
+  }
+  if (totalAnswered >= 20 && totalAnswered <= 24) {
+    // Low count — differentiate by effort signals
+    if (isVeryFast || isErratic) return 1;
+    return 2;
+  }
+  return 1; // fallback
+}
+
+// ═══════════════════════════════════════════════════════
 // GRADES
 // ═══════════════════════════════════════════════════════
 const GRADES = [
@@ -364,36 +465,36 @@ const gradePill = pct => {
 // FALLBACK BANK — 30 questions used when Gemini is unavailable
 // ═══════════════════════════════════════════════════════
 const FALLBACK = [
-  {d:'Biology',diff:1,q:'What is the correct order of a frog\'s life cycle?',o:['Egg \u2192 Frog \u2192 Tadpole','Egg \u2192 Tadpole \u2192 Froglet \u2192 Frog','Tadpole \u2192 Egg \u2192 Frog','Frog \u2192 Tadpole \u2192 Egg'],a:1,e:'Frogs hatch from eggs into tadpoles, grow legs to become froglets, then become adult frogs.'},
-  {d:'Biology',diff:1,q:'What type of metamorphosis do butterflies go through?',o:['Incomplete \u2014 3 stages','Complete \u2014 4 stages: egg, larva, pupa, adult','No metamorphosis','Partial \u2014 2 stages'],a:1,e:'Complete metamorphosis has four distinct stages including the pupa (chrysalis) where the caterpillar transforms.'},
+  {d:'Biology',diff:1,q:'What is the correct order of a frog\'s life cycle?',o:['Egg → Frog → Tadpole','Egg → Tadpole → Froglet → Frog','Tadpole → Egg → Frog','Frog → Tadpole → Egg'],a:1,e:'Frogs hatch from eggs into tadpoles, grow legs to become froglets, then become adult frogs.'},
+  {d:'Biology',diff:1,q:'What type of metamorphosis do butterflies go through?',o:['Incomplete — 3 stages','Complete — 4 stages: egg, larva, pupa, adult','No metamorphosis','Partial — 2 stages'],a:1,e:'Complete metamorphosis has four distinct stages including the pupa (chrysalis) where the caterpillar transforms.'},
   {d:'Biology',diff:2,q:'A cactus has a thick waxy stem and spines instead of leaves. How does the thick stem help it survive in a desert?',o:['It produces more oxygen','It stores water for dry periods','It attracts pollinators','It absorbs sunlight better'],a:1,e:'The thick fleshy stem stores water, allowing the cactus to survive long dry periods. The waxy coating reduces water loss.'},
   {d:'Biology',diff:2,q:'Which part of a flower produces pollen?',o:['Petal','Sepal','Stigma','Anther (part of the stamen)'],a:3,e:'The anther is the top part of the stamen, which is the male reproductive organ of a flower. It produces pollen grains.'},
   {d:'Biology',diff:3,q:'A student compares gestation periods: elephant 22 months, human 9 months, mouse 3 weeks. What pattern do you notice?',o:['Gestation length is random','Larger animals tend to have longer gestation periods','All mammals have the same gestation','Smaller animals always take longer'],a:1,e:'Generally larger mammals have longer gestation periods. This allows offspring to develop more fully before birth.'},
   {d:'Biology',diff:1,q:'What is an adaptation?',o:['A type of food','A scientific experiment','A feature that helps an organism survive in its environment','A change in the weather'],a:2,e:'Adaptations are features (physical or behavioural) that improve survival and reproduction in a particular environment.'},
   {d:'Biology',diff:2,q:'What is the difference between pollination and fertilisation in plants?',o:['They are the same thing','Pollination is pollen transfer to the stigma; fertilisation is when pollen joins the ovule to form a seed','Fertilisation happens before pollination','Pollination only happens underwater'],a:1,e:'Pollination (pollen reaching the stigma) must happen before fertilisation (pollen joining the ovule) can occur.'},
-  {d:'Chemistry',diff:1,q:'Which of these is a reversible change?',o:['Burning wood','Cooking an egg','Dissolving salt in water','Baking a cake'],a:2,e:'Dissolving salt is reversible \u2014 evaporate the water and the salt returns. Burning, cooking and baking create new substances.'},
+  {d:'Chemistry',diff:1,q:'Which of these is a reversible change?',o:['Burning wood','Cooking an egg','Dissolving salt in water','Baking a cake'],a:2,e:'Dissolving salt is reversible — evaporate the water and the salt returns. Burning, cooking and baking create new substances.'},
   {d:'Chemistry',diff:1,q:'Which material makes the best thermal insulator?',o:['Copper','Glass','Polystyrene foam','Iron'],a:2,e:'Polystyrene traps air in tiny pockets. Air is a very poor conductor of heat, making polystyrene an excellent insulator.'},
   {d:'Chemistry',diff:2,q:'A student wants to separate salt from salty water. Which method should they use?',o:['Filtration','Sieving','Evaporation','Using a magnet'],a:2,e:'Evaporation heats the solution until the water turns to vapour and escapes, leaving the salt crystals behind.'},
-  {d:'Chemistry',diff:2,q:'Which is NOT a sign that an irreversible chemical change has happened?',o:['Bubbles of gas forming','A permanent colour change','Ice melting when left out','An unexpected temperature change'],a:2,e:'Ice melting is a reversible physical change \u2014 no new substance is formed. The other options indicate chemical reactions.'},
+  {d:'Chemistry',diff:2,q:'Which is NOT a sign that an irreversible chemical change has happened?',o:['Bubbles of gas forming','A permanent colour change','Ice melting when left out','An unexpected temperature change'],a:2,e:'Ice melting is a reversible physical change — no new substance is formed. The other options indicate chemical reactions.'},
   {d:'Chemistry',diff:3,q:'A student mixes iron filings, salt and sand. What is the correct order to separate all three?',o:['Filter, then evaporate, then use magnet','Use magnet (remove iron), dissolve in water and filter (remove sand), evaporate (recover salt)','Sieve, then evaporate, then filter','Just heat the whole mixture'],a:1,e:'Each step uses a different property: magnetism for iron, insolubility for sand, and evaporation for dissolved salt.'},
   {d:'Physics',diff:1,q:'What causes day and night?',o:['The Sun moves around the Earth','The Moon blocks the Sun','The Earth rotates on its axis every 24 hours','Clouds cover the Sun at night'],a:2,e:'Earth rotates (spins) on its axis once every 24 hours. The side facing the Sun has day; the side facing away has night.'},
   {d:'Physics',diff:1,q:'What unit is used to measure force?',o:['Kilogram (kg)','Metre (m)','Newton (N)','Second (s)'],a:2,e:'Forces are measured in Newtons (N), named after Sir Isaac Newton. A force meter measures forces in Newtons.'},
   {d:'Physics',diff:1,q:'Which planet is closest to the Sun?',o:['Venus','Earth','Mars','Mercury'],a:3,e:'Mercury is the closest planet to the Sun. Order: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune.'},
-  {d:'Physics',diff:2,q:'What is the difference between mass and weight?',o:['They mean exactly the same thing','Mass is amount of matter (kg), constant everywhere; weight is gravitational force (N), changes with gravity','Weight stays the same everywhere; mass changes','Mass is measured in Newtons'],a:1,e:'Mass (kg) stays the same everywhere. Weight (N) depends on gravitational field strength \u2014 you weigh less on the Moon.'},
-  {d:'Physics',diff:2,q:'What causes the Moon to appear to change shape during the month?',o:['The Earth\'s shadow falls on the Moon','The Moon produces different amounts of light','We see different amounts of the sunlit side as the Moon orbits Earth','The Moon spins very fast'],a:2,e:'The Moon reflects sunlight. As it orbits Earth we see different portions of its lit side \u2014 giving us the phases.'},
-  {d:'Physics',diff:3,q:'An astronaut has a mass of 60 kg. On the Moon (gravity = 1.6 N/kg) what is their weight?',o:['60 N','96 N','588 N','600 N'],a:1,e:'Weight = mass \u00d7 gravitational field strength. On the Moon: 60 \u00d7 1.6 = 96 N. Mass stays 60 kg everywhere.'},
+  {d:'Physics',diff:2,q:'What is the difference between mass and weight?',o:['They mean exactly the same thing','Mass is amount of matter (kg), constant everywhere; weight is gravitational force (N), changes with gravity','Weight stays the same everywhere; mass changes','Mass is measured in Newtons'],a:1,e:'Mass (kg) stays the same everywhere. Weight (N) depends on gravitational field strength — you weigh less on the Moon.'},
+  {d:'Physics',diff:2,q:'What causes the Moon to appear to change shape during the month?',o:['The Earth\'s shadow falls on the Moon','The Moon produces different amounts of light','We see different amounts of the sunlit side as the Moon orbits Earth','The Moon spins very fast'],a:2,e:'The Moon reflects sunlight. As it orbits Earth we see different portions of its lit side — giving us the phases.'},
+  {d:'Physics',diff:3,q:'An astronaut has a mass of 60 kg. On the Moon (gravity = 1.6 N/kg) what is their weight?',o:['60 N','96 N','588 N','600 N'],a:1,e:'Weight = mass × gravitational field strength. On the Moon: 60 × 1.6 = 96 N. Mass stays 60 kg everywhere.'},
   {d:'Physics',diff:2,q:'How does a lever make lifting easier?',o:['It increases the weight of the load','A longer effort arm allows a smaller force to lift a heavier load','It removes friction','It increases gravity at the pivot'],a:1,e:'The longer the effort arm (distance from pivot to where you push), the less force you need. This is mechanical advantage.'},
   {d:'Working Scientifically',diff:1,q:'What is the variable you deliberately change in a fair test?',o:['The dependent variable','The control variable','The independent variable','The anomalous variable'],a:2,e:'The independent variable is what you change. The dependent variable is what you measure. Control variables stay the same.'},
   {d:'Working Scientifically',diff:1,q:'Why should an experiment be repeated several times?',o:['To use more equipment','To make results more reliable and spot anomalies','Because one result is always wrong','To make the write-up longer'],a:1,e:'Repeating experiments improves reliability. Consistent results give more confidence; repeating also helps spot anomalies.'},
-  {d:'Working Scientifically',diff:2,q:'Results: 23, 24, 22, 45, 23 seconds. What should you do with the result of 45?',o:['Use it \u2014 it is the most important result','Note it as anomalous and exclude it from the mean','Repeat the whole experiment from scratch','Use all five to calculate the mean'],a:1,e:'45 is clearly anomalous \u2014 far outside the cluster of 22\u201324. Note it and exclude: mean = (23+24+22+23)\u00f74 = 23 s.'},
-  {d:'Working Scientifically',diff:2,q:'A student tests friction on 5 surfaces (cm car travels): carpet 12, tiles 45, rubber 8, wood 30, ice 82. Which has most friction?',o:['Ice \u2014 82 cm','Tiles \u2014 45 cm','Wood \u2014 30 cm','Rubber \u2014 8 cm'],a:3,e:'Most friction = shortest distance. Rubber at 8 cm slows the car most. Ice at 82 cm has least friction.'},
-  {d:'Working Scientifically',diff:3,q:'A student concludes: "Fertiliser always makes plants grow taller." What is wrong?',o:['Nothing \u2014 it is correct','It overclaims \u2014 one experiment cannot justify "always". Should say "in this investigation..."','The student should not mention fertiliser','Conclusions must be shorter'],a:1,e:'"Always" goes beyond what one experiment can prove. A good conclusion says "in this investigation" and refers to the data.'},
+  {d:'Working Scientifically',diff:2,q:'Results: 23, 24, 22, 45, 23 seconds. What should you do with the result of 45?',o:['Use it — it is the most important result','Note it as anomalous and exclude it from the mean','Repeat the whole experiment from scratch','Use all five to calculate the mean'],a:1,e:'45 is clearly anomalous — far outside the cluster of 22–24. Note it and exclude: mean = (23+24+22+23)÷4 = 23 s.'},
+  {d:'Working Scientifically',diff:2,q:'A student tests friction on 5 surfaces (cm car travels): carpet 12, tiles 45, rubber 8, wood 30, ice 82. Which has most friction?',o:['Ice — 82 cm','Tiles — 45 cm','Wood — 30 cm','Rubber — 8 cm'],a:3,e:'Most friction = shortest distance. Rubber at 8 cm slows the car most. Ice at 82 cm has least friction.'},
+  {d:'Working Scientifically',diff:3,q:'A student concludes: "Fertiliser always makes plants grow taller." What is wrong?',o:['Nothing — it is correct','It overclaims — one experiment cannot justify "always". Should say "in this investigation..."','The student should not mention fertiliser','Conclusions must be shorter'],a:1,e:'"Always" goes beyond what one experiment can prove. A good conclusion says "in this investigation" and refers to the data.'},
   {d:'Biology',diff:2,q:'A salmon is born in a river, lives in the ocean, then returns to the same river to reproduce. What is this called?',o:['Hibernation','Migration for reproduction','Complete metamorphosis','Dormancy'],a:1,e:'Salmon migration is a remarkable reproductive behaviour. They return to their birth river to spawn using smell and Earth\'s magnetic field.'},
   {d:'Chemistry',diff:1,q:'What does "soluble" mean?',o:['Cannot be bent','Dissolves in a liquid','Burns easily','Is see-through'],a:1,e:'A soluble substance dissolves in a solvent (usually water) to form a solution. Salt and sugar are soluble; sand is not.'},
-  {d:'Physics',diff:1,q:'What is gravity?',o:['A type of friction','A force that pulls objects towards each other \u2014 on Earth it pulls things downward','The speed of a falling object','A type of magnetism'],a:1,e:'Gravity is a non-contact force that attracts all objects with mass. Earth\'s gravity pulls everything toward its centre.'},
-  {d:'Working Scientifically',diff:2,q:'Which graph is best for showing how temperature changes every hour throughout a day?',o:['Pie chart','Bar chart with gaps','Line graph \u2014 continuous data over time','Tally chart'],a:2,e:'Temperature over time is continuous data. A line graph shows trends clearly and allows reading values between measurements.'},
-  {d:'Biology',diff:3,q:'Why might animals in very cold environments have smaller ears than related animals in warm environments?',o:['Cold animals don\'t need to hear as well','Smaller ears lose less body heat \u2014 less surface area means less heat loss','Large ears would freeze','Cold animals grow more slowly'],a:1,e:'Allen\'s Rule: smaller extremities reduce surface area in cold climates, conserving body heat. Polar bears have small ears.'},
-  {d:'Chemistry',diff:3,q:'Why is burning wood an irreversible change?',o:['Because it produces light','Because new substances (CO\u2082, water vapour and ash) are formed that cannot revert to wood','Because it gets hot','Because it makes smoke'],a:1,e:'Burning is a chemical reaction creating entirely new substances. Irreversible changes cannot easily be undone.'},
+  {d:'Physics',diff:1,q:'What is gravity?',o:['A type of friction','A force that pulls objects towards each other — on Earth it pulls things downward','The speed of a falling object','A type of magnetism'],a:1,e:'Gravity is a non-contact force that attracts all objects with mass. Earth\'s gravity pulls everything toward its centre.'},
+  {d:'Working Scientifically',diff:2,q:'Which graph is best for showing how temperature changes every hour throughout a day?',o:['Pie chart','Bar chart with gaps','Line graph — continuous data over time','Tally chart'],a:2,e:'Temperature over time is continuous data. A line graph shows trends clearly and allows reading values between measurements.'},
+  {d:'Biology',diff:3,q:'Why might animals in very cold environments have smaller ears than related animals in warm environments?',o:['Cold animals don\'t need to hear as well','Smaller ears lose less body heat — less surface area means less heat loss','Large ears would freeze','Cold animals grow more slowly'],a:1,e:'Allen\'s Rule: smaller extremities reduce surface area in cold climates, conserving body heat. Polar bears have small ears.'},
+  {d:'Chemistry',diff:3,q:'Why is burning wood an irreversible change?',o:['Because it produces light','Because new substances (CO₂, water vapour and ash) are formed that cannot revert to wood','Because it gets hot','Because it makes smoke'],a:1,e:'Burning is a chemical reaction creating entirely new substances. Irreversible changes cannot easily be undone.'},
 ];
 
 let FALLBACK_USED = new Set();
@@ -403,7 +504,6 @@ function getFallback(domain, diff) {
     (domain === 'all' || q.d === domain)
   );
   if (!pool.length) { FALLBACK_USED.clear(); pool = FALLBACK; }
-  // prefer matching difficulty
   const match = pool.filter(q => q.diff === diff);
   const src   = match.length ? match : pool;
   const chosen = src[Math.floor(Math.random() * src.length)];
@@ -414,11 +514,11 @@ function getFallback(domain, diff) {
 // ═══════════════════════════════════════════════════════
 // ADAPTIVE ENGINE
 // ═══════════════════════════════════════════════════════
-let S = {};     // session state
+let S = {};
 
 function targetDiff(theta) {
   if (theta < -0.8) return 1;
-  if (theta > 1.5)  return 4;  // extension
+  if (theta > 1.5)  return 4;
   if (theta > 0.6)  return 3;
   return 2;
 }
@@ -431,13 +531,13 @@ function updateTheta(theta, correct, diff) {
 }
 
 // ═══════════════════════════════════════════════════════
-// GEMINI — one clean function, called only when needed
+// GEMINI
 // ═══════════════════════════════════════════════════════
 const TOPICS = {
   Biology:['life cycles of frogs, butterflies (complete metamorphosis), grasshoppers (incomplete), birds and plants','adaptations of animals and plants to environments (desert cactus, polar bear, rainforest, ocean)','plant reproduction: flower parts (stamen, pistil, petals), pollination, fertilisation, seed dispersal methods','human life cycle stages: infancy, childhood, adolescence, adulthood, old age and key changes','asexual reproduction: runners (strawberries), bulbs, cuttings, tubers','mammal reproduction: live birth, gestation periods, parental care'],
-  Chemistry:['physical properties of materials: hardness, flexibility, transparency, thermal conductivity','thermal insulation: comparing materials, designing a fair test','solubility: soluble vs insoluble, saturated solutions, factors that speed up dissolving','separating mixtures: filtration, evaporation, magnetism, sieving \u2014 matching method to mixture','reversible changes: melting, freezing, dissolving, condensation \u2014 original substance recovered','irreversible changes: burning, cooking, rusting \u2014 signs include gas, colour change, temperature change'],
-  Physics:['solar system: 8 planets in order, relative sizes, orbits around the Sun','day and night: Earth rotates on its axis every 24 hours \u2014 NOT the Sun moving','year: Earth orbits the Sun in 365.25 days; leap year adds Feb 29 every 4 years','Moon phases: different amounts of sunlit side visible as Moon orbits Earth in 28 days','forces: pushes and pulls in Newtons, contact forces (friction), non-contact (gravity, magnetic)','gravity: gives objects weight in N, keeps planets in orbit, less on Moon than Earth','mass vs weight: mass in kg stays same everywhere; weight in N depends on gravity','friction: opposes motion, rough surfaces create more, smooth create less','levers: longer effort arm = less force needed (mechanical advantage)'],
-  'Working Scientifically':['variables: independent (what you change), dependent (what you measure), control (kept the same)','hypotheses: testable prediction written before the experiment','anomalous results: exclude from mean, note in evaluation','calculating means: add all values, divide by count (excluding anomalies)','graphs: line for continuous data over time, bar for categories; label axes with units','conclusions: refer to specific data values, write \u201cin this investigation\u201d not \u201calways\u201d','reliability: repeat measurements, more repeats = more reliable results']
+  Chemistry:['physical properties of materials: hardness, flexibility, transparency, thermal conductivity','thermal insulation: comparing materials, designing a fair test','solubility: soluble vs insoluble, saturated solutions, factors that speed up dissolving','separating mixtures: filtration, evaporation, magnetism, sieving — matching method to mixture','reversible changes: melting, freezing, dissolving, condensation — original substance recovered','irreversible changes: burning, cooking, rusting — signs include gas, colour change, temperature change'],
+  Physics:['solar system: 8 planets in order, relative sizes, orbits around the Sun','day and night: Earth rotates on its axis every 24 hours — NOT the Sun moving','year: Earth orbits the Sun in 365.25 days; leap year adds Feb 29 every 4 years','Moon phases: different amounts of sunlit side visible as Moon orbits Earth in 28 days','forces: pushes and pulls in Newtons, contact forces (friction), non-contact (gravity, magnetic)','gravity: gives objects weight in N, keeps planets in orbit, less on Moon than Earth','mass vs weight: mass in kg stays same everywhere; weight in N depends on gravity','friction: opposes motion, rough surfaces create more, smooth create less','levers: longer effort arm = less force needed (mechanical advantage)'],
+  'Working Scientifically':['variables: independent (what you change), dependent (what you measure), control (kept the same)','hypotheses: testable prediction written before the experiment','anomalous results: exclude from mean, note in evaluation','calculating means: add all values, divide by count (excluding anomalies)','graphs: line for continuous data over time, bar for categories; label axes with units','conclusions: refer to specific data values, write "in this investigation" not "always"','reliability: repeat measurements, more repeats = more reliable results']
 };
 
 async function callGemini(domain, diff, theta, style) {
@@ -447,10 +547,10 @@ async function callGemini(domain, diff, theta, style) {
   const topic = topicList[Math.floor(Math.random() * topicList.length)];
 
   const diffGuide = {
-    1:'EASY \u2014 simple recall, one concept, short question for age 9-10',
-    2:'MEDIUM \u2014 understanding and simple application, may include a brief scenario, Year 5 expected',
-    3:'HARD \u2014 analysis or applying knowledge to new situations, KS2 mastery (NOT KS3)',
-    4:'EXTENSION \u2014 KS2/KS3 bridge for high-ability students, start explanation with \ud83d\ude80'
+    1:'EASY — simple recall, one concept, short question for age 9-10',
+    2:'MEDIUM — understanding and simple application, may include a brief scenario, Year 5 expected',
+    3:'HARD — analysis or applying knowledge to new situations, KS2 mastery (NOT KS3)',
+    4:'EXTENSION — KS2/KS3 bridge for high-ability students, start explanation with 🚀'
   }[diff] || 'MEDIUM';
 
   const styleGuide = style === 'pts'
@@ -466,7 +566,7 @@ Domain: ${domain}
 Topic: ${topic}
 Difficulty: ${diffGuide}
 Style: ${styleGuide}
-Student theta=${theta.toFixed(1)}: ${theta>0.8?'above average \u2014 challenge them':'theta<-0.5'?'below average \u2014 keep accessible':'average Year 5 level'}
+Student theta=${theta.toFixed(1)}: ${theta>0.8?'above average — challenge them':'theta<-0.5'?'below average — keep accessible':'average Year 5 level'}
 
 RULES:
 - KS2 only (no KS3 unless diff=4)
@@ -476,7 +576,7 @@ RULES:
 - Friendly language for age 9-10
 
 Reply ONLY with JSON, no other text:
-{"q":"question","context":"optional \u2014 only for Cambridge style, omit key if PTS","o":["A","B","C","D"],"a":0,"e":"explanation"}`;
+{"q":"question","context":"optional — only for Cambridge style, omit key if PTS","o":["A","B","C","D"],"a":0,"e":"explanation"}`;
 
   try {
     const r = await fetch(
@@ -492,10 +592,7 @@ Reply ONLY with JSON, no other text:
       }
     );
 
-    if (r.status === 429) {
-      console.warn('Gemini rate limit \u2014 using fallback for this question');
-      return null;
-    }
+    if (r.status === 429) { console.warn('Gemini rate limit — using fallback'); return null; }
     if (!r.ok) { console.warn('Gemini error',r.status); return null; }
 
     const data  = await r.json();
@@ -513,7 +610,7 @@ Reply ONLY with JSON, no other text:
 }
 
 // ═══════════════════════════════════════════════════════
-// QUIZ FLOW — simple sequential, no queue
+// QUIZ FLOW
 // ═══════════════════════════════════════════════════════
 function startQuiz() {
   const name = document.getElementById('inp-name').value.trim();
@@ -526,15 +623,14 @@ function startQuiz() {
     domain: document.getElementById('inp-domain').value,
     style:  document.getElementById('inp-style').value,
     theta: 0, streak: 0, maxStreak: 0,
-    qs: [],           // answered questions
-    currentQ: null,   // question being shown
+    qs: [],
+    currentQ: null,
     qNum: 0,
     startTime: Date.now(),
     qStart: Date.now()
   };
   FALLBACK_USED.clear();
 
-  // Stars
   const sb = document.getElementById('stars'); sb.innerHTML='';
   for(let i=0;i<80;i++){
     const s=document.createElement('div'); s.className='star-dot';
@@ -544,6 +640,8 @@ function startQuiz() {
   }
 
   showScreen('quiz');
+  // Initialise finish button state — locked at Q0
+  updateFinishButton(0);
   loadQuestion();
 }
 
@@ -553,14 +651,13 @@ function showLoading(msg) {
 }
 
 async function loadQuestion() {
-  showLoading('Generating question with Gemini AI\u2026');
+  showLoading('Generating question with Gemini AI…');
   const domains = ['Biology','Chemistry','Physics','Working Scientifically'];
   const domain  = S.domain==='all'
     ? domains[Math.floor(Math.random()*domains.length)]
     : S.domain;
   const diff = targetDiff(S.theta);
 
-  // Try Gemini — fall back silently if it fails
   let q = await callGemini(domain, diff, S.theta, S.style);
   if (!q) q = getFallback(domain, diff);
 
@@ -580,7 +677,7 @@ function renderQuestion(q) {
   document.getElementById('hdr-cls').textContent   = S.cls;
   document.getElementById('hdr-count').textContent = `Q${n}`;
   document.getElementById('prog').style.width      = Math.min(95,n*4)+'%';
-  document.getElementById('hdr-diff').textContent  = q.ext ? '\u2605 Extension' : dlbl;
+  document.getElementById('hdr-diff').textContent  = q.ext ? '★ Extension' : dlbl;
   document.getElementById('hdr-diff').className    = 'diff-chip '+(q.ext?'dc-ext':dcls);
 
   const streak = document.getElementById('streak');
@@ -589,10 +686,10 @@ function renderQuestion(q) {
 
   const letters = ['A','B','C','D'];
   const ctxHtml = q.context
-    ? `<div class="q-ctx"><div class="q-ctx-lbl">\ud83d\udccb Read this first</div>${q.context}</div>`
+    ? `<div class="q-ctx"><div class="q-ctx-lbl">📋 Read this first</div>${q.context}</div>`
     : '';
   const hintHtml = q.ext
-    ? '<div class="q-hint">\ud83d\ude80 <strong>Extension challenge</strong> \u2014 this goes beyond Year 5. Give it your best try!</div>'
+    ? '<div class="q-hint">🚀 <strong>Extension challenge</strong> — this goes beyond Year 5. Give it your best try!</div>'
     : '';
   const aiBadge = q.ai && !q._fb
     ? '<span class="ai-chip">AI</span>'
@@ -624,16 +721,14 @@ function pick(i) {
   if (!S.currentQ) return;
   const q = S.currentQ;
 
-  // Lock all buttons
   document.querySelectorAll('.opt').forEach((b,idx) => {
     b.classList.add('locked');
-    if (idx === q.a)           b.classList.add('correct');
-    else if (idx === i && i!==q.a) b.classList.add('wrong');
+    if (idx === q.a)                b.classList.add('correct');
+    else if (idx === i && i!==q.a)  b.classList.add('wrong');
   });
-  // Fix letter icons
   document.querySelectorAll('.opt-let').forEach((l,idx) => {
-    if(idx===q.a)      { l.textContent='\u2713'; }
-    else if(idx===i&&i!==q.a){ l.textContent='\u2717'; }
+    if(idx===q.a)           { l.textContent='✓'; }
+    else if(idx===i&&i!==q.a){ l.textContent='✗'; }
   });
 
   const correct = i === q.a;
@@ -645,14 +740,15 @@ function pick(i) {
 
   S.qs.push({q, chosen:i, correct, timeMs:elapsed});
 
-  // Show feedback
+  // MOD 1: Update finish button after each answered question
+  updateFinishButton(S.qs.length);
+
   const fb = document.getElementById('fb');
   fb.className = 'fb show '+(correct?'ok':'no');
-  fb.textContent = (correct?'\u2713 Correct! ':'\u2717 Not quite \u2014 ')+q.e;
+  fb.textContent = (correct?'✓ Correct! ':'✗ Not quite — ')+q.e;
 
-  // Enable Next button
   const btn = document.getElementById('btn-next');
-  btn.textContent = 'Next \u2192';
+  btn.textContent = 'Next →';
   btn.className   = 'btn btn-pri';
   btn.disabled    = false;
   btn.onclick     = () => loadQuestion();
@@ -662,11 +758,17 @@ function goBack() {
   if(S.qs.length>0) S.qs.pop();
   S.qNum = Math.max(0, S.qNum-1);
   S.theta = S.qs.length>0 ? updateTheta(S.theta, false, 2) : 0;
+  // MOD 1: Re-sync finish button when going back
+  updateFinishButton(S.qs.length);
   loadQuestion();
 }
 
 function finishNow() {
-  if(S.qs.length===0){ alert('Answer at least one question first!'); return; }
+  // MOD 1: Guard — should not be reachable below floor, but defensive check
+  if(S.qs.length < MIN_QUESTIONS) {
+    alert(`Please answer at least ${MIN_QUESTIONS} questions before finishing.`);
+    return;
+  }
   showResults();
 }
 
@@ -684,16 +786,23 @@ function showResults() {
   const grade = getGrade(pct);
   const aiCount = done.filter(e=>e.q.ai&&!e.q._fb).length;
 
+  // MOD 2: Calculate engagement score — teacher-only, not rendered in student UI
+  const engagementScore = calcEngagementScore(done, total);
+  // Store on S for use in Sheets submission
+  S.engagementScore = engagementScore;
+
   const gel = document.getElementById('rh-grade');
   gel.textContent=grade.label; gel.className='rh-grade '+grade.cls;
-  document.getElementById('rh-name').textContent = S.name+' \u00b7 '+S.cls;
+  document.getElementById('rh-name').textContent = S.name+' · '+S.cls;
   document.getElementById('rh-score').textContent = right+'/'+total;
   document.getElementById('rh-pct').textContent   = pct+'%';
   document.getElementById('rh-tag').textContent   =
-    [[81,'Fantastic \u2014 Exceeding!'],[70,'Great work \u2014 above expected!'],[60,'Working at expected level'],[50,'Keep going \u2014 almost there!'],[0,'Every question helps \u2014 keep practising']]
+    [[81,'Fantastic — Exceeding!'],[70,'Great work — above expected!'],[60,'Working at expected level'],[50,'Keep going — almost there!'],[0,'Every question helps — keep practising']]
     .find(([t])=>pct>=t)[1];
+
+  // MOD 2: Student-facing meta — engagement score deliberately excluded
   document.getElementById('rh-meta').innerHTML =
-    `<span>${mins}m ${secs}s</span><span>\u00b7</span><span>Streak: ${S.maxStreak}</span><span>\u00b7</span><span>${aiCount} AI questions</span><span>\u00b7</span><span>\u03b8 ${S.theta.toFixed(2)}</span>`;
+    `<span>${mins}m ${secs}s</span><span>·</span><span>Streak: ${S.maxStreak}</span><span>·</span><span>${aiCount} AI questions</span><span>·</span><span>θ ${S.theta.toFixed(2)}</span>`;
 
   // Domain cards
   const domains=['Biology','Chemistry','Physics','Working Scientifically'];
@@ -716,11 +825,11 @@ function showResults() {
   // Grade scale
   document.getElementById('rd-scale').innerHTML = GRADES.map(g=>{
     const isYours = grade.label===g.label;
-    const range   = g===GRADES[0]?'above 80%':g===GRADES[1]?'70\u201380%':g===GRADES[2]?'60\u201369%':g===GRADES[3]?'50\u201359%':'below 50%';
+    const range   = g===GRADES[0]?'above 80%':g===GRADES[1]?'70–80%':g===GRADES[2]?'60–69%':g===GRADES[3]?'50–59%':'below 50%';
     return `<div class="gs-row">
       <span class="gs-pill" style="background:${g.bg};color:${g.txt};border:1px solid ${g.bdr};font-family:'Nunito',sans-serif;font-weight:700">${g.label}</span>
       <span class="gs-range">${range}</span>
-      ${isYours?`<span class="gs-you">\u2190 your score (${pct}%)</span>`:''}
+      ${isYours?`<span class="gs-you">← your score (${pct}%)</span>`:''}
     </div>`;
   }).join('');
 
@@ -728,23 +837,23 @@ function showResults() {
   const dcb={Biology:'db-bio',Chemistry:'db-chem',Physics:'db-phys','Working Scientifically':'db-ws'};
   const resources = {
     Biology:[
-      {name:'BBC Bitesize \u2014 KS2 Science',desc:'Life cycles, adaptations, plants and reproduction',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr'},
-      {name:'Oak National Academy \u2014 KS2 Biology',desc:'Free video lessons for Year 5 Biology topics',url:'https://www.thenational.academy/teachers/programmes/science-primary-ks2/units'},
-      {name:'Seneca Learning \u2014 KS2 Science',desc:'Free adaptive quizzes for all Year 5 topics',url:'https://senecalearning.com/en-GB/revision-notes/ks2/science'},
+      {name:'BBC Bitesize — KS2 Science',desc:'Life cycles, adaptations, plants and reproduction',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr'},
+      {name:'Oak National Academy — KS2 Biology',desc:'Free video lessons for Year 5 Biology topics',url:'https://www.thenational.academy/teachers/programmes/science-primary-ks2/units'},
+      {name:'Seneca Learning — KS2 Science',desc:'Free adaptive quizzes for all Year 5 topics',url:'https://senecalearning.com/en-GB/revision-notes/ks2/science'},
     ],
     Chemistry:[
-      {name:'BBC Bitesize \u2014 KS2 Materials',desc:'Properties, reversible and irreversible changes',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr'},
-      {name:'Oak National Academy \u2014 KS2 Chemistry',desc:'Lessons on materials, reactions and separating',url:'https://www.thenational.academy/teachers/programmes/science-primary-ks2/units'},
-      {name:'PhET \u2014 States of Matter',desc:'Interactive simulation: particles in solids, liquids and gases',url:'https://phet.colorado.edu/en/simulations/states-of-matter'},
+      {name:'BBC Bitesize — KS2 Materials',desc:'Properties, reversible and irreversible changes',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr'},
+      {name:'Oak National Academy — KS2 Chemistry',desc:'Lessons on materials, reactions and separating',url:'https://www.thenational.academy/teachers/programmes/science-primary-ks2/units'},
+      {name:'PhET — States of Matter',desc:'Interactive simulation: particles in solids, liquids and gases',url:'https://phet.colorado.edu/en/simulations/states-of-matter'},
     ],
     Physics:[
-      {name:'BBC Bitesize \u2014 KS2 Physics',desc:'Space, forces, Earth and beyond',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr'},
+      {name:'BBC Bitesize — KS2 Physics',desc:'Space, forces, Earth and beyond',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr'},
       {name:'NASA Kids Club',desc:'Explore space and planets with NASA student resources',url:'https://www.nasa.gov/learning-resources/for-kids-and-students/'},
-      {name:'PhET \u2014 Forces and Motion',desc:'Interactive: explore how forces affect movement',url:'https://phet.colorado.edu/en/simulations/forces-and-motion-basics'},
+      {name:'PhET — Forces and Motion',desc:'Interactive: explore how forces affect movement',url:'https://phet.colorado.edu/en/simulations/forces-and-motion-basics'},
     ],
     'Working Scientifically':[
-      {name:'BBC Bitesize \u2014 Scientific Skills',desc:'Variables, graphs, fair testing and conclusions',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr'},
-      {name:'Oak National Academy \u2014 Science Skills',desc:'Planning experiments and analysing data',url:'https://www.thenational.academy/teachers/programmes/science-primary-ks2/units'},
+      {name:'BBC Bitesize — Scientific Skills',desc:'Variables, graphs, fair testing and conclusions',url:'https://www.bbc.co.uk/bitesize/subjects/zcpqtfr'},
+      {name:'Oak National Academy — Science Skills',desc:'Planning experiments and analysing data',url:'https://www.thenational.academy/teachers/programmes/science-primary-ks2/units'},
       {name:'Science Sparks',desc:'Fun hands-on experiments to practise scientific skills',url:'https://www.science-sparks.com'},
     ],
   };
@@ -756,13 +865,13 @@ function showResults() {
     const [priority,pCls]=dp<50?['High priority','p-high']:dp<70?['Needs work','p-med']:['Looking good','p-good'];
     const seen=new Set();
     const tags=missed.length===0
-      ? '<span class="ttag" style="color:#16a34a">\u2713 All correct!</span>'
+      ? '<span class="ttag" style="color:#16a34a">✓ All correct!</span>'
       : missed.slice(0,4).map(e=>{
           const words=e.q.q.replace(/[^a-zA-Z\s]/g,'').split(/\s+/).slice(0,5).join(' ');
-          const label=e.q.q.length>50?e.q.q.slice(0,48)+'\u2026':e.q.q;
+          const label=e.q.q.length>50?e.q.q.slice(0,48)+'…':e.q.q;
           if(seen.has(label)) return '';
           seen.add(label);
-          return `<a class="ttag" href="https://www.bbc.co.uk/bitesize/search?q=${encodeURIComponent(words)}" target="_blank" rel="noopener">${label} \u2197</a>`;
+          return `<a class="ttag" href="https://www.bbc.co.uk/bitesize/search?q=${encodeURIComponent(words)}" target="_blank" rel="noopener">${label} ↗</a>`;
         }).filter(Boolean).join('');
     const links=(resources[dm]||[]).slice(0,dp>=70?2:3).map(l=>
       `<a class="rlink" href="${l.url}" target="_blank" rel="noopener">
@@ -773,11 +882,11 @@ function showResults() {
       <div class="study-hdr">
         <span class="dom-badge ${dcb[dm]}" style="margin:0">${dm}</span>
         <span style="flex:1"></span>
-        <span class="study-score">${dc}/${dqs.length} \u00b7 ${dp}%</span>
+        <span class="study-score">${dc}/${dqs.length} · ${dp}%</span>
         <span class="${pCls}">${priority}</span>
       </div>
       <div class="study-body">
-        <div class="study-lbl">Topics to revise (click \u2192 BBC Bitesize)</div>
+        <div class="study-lbl">Topics to revise (click → BBC Bitesize)</div>
         <div class="topic-tags">${tags}</div>
         <div class="study-lbl">Resources</div>
         <div class="res-links">${links}</div>
@@ -787,13 +896,13 @@ function showResults() {
 
   // Missed questions
   document.getElementById('rd-review').innerHTML = done.filter(e=>!e.correct).length===0
-    ? '<p style="font-size:13px;color:var(--ink3);padding:.5rem 0">All correct \u2014 nothing to review! \ud83c\udf1f</p>'
+    ? '<p style="font-size:13px;color:var(--ink3);padding:.5rem 0">All correct — nothing to review! 🌟</p>'
     : done.filter(e=>!e.correct).map(e=>
         `<div class="missed-item">
           <div><span class="dom-badge ${dcb[e.q.d]||'db-bio'}" style="font-size:10px;padding:1px 7px;margin-bottom:0">${e.q.d}</span></div>
           <div class="missed-q">${e.q.q}</div>
-          <div class="missed-wrong">Your answer: ${e.q.o[e.chosen]||'\u2014'}</div>
-          <div class="missed-right">\u2713 ${e.q.o[e.q.a]} \u2014 ${e.q.e}</div>
+          <div class="missed-wrong">Your answer: ${e.q.o[e.chosen]||'—'}</div>
+          <div class="missed-right">✓ ${e.q.o[e.q.a]} — ${e.q.e}</div>
         </div>`).join('');
 
   sendToSheet(done,right,total,pct,elapsed,grade.label);
@@ -801,26 +910,30 @@ function showResults() {
 
 // ═══════════════════════════════════════════════════════
 // GOOGLE SHEETS
+// MOD 2: engagementScore added as a parameter, logged to Sheets
 // ═══════════════════════════════════════════════════════
 function sendToSheet(done,right,total,pct,elapsed,gradeLabel) {
   if(!SHEETS_ENDPOINT) return;
   const domains=['Biology','Chemistry','Physics','Working Scientifically'];
   const scores=domains.map(dm=>{
     const dqs=done.filter(e=>e.q.d===dm);
-    return dqs.length ? dqs.filter(e=>e.correct).length+'/'+dqs.length : '\u2014';
+    return dqs.length ? dqs.filter(e=>e.correct).length+'/'+dqs.length : '—';
   });
-  let worst='\u2014',worstPct=101;
+  let worst='—',worstPct=101;
   domains.forEach((dm,i)=>{
     const dqs=done.filter(e=>e.q.d===dm); if(!dqs.length) return;
     const p=Math.round(dqs.filter(e=>e.correct).length/dqs.length*100);
     if(p<worstPct){worstPct=p;worst=dm;}
   });
+
   const params=new URLSearchParams({
     name:S.name,cls:S.cls,year:'Year 5',
     score:`${right}/${total}`,pct,grade:gradeLabel,
     bio:scores[0],chem:scores[1],phys:scores[2],ws:scores[3],
     duration:elapsed,maxStreak:S.maxStreak,theta:S.theta.toFixed(2),weakDomain:worst,
-    aiQuestions:done.filter(e=>e.q.ai&&!e.q._fb).length
+    aiQuestions:done.filter(e=>e.q.ai&&!e.q._fb).length,
+    // MOD 2: engagement score logged to Sheets — not shown to students
+    engagementAtL: S.engagementScore || 1
   });
   new Image().src = SHEETS_ENDPOINT+'?'+params;
 }
