@@ -70,6 +70,7 @@ body{font-family:'Nunito Sans',sans-serif;background:var(--paper);color:var(--in
 .dc-medium{background:#fef3c7;color:#92400e}
 .dc-hard{background:#fee2e2;color:#991b1b}
 .dc-ext{background:#fce7f3;color:#be185d}
+.dc-chal{background:#1e1b4b;color:#c7d2fe}
 .btn-stop{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;
   font-family:'Nunito',sans-serif;background:transparent;
   border:1.5px solid #fca5a5;color:#991b1b;cursor:pointer;white-space:nowrap;transition:all .2s}
@@ -228,6 +229,48 @@ a.ttag:hover{border-color:var(--chem-mid);background:var(--chem-bg);color:var(--
 @media(max-width:480px){.dom-grid{grid-template-columns:1fr}}
 .fade-in{animation:fi .22s ease}
 @keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* ── CHALLENGE UNLOCK OVERLAY ─────────────────────────────── */
+#unlock-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:radial-gradient(ellipse at 50% 40%, #0f0c29 0%, #000 100%);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .5s ease;pointer-events:none}
+#unlock-overlay.visible{opacity:1;pointer-events:all}
+#unlock-overlay.dismissing{opacity:0}
+.unlock-stars{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.unlock-star{position:absolute;border-radius:50%;background:#fff;
+  animation:ustar var(--d) ease-in-out infinite var(--dl),
+            shoot 3s ease-out forwards var(--dl)}
+@keyframes ustar{0%,100%{opacity:.1}50%{opacity:1}}
+@keyframes shoot{0%{transform:translate(0,0) scale(1)}
+  100%{transform:translate(var(--x),var(--y)) scale(0);opacity:0}}
+.unlock-content{
+  position:relative;z-index:1;text-align:center;
+  padding:2.5rem 2rem;max-width:480px;
+  animation:unlock-rise .6s cubic-bezier(.34,1.56,.64,1) .2s both}
+@keyframes unlock-rise{from{transform:translateY(40px) scale(.9);opacity:0}
+  to{transform:none;opacity:1}}
+.unlock-icon{font-size:72px;margin-bottom:.5rem;
+  animation:pulse-icon 1.5s ease-in-out infinite .8s}
+@keyframes pulse-icon{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.unlock-title{
+  font-family:'Nunito',sans-serif;font-size:32px;font-weight:800;
+  color:#fff;letter-spacing:-1px;margin-bottom:.3rem;
+  text-shadow:0 0 40px rgba(199,210,254,.6)}
+.unlock-name{
+  font-size:16px;color:#a5b4fc;margin-bottom:1.2rem;font-weight:600}
+.unlock-msg{
+  font-size:15px;color:#c7d2fe;line-height:1.65;margin-bottom:.6rem}
+.unlock-sub{
+  font-size:12px;color:#6366f1;margin-bottom:1.8rem;opacity:.8}
+.unlock-btn{
+  padding:13px 36px;border-radius:30px;font-size:15px;font-weight:800;
+  font-family:'Nunito',sans-serif;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;
+  box-shadow:0 0 30px rgba(99,102,241,.5);
+  transition:transform .12s,box-shadow .12s}
+.unlock-btn:hover{transform:scale(1.04);box-shadow:0 0 45px rgba(99,102,241,.7)}
 </style>
 </head>
 <body>
@@ -341,11 +384,13 @@ const SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzJbsGAELB71C0F
 
 // ═══════════════════════════════════════════════════════
 // RATE LIMITING
-// Minimum ms between AI question requests.
-// 3000ms = 3 seconds — keeps well within Gemini 1.5 Flash
-// free tier limits (15 RPM) even with a full class.
+// 5 second minimum between requests — matches the visible
+// loading spinner so students see a natural pause rather
+// than a blank screen, and keeps within free tier RPM.
+// On 429, automatically retries once after 8 seconds
+// before falling back to the local question bank.
 // ═══════════════════════════════════════════════════════
-const MIN_REQUEST_INTERVAL_MS = 3000;
+const MIN_REQUEST_INTERVAL_MS = 5000;
 let lastRequestTime = 0;
 
 async function waitForRateLimit() {
@@ -415,41 +460,138 @@ const gradePill = pct => {
 };
 
 // ═══════════════════════════════════════════════════════
-// FALLBACK BANK — 30 questions, used when Apps Script
-// is unavailable or returns an error
+// QUESTION BANK — 108 questions, levels 1–4
+// Level 1: Below grade  Level 2: At grade
+// Level 3: Top of grade Level 4: KS2/KS3 bridge
+// Level 5: KS3 Challenge — AI generated only
+// PTS and Cambridge style, aligned to Y5 SOW
 // ═══════════════════════════════════════════════════════
 const FALLBACK = [
+  // ── BIOLOGY L1 ──────────────────────────────────────
   {d:'Biology',diff:1,q:'What is the correct order of a frog\'s life cycle?',o:['Egg → Frog → Tadpole','Egg → Tadpole → Froglet → Frog','Tadpole → Egg → Frog','Frog → Tadpole → Egg'],a:1,e:'Frogs hatch from eggs into tadpoles, grow legs to become froglets, then become adult frogs.'},
-  {d:'Biology',diff:1,q:'What type of metamorphosis do butterflies go through?',o:['Incomplete — 3 stages','Complete — 4 stages: egg, larva, pupa, adult','No metamorphosis','Partial — 2 stages'],a:1,e:'Complete metamorphosis has four distinct stages including the pupa (chrysalis) where the caterpillar transforms.'},
+  {d:'Biology',diff:1,q:'What type of metamorphosis do butterflies go through?',o:['Incomplete — 3 stages','Complete — 4 stages: egg, larva, pupa, adult','No metamorphosis','Partial — 2 stages'],a:1,e:'Complete metamorphosis has four stages. The pupa (chrysalis) stage is where the caterpillar transforms into a butterfly.'},
+  {d:'Biology',diff:1,q:'What is an adaptation?',o:['A type of food','A scientific experiment','A feature that helps an organism survive in its environment','A change in the weather'],a:2,e:'Adaptations are features — physical or behavioural — that improve an organism\'s survival and reproduction in its environment.'},
+  {d:'Biology',diff:1,q:'Which of these is a mammal?',o:['Salmon','Frog','Bat','Grasshopper'],a:2,e:'Bats are mammals — they have fur, are warm-blooded, and feed their young on milk. The others are fish, amphibian, and insect.'},
+  {d:'Biology',diff:1,q:'What do plants use sunlight for?',o:['To keep warm','To make their own food through photosynthesis','To attract insects','To produce seeds'],a:1,e:'Plants are autotrophs — they use sunlight, water, and carbon dioxide to produce glucose through photosynthesis.'},
+  {d:'Biology',diff:1,q:'A caterpillar changes into a butterfly inside a structure called a:',o:['Cocoon','Nest','Chrysalis (pupa)','Larva'],a:2,e:'The chrysalis is the pupa stage in butterfly metamorphosis. Inside, the caterpillar\'s body is completely reorganised into a butterfly.'},
+  {d:'Biology',diff:1,q:'Which part of a plant absorbs water and nutrients from the soil?',o:['Leaves','Flowers','Stem','Roots'],a:3,e:'Roots anchor the plant and absorb water and minerals from the soil, which travel up the stem to the leaves.'},
+  {d:'Biology',diff:1,q:'What is the main job of a flower?',o:['To make food for the plant','To absorb water','To reproduce — produce seeds for new plants','To support the leaves'],a:2,e:'Flowers are the reproductive organs of flowering plants. They attract pollinators to enable fertilisation and seed production.'},
+
+  // ── BIOLOGY L2 ──────────────────────────────────────
   {d:'Biology',diff:2,q:'A cactus has a thick waxy stem and spines instead of leaves. How does the thick stem help it survive in a desert?',o:['It produces more oxygen','It stores water for dry periods','It attracts pollinators','It absorbs sunlight better'],a:1,e:'The thick fleshy stem stores water, allowing the cactus to survive long dry periods. The waxy coating reduces water loss.'},
   {d:'Biology',diff:2,q:'Which part of a flower produces pollen?',o:['Petal','Sepal','Stigma','Anther (part of the stamen)'],a:3,e:'The anther is the top part of the stamen, the male reproductive organ. It produces pollen grains.'},
-  {d:'Biology',diff:3,q:'A student compares gestation periods: elephant 22 months, human 9 months, mouse 3 weeks. What pattern do you notice?',o:['Gestation length is random','Larger animals tend to have longer gestation periods','All mammals have the same gestation','Smaller animals always take longer'],a:1,e:'Generally larger mammals have longer gestation periods, allowing offspring to develop more fully before birth.'},
-  {d:'Biology',diff:1,q:'What is an adaptation?',o:['A type of food','A scientific experiment','A feature that helps an organism survive in its environment','A change in the weather'],a:2,e:'Adaptations are features (physical or behavioural) that improve survival and reproduction in a particular environment.'},
   {d:'Biology',diff:2,q:'What is the difference between pollination and fertilisation in plants?',o:['They are the same thing','Pollination is pollen transfer to the stigma; fertilisation is when pollen joins the ovule to form a seed','Fertilisation happens before pollination','Pollination only happens underwater'],a:1,e:'Pollination (pollen reaching the stigma) must happen before fertilisation (pollen joining the ovule) can occur.'},
-  {d:'Chemistry',diff:1,q:'Which of these is a reversible change?',o:['Burning wood','Cooking an egg','Dissolving salt in water','Baking a cake'],a:2,e:'Dissolving salt is reversible — evaporate the water and the salt returns. Burning, cooking and baking create new substances.'},
+  {d:'Biology',diff:2,q:'A salmon is born in a river, lives in the ocean, then returns to the same river to reproduce. What is this called?',o:['Hibernation','Migration for reproduction','Complete metamorphosis','Dormancy'],a:1,e:'Salmon migration is a remarkable reproductive behaviour — they use smell and Earth\'s magnetic field to return to their birth river.'},
+  {d:'Biology',diff:2,q:'A student measures the gestation periods of five mammals: elephant 22 months, human 9 months, dog 2 months, rabbit 1 month, mouse 3 weeks. What general pattern do the data show?',o:['Gestation length is random','Larger animals tend to have longer gestation periods','All mammals have the same gestation','Smaller animals always have shorter gestations by exactly half'],a:1,e:'Generally larger mammals have longer gestation periods, allowing offspring to develop more fully before birth, though there are exceptions.'},
+  {d:'Biology',diff:2,q:'A strawberry plant sends out long horizontal stems that grow new plants where they touch the ground. What type of reproduction is this?',o:['Sexual reproduction','Pollination','Asexual reproduction using runners','Complete metamorphosis'],a:2,e:'Runners are a form of asexual reproduction — a new plant genetically identical to the parent grows from the horizontal stem (stolon).'},
+  {d:'Biology',diff:2,q:'Which adaptation helps a duck survive in water?',o:['Sharp claws','Waterproof feathers and webbed feet','A long neck','Thick fur'],a:1,e:'Waterproof feathers (oiled by a preen gland) keep ducks dry and warm. Webbed feet act as paddles for efficient swimming.'},
+  {d:'Biology',diff:2,q:'What is the difference between complete and incomplete metamorphosis?',o:['There is no difference','Complete has 4 stages including a pupa; incomplete has 3 stages with no pupa — nymphs resemble adults','Complete metamorphosis is faster','Incomplete metamorphosis only happens in butterflies'],a:1,e:'Butterflies undergo complete metamorphosis (egg→larva→pupa→adult). Grasshoppers undergo incomplete (egg→nymph→adult) — no pupal stage.'},
+
+  // ── BIOLOGY L3 ──────────────────────────────────────
+  {d:'Biology',diff:3,q:'Why might animals in very cold environments have smaller ears than related animals in warm environments?',o:['Cold animals don\'t need to hear as well','Smaller ears lose less body heat — less surface area means less heat loss','Large ears would freeze','Cold animals grow more slowly'],a:1,e:'Allen\'s Rule: smaller extremities reduce surface area in cold climates, conserving body heat. Polar bears have notably small ears.'},
+  {d:'Biology',diff:3,q:'A student compares gestation periods: elephant 22 months, human 9 months, mouse 3 weeks. What pattern do you notice and what does it suggest about offspring development?',o:['Gestation length is random','Larger animals tend to have longer gestations, suggesting their young need more development time before birth','All mammals have the same gestation','Smaller animals always take longer'],a:1,e:'Larger mammals generally have longer gestations. This allows complex organ systems to develop more fully, producing more capable offspring at birth.'},
+  {d:'Biology',diff:3,q:'A plant produces seeds inside a fruit with hooks that catch on animal fur. What seed dispersal method is this, and what is its advantage?',o:['Wind dispersal — seeds travel further','Animal external dispersal — seeds are carried to new locations away from the parent plant','Water dispersal — seeds float downstream','Self-dispersal — the plant throws its own seeds'],a:1,e:'External animal dispersal (e.g. burrs) carries seeds away from the parent, reducing competition for light, water, and nutrients between parent and offspring.'},
+  {d:'Biology',diff:3,q:'Why do insects that undergo complete metamorphosis (like beetles) rarely compete with their own larvae for food?',o:['They live in different countries','The adult and larva have completely different body forms and diets — they occupy different ecological niches','Larvae eat nothing at all','Adults always die before larvae hatch'],a:1,e:'In complete metamorphosis, the larva and adult often look completely different and eat different foods (e.g. caterpillar eats leaves; butterfly drinks nectar), reducing direct competition.'},
+  {d:'Biology',diff:3,q:'A species of bird on an island has a beak perfectly shaped for cracking hard seeds. After a drought kills most seed plants, insects become the main food source. Over many generations, what might happen to the beak shape?',o:['Nothing — beaks cannot change','Birds with thinner, more pointed beaks better suited to catching insects are more likely to survive and reproduce, gradually shifting the population\'s average beak shape','All birds immediately grow thinner beaks','The birds will go extinct immediately'],a:1,e:'This is natural selection in action — the environment selects for variation that improves survival. Over generations, advantageous traits become more common in the population.'},
+  {d:'Biology',diff:3,q:'Cambridge style — A student investigates asexual reproduction in spider plants. She takes 6 runners and plants them in identical pots with the same soil. After 4 weeks she measures the height of each new plant: 8, 9, 8, 7, 9, 8 cm. Why are all the new plants very similar in height rather than showing wide variation?',o:['She used too few plants','Asexual reproduction produces genetically identical clones — variation is only caused by minor environmental differences','She measured incorrectly','The plants were all the same age'],a:1,e:'Asexual reproduction produces clones with identical genetic material. The small height differences (7–9 cm) reflect environmental variation (slight differences in soil, light, watering) rather than genetic variation.'},
+
+  // ── BIOLOGY L4 ──────────────────────────────────────
+  {d:'Biology',diff:4,q:'A student reads that the gestation period of a guinea pig (65 days) is much longer than that of a rat (22 days), despite both being similar in size. Which factor best explains this difference?',o:['Guinea pigs are older animals','Guinea pig young are precocial — born fully developed with open eyes and fur; rat young are altricial — born hairless and helpless, needing less gestation','Guinea pigs eat more food','Rats are domesticated and have shorter gestations as a result'],a:1,e:'Gestation length relates to how developed offspring are at birth. Precocial young (guinea pigs) need longer gestation. Altricial young (rats) are born underdeveloped and require extensive parental care after birth.'},
+  {d:'Biology',diff:4,q:'Identical twins develop from a single fertilised egg that splits in two. Non-identical twins develop from two separate eggs. What does this tell us about the source of genetic variation?',o:['Twins are always identical','Identical twins share 100% of their DNA — variation between them is entirely environmental; non-identical twins share ~50% DNA and show both genetic and environmental variation','Non-identical twins are more common because they are healthier','Environmental variation is more important than genetic variation in all cases'],a:1,e:'This illustrates the nature/nurture distinction. Identical twins are natural clones — any differences are environmental. Non-identical twins are as genetically similar as any siblings.'},
+  {d:'Biology',diff:4,q:'A deep-sea fish produces 1 million eggs per year but provides no parental care. A blue whale produces one calf every 2–3 years and cares for it intensively. What evolutionary strategy does each represent?',o:['Both use the same strategy','The fish uses a "quantity" strategy — many offspring, low survival rate; the whale uses a "quality" strategy — few offspring, high investment per offspring','Fish are less evolved than whales','Whales produce fewer offspring because they are larger'],a:1,e:'These represent r-selection (many offspring, little parental care) and K-selection (few offspring, high parental investment). Both are successful evolutionary strategies in their respective environments.'},
+  {d:'Biology',diff:4,q:'Aphids can reproduce asexually in summer (producing females only) and sexually in autumn. What is the advantage of switching to sexual reproduction in autumn?',o:['Sexual reproduction is always faster','Asexual reproduction produces more offspring','Sexual reproduction generates genetic variation in offspring — important for surviving unpredictable winter conditions','Sexual reproduction uses less energy'],a:2,e:'Asexual reproduction is efficient when conditions are stable and favourable. Sexual reproduction generates variation, increasing the chance that some offspring will survive unpredictable or harsh conditions.'},
+
+  // ── CHEMISTRY L1 ────────────────────────────────────
+  {d:'Chemistry',diff:1,q:'Which of these is a reversible change?',o:['Burning wood','Cooking an egg','Dissolving salt in water','Baking a cake'],a:2,e:'Dissolving salt is reversible — evaporate the water and the salt returns. Burning, cooking and baking create new substances that cannot be recovered.'},
   {d:'Chemistry',diff:1,q:'Which material makes the best thermal insulator?',o:['Copper','Glass','Polystyrene foam','Iron'],a:2,e:'Polystyrene traps air in tiny pockets. Air is a very poor conductor of heat, making polystyrene an excellent insulator.'},
-  {d:'Chemistry',diff:2,q:'A student wants to separate salt from salty water. Which method should they use?',o:['Filtration','Sieving','Evaporation','Using a magnet'],a:2,e:'Evaporation heats the solution until water turns to vapour, leaving the salt crystals behind.'},
-  {d:'Chemistry',diff:2,q:'Which is NOT a sign that an irreversible chemical change has happened?',o:['Bubbles of gas forming','A permanent colour change','Ice melting when left out','An unexpected temperature change'],a:2,e:'Ice melting is a reversible physical change — no new substance is formed. The other options indicate chemical reactions.'},
-  {d:'Chemistry',diff:3,q:'A student mixes iron filings, salt and sand. What is the correct order to separate all three?',o:['Filter, then evaporate, then use magnet','Use magnet (remove iron), dissolve in water and filter (remove sand), evaporate (recover salt)','Sieve, then evaporate, then filter','Just heat the whole mixture'],a:1,e:'Each step uses a different property: magnetism for iron, insolubility for sand, and evaporation for dissolved salt.'},
-  {d:'Physics',diff:1,q:'What causes day and night?',o:['The Sun moves around the Earth','The Moon blocks the Sun','The Earth rotates on its axis every 24 hours','Clouds cover the Sun at night'],a:2,e:'Earth rotates on its axis once every 24 hours. The side facing the Sun has day; the side away has night.'},
-  {d:'Physics',diff:1,q:'What unit is used to measure force?',o:['Kilogram (kg)','Metre (m)','Newton (N)','Second (s)'],a:2,e:'Forces are measured in Newtons (N), named after Sir Isaac Newton. A force meter measures forces in Newtons.'},
-  {d:'Physics',diff:1,q:'Which planet is closest to the Sun?',o:['Venus','Earth','Mars','Mercury'],a:3,e:'Mercury is the closest planet to the Sun. Order: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune.'},
-  {d:'Physics',diff:2,q:'What is the difference between mass and weight?',o:['They mean exactly the same thing','Mass is amount of matter (kg), constant everywhere; weight is gravitational force (N), changes with gravity','Weight stays the same everywhere; mass changes','Mass is measured in Newtons'],a:1,e:'Mass (kg) stays the same everywhere. Weight (N) depends on gravitational field strength — you weigh less on the Moon.'},
-  {d:'Physics',diff:2,q:'What causes the Moon to appear to change shape during the month?',o:['The Earth\'s shadow falls on the Moon','The Moon produces different amounts of light','We see different amounts of the sunlit side as the Moon orbits Earth','The Moon spins very fast'],a:2,e:'The Moon reflects sunlight. As it orbits Earth we see different portions of its lit side — giving us the phases.'},
-  {d:'Physics',diff:3,q:'An astronaut has a mass of 60 kg. On the Moon (gravity = 1.6 N/kg) what is their weight?',o:['60 N','96 N','588 N','600 N'],a:1,e:'Weight = mass × gravitational field strength. On the Moon: 60 × 1.6 = 96 N. Mass stays 60 kg everywhere.'},
-  {d:'Physics',diff:2,q:'How does a lever make lifting easier?',o:['It increases the weight of the load','A longer effort arm allows a smaller force to lift a heavier load','It removes friction','It increases gravity at the pivot'],a:1,e:'The longer the effort arm, the less force needed. This is mechanical advantage.'},
-  {d:'Working Scientifically',diff:1,q:'What is the variable you deliberately change in a fair test?',o:['The dependent variable','The control variable','The independent variable','The anomalous variable'],a:2,e:'The independent variable is what you change. The dependent variable is what you measure. Control variables stay the same.'},
-  {d:'Working Scientifically',diff:1,q:'Why should an experiment be repeated several times?',o:['To use more equipment','To make results more reliable and spot anomalies','Because one result is always wrong','To make the write-up longer'],a:1,e:'Repeating experiments improves reliability. Consistent results give more confidence; repeating also helps spot anomalies.'},
-  {d:'Working Scientifically',diff:2,q:'Results: 23, 24, 22, 45, 23 seconds. What should you do with the result of 45?',o:['Use it — it is the most important result','Note it as anomalous and exclude it from the mean','Repeat the whole experiment from scratch','Use all five to calculate the mean'],a:1,e:'45 is anomalous — far outside 22–24. Note it and exclude: mean = (23+24+22+23)÷4 = 23 s.'},
-  {d:'Working Scientifically',diff:2,q:'A student tests friction on 5 surfaces (cm car travels): carpet 12, tiles 45, rubber 8, wood 30, ice 82. Which has most friction?',o:['Ice — 82 cm','Tiles — 45 cm','Wood — 30 cm','Rubber — 8 cm'],a:3,e:'Most friction = shortest distance. Rubber at 8 cm slows the car most. Ice at 82 cm has least friction.'},
-  {d:'Working Scientifically',diff:3,q:'A student concludes: "Fertiliser always makes plants grow taller." What is wrong?',o:['Nothing — it is correct','It overclaims — one experiment cannot justify "always". Should say "in this investigation..."','The student should not mention fertiliser','Conclusions must be shorter'],a:1,e:'"Always" goes beyond one experiment. A good conclusion says "in this investigation" and refers to the data.'},
-  {d:'Biology',diff:2,q:'A salmon is born in a river, lives in the ocean, then returns to the same river to reproduce. What is this called?',o:['Hibernation','Migration for reproduction','Complete metamorphosis','Dormancy'],a:1,e:'Salmon migration is a remarkable reproductive behaviour — they return to their birth river to spawn.'},
-  {d:'Chemistry',diff:1,q:'What does "soluble" mean?',o:['Cannot be bent','Dissolves in a liquid','Burns easily','Is see-through'],a:1,e:'A soluble substance dissolves in a solvent (usually water). Salt and sugar are soluble; sand is not.'},
-  {d:'Physics',diff:1,q:'What is gravity?',o:['A type of friction','A force that pulls objects towards each other — on Earth it pulls things downward','The speed of a falling object','A type of magnetism'],a:1,e:'Gravity is a non-contact force that attracts all objects with mass. Earth\'s gravity pulls everything toward its centre.'},
-  {d:'Working Scientifically',diff:2,q:'Which graph is best for showing how temperature changes every hour throughout a day?',o:['Pie chart','Bar chart with gaps','Line graph — continuous data over time','Tally chart'],a:2,e:'Temperature over time is continuous data. A line graph shows trends clearly.'},
-  {d:'Biology',diff:3,q:'Why might animals in very cold environments have smaller ears than related animals in warm environments?',o:['Cold animals don\'t need to hear as well','Smaller ears lose less body heat — less surface area means less heat loss','Large ears would freeze','Cold animals grow more slowly'],a:1,e:'Allen\'s Rule: smaller extremities reduce surface area in cold climates, conserving body heat.'},
-  {d:'Chemistry',diff:3,q:'Why is burning wood an irreversible change?',o:['Because it produces light','Because new substances (CO₂, water vapour and ash) are formed that cannot revert to wood','Because it gets hot','Because it makes smoke'],a:1,e:'Burning is a chemical reaction creating new substances. Irreversible changes cannot be undone.'},
+  {d:'Chemistry',diff:1,q:'What does "soluble" mean?',o:['Cannot be bent','Dissolves in a liquid','Burns easily','Is see-through'],a:1,e:'A soluble substance dissolves in a solvent (usually water). Salt and sugar are soluble; sand and chalk are insoluble.'},
+  {d:'Chemistry',diff:1,q:'Which of these is a physical property of a material?',o:['Whether it can burn','Whether it reacts with acid','Whether it is hard or soft','Whether it is alive'],a:2,e:'Physical properties (hardness, flexibility, transparency, conductivity) describe a material without changing it chemically. Burning is a chemical change.'},
+  {d:'Chemistry',diff:1,q:'When water freezes into ice, what type of change is this?',o:['Irreversible — a new substance is formed','Reversible — ice melts back into water','Chemical — a reaction has occurred','Permanent — the water is gone forever'],a:1,e:'Freezing is a reversible physical change — the substance (water) remains the same, just in a different state. No new substance is created.'},
+  {d:'Chemistry',diff:1,q:'Which method would you use to separate sand from water?',o:['Evaporation','Magnetism','Filtration','Sieving'],a:2,e:'Filtration separates an insoluble solid (sand) from a liquid (water). The sand is trapped by the filter paper while water passes through.'},
+  {d:'Chemistry',diff:1,q:'What happens to the mass of salt when it dissolves in water?',o:['It disappears completely','It stays the same — the salt particles are still there, just spread throughout the water','It doubles','It turns into water'],a:1,e:'Conservation of mass: dissolving is a physical change. The salt particles disperse between water molecules but are still present — evaporate the water and the salt reappears.'},
+
+  // ── CHEMISTRY L2 ────────────────────────────────────
+  {d:'Chemistry',diff:2,q:'A student wants to separate salt from salty water. Which method should they use?',o:['Filtration','Sieving','Evaporation','Using a magnet'],a:2,e:'Evaporation heats the solution until water turns to vapour, leaving the salt crystals behind. Filtration would not work as salt is dissolved.'},
+  {d:'Chemistry',diff:2,q:'Which is NOT a sign that an irreversible chemical change has happened?',o:['Bubbles of gas forming','A permanent colour change','Ice melting when left out','An unexpected temperature change'],a:2,e:'Ice melting is a reversible physical change — no new substance is formed. The other options indicate chemical reactions where new substances are produced.'},
+  {d:'Chemistry',diff:2,q:'A student wants to find out which material is the best thermal insulator. She wraps identical cups of hot water in wool, bubble wrap, paper, and nothing. She measures temperature every 2 minutes. What is the dependent variable?',o:['The type of material used','The starting temperature of the water','The temperature of the water over time','The size of the cup'],a:2,e:'The dependent variable is what you measure in response to changes. She is measuring temperature change — this is what responds to the different insulating materials.'},
+  {d:'Chemistry',diff:2,q:'Sugar dissolves faster in hot water than cold water. Which factor is being changed in this investigation?',o:['The amount of sugar','The type of liquid','The temperature of the water','The size of the container'],a:2,e:'Temperature is the independent variable — it is deliberately changed to investigate its effect on dissolving speed (the dependent variable).'},
+  {d:'Chemistry',diff:2,q:'A student has a mixture of iron filings, sand, and salt dissolved in water. Which method removes the iron filings first?',o:['Filtration','Evaporation','Magnetism','Sieving'],a:2,e:'A magnet attracts iron filings but not sand or salt solution. This is the first step. Then filter to remove sand. Then evaporate to recover the salt.'},
+  {d:'Chemistry',diff:2,q:'Cambridge style — A student tests whether temperature affects how fast sugar dissolves. She uses 5g of sugar each time, stirs for 10 seconds, and tests at 20°C, 40°C, 60°C, and 80°C. Her results show: 20°C: 45s, 40°C: 28s, 60°C: 16s, 80°C: 9s. What conclusion can she draw?',o:['Temperature has no effect on dissolving','As temperature increases, sugar dissolves faster — higher temperature increases dissolving rate','Sugar dissolves faster in cold water','The results are anomalous'],a:1,e:'The data shows a clear pattern — each 20°C increase roughly halves the dissolving time. Higher temperature gives water molecules more energy, increasing the rate of dissolving.'},
+  {d:'Chemistry',diff:2,q:'Why does a wet swimming costume dry faster on a hot sunny day than on a cold cloudy day?',o:['The fabric absorbs more water on cold days','Higher temperature increases the rate of evaporation — water molecules have more energy to escape into the air','Cold days have more wind','The costume is a different size'],a:1,e:'Evaporation rate increases with temperature because water molecules have more kinetic energy, making it easier for them to escape from the liquid surface into the air.'},
+
+  // ── CHEMISTRY L3 ────────────────────────────────────
+  {d:'Chemistry',diff:3,q:'A student mixes iron filings, salt and sand. What is the correct order to separate all three completely?',o:['Filter, then evaporate, then use magnet','Use magnet (remove iron), dissolve in water and filter (remove sand), evaporate (recover salt)','Sieve, then evaporate, then filter','Just heat the whole mixture'],a:1,e:'Each step exploits a different property: magnetism for iron, insolubility for sand (filtration), and evaporation for dissolved salt. The order matters because dissolving salt first would make it harder to use the magnet.'},
+  {d:'Chemistry',diff:3,q:'Why is burning wood an irreversible change?',o:['Because it produces light','Because new substances (CO₂, water vapour and ash) are formed that cannot revert to wood','Because it gets hot','Because it makes smoke'],a:1,e:'Burning is a chemical reaction where wood (cellulose) reacts with oxygen. The products — carbon dioxide, water vapour, and ash — are completely different substances that cannot be recombined to form wood.'},
+  {d:'Chemistry',diff:3,q:'A student grows crystals by dissolving as much salt as possible in hot water, then leaving it to cool slowly. Why does cooling slowly produce larger crystals than cooling quickly?',o:['Slower cooling uses less energy','Slow cooling gives particles more time to arrange themselves into an ordered crystal lattice, producing larger crystals','Quick cooling makes purer crystals','The temperature doesn\'t affect crystal size'],a:1,e:'Crystal formation requires ions to find their correct positions in the lattice. Slow cooling provides time for this ordered arrangement, producing larger, more regular crystals.'},
+  {d:'Chemistry',diff:3,q:'Cambridge style — A student tests the hardness of four rocks: granite (scratches glass), limestone (scratched by a coin), chalk (scratched by a fingernail), marble (scratches a coin but not glass). Rank these from softest to hardest.',o:['Chalk, limestone, marble, granite','Granite, marble, limestone, chalk','Limestone, chalk, granite, marble','Marble, granite, chalk, limestone'],a:0,e:'The Mohs scale logic applies: chalk is scratched by a fingernail (softest), limestone by a coin, marble scratches a coin but not glass, granite scratches glass (hardest). Chalk < Limestone < Marble < Granite.'},
+  {d:'Chemistry',diff:3,q:'A student dissolves different amounts of salt in 100ml of water at 20°C. She finds that after 36g, no more will dissolve. What is the solution called at this point, and what would happen if she heated it?',o:['Dilute — heating would not change anything','Saturated — heating would allow more salt to dissolve because solubility increases with temperature','Pure — heating would separate the salt','Concentrated — heating would cause a chemical reaction'],a:1,e:'A saturated solution contains the maximum dissolved solute at that temperature. Heating increases solubility for most solids, allowing more salt to dissolve. Cooling a saturated solution causes crystallisation.'},
+
+  // ── CHEMISTRY L4 ────────────────────────────────────
+  {d:'Chemistry',diff:4,q:'When magnesium burns in oxygen, it produces magnesium oxide. The magnesium has a mass of 2.4g. The product (magnesium oxide) has a mass of 4.0g. Where does the extra 1.6g come from?',o:['It appears from nowhere','The extra mass comes from oxygen atoms that combine with the magnesium during the reaction — mass is conserved overall','The magnesium gains mass by absorbing heat','The scales were inaccurate'],a:1,e:'The law of conservation of mass: in a chemical reaction, mass is neither created nor destroyed. The extra 1.6g is the mass of oxygen from the air that bonded with the magnesium to form magnesium oxide.'},
+  {d:'Chemistry',diff:4,q:'Rusting requires both oxygen and water. A student tests four iron nails: (1) in dry air, (2) in boiled water with oil seal, (3) in salt water open to air, (4) in tap water open to air. Which nail rusts fastest and why?',o:['Nail 1 — dry air has more oxygen','Nail 3 — salt water accelerates rusting by acting as an electrolyte, increasing the rate of the electrochemical reaction','Nail 2 — boiled water has no dissolved oxygen','Nail 4 — tap water is purest'],a:1,e:'Salt water acts as an electrolyte, speeding up the electrochemical corrosion reaction. Nail 1 has no water; Nail 2 has no dissolved oxygen (boiled out); Nail 4 rusts but more slowly than in salt water.'},
+  {d:'Chemistry',diff:4,q:'A student makes a saturated solution of copper sulphate at 80°C, then allows it to cool to 20°C. Blue crystals form. Which statement best explains why crystals form on cooling?',o:['Cold water dissolves more solute','As temperature decreases, the solubility of copper sulphate decreases — excess solute can no longer remain dissolved and forms solid crystals','The water evaporates on cooling','Cooling causes a chemical reaction'],a:1,e:'Most salts are more soluble in hot water. As the solution cools, it becomes supersaturated — more solute is dissolved than the water can hold at the lower temperature, so the excess crystallises out.'},
+  {d:'Chemistry',diff:4,q:'Baking powder contains sodium bicarbonate and an acid. When mixed with water and heated, CO₂ is produced. This makes cakes rise. Is this a reversible or irreversible change, and how do you know?',o:['Reversible — you can unbake a cake','Irreversible — new gases and substances are produced; the original ingredients cannot be recovered from the baked cake','Reversible — all chemical reactions can be reversed','Neither — cooking is not a chemical change'],a:1,e:'Irreversible chemical changes produce new substances that cannot easily be converted back to reactants. Gas production, colour change, and the permanent structural change of the cake are all indicators of an irreversible reaction.'},
+
+  // ── PHYSICS L1 ──────────────────────────────────────
+  {d:'Physics',diff:1,q:'What causes day and night?',o:['The Sun moves around the Earth','The Moon blocks the Sun','The Earth rotates on its axis every 24 hours','Clouds cover the Sun at night'],a:2,e:'Earth rotates on its axis once every 24 hours. The side facing the Sun has day; the side facing away has night.'},
+  {d:'Physics',diff:1,q:'What unit is used to measure force?',o:['Kilogram (kg)','Metre (m)','Newton (N)','Second (s)'],a:2,e:'Forces are measured in Newtons (N), named after Sir Isaac Newton. A force meter (Newton meter) measures in Newtons.'},
+  {d:'Physics',diff:1,q:'Which planet is closest to the Sun?',o:['Venus','Earth','Mars','Mercury'],a:3,e:'Mercury is the closest planet. Order from Sun: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune.'},
+  {d:'Physics',diff:1,q:'What is gravity?',o:['A type of friction','A force that pulls objects towards each other — on Earth it pulls things downward','The speed of a falling object','A type of magnetism'],a:1,e:'Gravity is a non-contact attractive force between objects with mass. Earth\'s gravity pulls everything toward its centre, giving objects weight.'},
+  {d:'Physics',diff:1,q:'Which of these is a contact force?',o:['Gravity','Magnetism','Friction','Static electricity'],a:2,e:'Friction acts when two surfaces are in contact. Gravity, magnetism, and static electricity are non-contact forces — they act at a distance.'},
+  {d:'Physics',diff:1,q:'How long does it take the Earth to orbit the Sun once?',o:['24 hours','28 days','365.25 days','12 months exactly'],a:2,e:'Earth takes 365.25 days to orbit the Sun. The extra 0.25 days accumulates to give us a leap year (with 366 days) every 4 years.'},
+  {d:'Physics',diff:1,q:'What is the name of the force that opposes motion between two surfaces?',o:['Gravity','Air resistance','Tension','Friction'],a:3,e:'Friction is a contact force that opposes the relative motion of two surfaces. It acts in the opposite direction to movement and produces heat.'},
+
+  // ── PHYSICS L2 ──────────────────────────────────────
+  {d:'Physics',diff:2,q:'What is the difference between mass and weight?',o:['They mean exactly the same thing','Mass is amount of matter (kg), constant everywhere; weight is gravitational force (N), changes with gravity','Weight stays the same everywhere; mass changes','Mass is measured in Newtons'],a:1,e:'Mass (kg) is constant everywhere. Weight (N) = mass × gravitational field strength, so you weigh less on the Moon but your mass stays the same.'},
+  {d:'Physics',diff:2,q:'What causes the Moon to appear to change shape during the month?',o:['The Earth\'s shadow falls on the Moon','The Moon produces different amounts of light','We see different amounts of the sunlit side as the Moon orbits Earth','The Moon spins very fast'],a:2,e:'The Moon reflects sunlight and does not produce its own light. As it orbits Earth over 28 days, we see different proportions of its illuminated side.'},
+  {d:'Physics',diff:2,q:'How does a lever make lifting easier?',o:['It increases the weight of the load','A longer effort arm allows a smaller force to lift a heavier load','It removes friction','It increases gravity at the pivot'],a:1,e:'The mechanical advantage of a lever: the longer the effort arm relative to the load arm, the less force is needed to lift the load. The pivot (fulcrum) is the turning point.'},
+  {d:'Physics',diff:2,q:'A student pushes a toy car along carpet and along a smooth floor. The car travels further on the smooth floor. Why?',o:['The floor is harder','Carpet creates more friction, slowing the car down more quickly','Smooth floors are longer','The car is lighter on smooth floors'],a:1,e:'Rough surfaces (carpet) create more friction than smooth surfaces, opposing motion more strongly and slowing the car more quickly.'},
+  {d:'Physics',diff:2,q:'Cambridge style — A student uses a force meter to measure the force needed to pull a block across four surfaces. Results: sandpaper 8N, carpet 6N, wood 4N, ice 1N. What conclusion can be drawn?',o:['All surfaces require the same force','Rougher surfaces require more force to pull the block — they create more friction','Ice requires the most force','Force is not related to surface type'],a:1,e:'The data shows a clear pattern: rougher surfaces need more force. This is because rough surfaces have more contact points between surfaces, creating greater friction.'},
+  {d:'Physics',diff:2,q:'What is the difference between a moon and a planet?',o:['Moons are larger than planets','A planet orbits a star; a moon orbits a planet','Planets produce their own light; moons do not','Moons are made of rock and planets are made of gas'],a:1,e:'Planets orbit stars (like Earth orbits the Sun). Moons are natural satellites that orbit planets. Our Moon orbits Earth; Jupiter has over 90 moons.'},
+  {d:'Physics',diff:2,q:'A student applies a 5N force to each end of a see-saw from the centre. What is the effect?',o:['The see-saw tips to one side','The forces are balanced — the see-saw stays level','The see-saw spins rapidly','The forces cancel and the see-saw disappears'],a:1,e:'Equal forces acting at equal distances from the pivot (fulcrum) produce balanced moments. The see-saw remains level because the turning effects in each direction are equal.'},
+
+  // ── PHYSICS L3 ──────────────────────────────────────
+  {d:'Physics',diff:3,q:'An astronaut has a mass of 60 kg. On the Moon (gravity = 1.6 N/kg) what is their weight?',o:['60 N','96 N','588 N','600 N'],a:1,e:'Weight = mass × gravitational field strength. On the Moon: 60 × 1.6 = 96 N. The astronaut\'s mass remains 60 kg everywhere.'},
+  {d:'Physics',diff:3,q:'Cambridge style — A student investigates pulleys. With 1 pulley she needs 10N to lift a 10N load. With 2 pulleys she needs 5N. With 3 pulleys she needs 3.3N. What pattern is shown, and what is the trade-off?',o:['More pulleys require more force','More pulleys reduce the force needed by roughly dividing it by the number of pulleys, but the rope must be pulled a greater distance','Pulleys have no effect on force','Three pulleys require no force at all'],a:1,e:'Each additional pulley roughly halves the force needed but doubles the distance you must pull the rope. The total work done (force × distance) remains the same — this is conservation of energy.'},
+  {d:'Physics',diff:3,q:'The Earth\'s axis is tilted at 23.5° as it orbits the Sun. How does this tilt cause seasons?',o:['The Earth gets closer to the Sun in summer','The tilt means different hemispheres receive more direct sunlight at different times of year, giving summer and winter','The Sun moves north and south during the year','Seasons are caused by the Moon\'s orbit'],a:1,e:'When the northern hemisphere tilts toward the Sun (summer), it receives more direct sunlight over more hours. When it tilts away (winter), sunlight is spread over a larger area and days are shorter. Distance from the Sun is almost irrelevant.'},
+  {d:'Physics',diff:3,q:'A class 1 lever has the pivot between the effort and the load (like a see-saw). A class 2 lever has the load between the pivot and the effort (like a wheelbarrow). What is the key difference in mechanical advantage?',o:['Class 1 levers always have greater mechanical advantage','In a class 2 lever the effort arm is always longer than the load arm, so the mechanical advantage is always greater than 1 — you always need less force than the load','Class 2 levers provide no mechanical advantage','Class 1 levers cannot lift loads'],a:1,e:'In a class 2 lever (wheelbarrow, bottle opener), the load is always between the pivot and effort, so the effort arm is always longer. This always gives a mechanical advantage > 1, meaning you always need less force than the load weight.'},
+  {d:'Physics',diff:3,q:'Cambridge style — A student drops balls of different masses from 1m. All balls hit the ground at the same time. A second student claims heavier balls should fall faster. Who is correct and why?',o:['The second student — heavier balls have more gravity','The first student — gravity accelerates all objects at the same rate regardless of mass (ignoring air resistance). Galileo demonstrated this.','Neither — balls of different masses always land at different times','The second student — air resistance doesn\'t affect heavy balls'],a:1,e:'Galileo showed (and Newton explained) that gravitational acceleration is independent of mass. All objects in the same gravitational field accelerate at the same rate. Air resistance is the only factor that changes this.'},
+
+  // ── PHYSICS L4 ──────────────────────────────────────
+  {d:'Physics',diff:4,q:'A student uses a force meter to measure the weight of a 500g object on Earth (gravity = 10 N/kg) and on Mars (gravity = 3.7 N/kg). What is the weight on each planet and what stays the same?',o:['Weight: Earth 500N, Mars 500N — nothing changes','Weight: Earth 5N, Mars 1.85N — mass (500g / 0.5kg) stays the same on both planets','Weight: Earth 5000N, Mars 1850N — mass increases','Weight changes but mass also changes'],a:1,e:'Weight = mass × g. On Earth: 0.5 × 10 = 5N. On Mars: 0.5 × 3.7 = 1.85N. Mass is an intrinsic property of matter and does not change with location. Only weight (a force) changes with gravitational field strength.'},
+  {d:'Physics',diff:4,q:'A first-class lever has its pivot 20cm from a 60N load. How far from the pivot must a 20N effort be applied to balance the load?',o:['20 cm','40 cm','60 cm','80 cm'],a:2,e:'For a balanced lever: effort × effort arm = load × load arm. So 20N × d = 60N × 20cm. d = (60 × 20) ÷ 20 = 60 cm. The effort must be 60cm from the pivot.'},
+  {d:'Physics',diff:4,q:'Light from the Sun takes approximately 8 minutes to reach Earth. The nearest star (Proxima Centauri) is about 4.2 light-years away. What does "light-year" mean and approximately how many minutes of light-travel is 4.2 light-years?',o:['A light-year is the distance light travels in one year; 4.2 light-years ≈ 2.2 million minutes of travel','A light-year is how fast light travels in a year','A light-year is 365 light-minutes','A light-year is the same as 4.2 years of Earth time'],a:0,e:'A light-year is a unit of distance: how far light travels in one year (~9.46 trillion km). One year ≈ 525,600 minutes. 4.2 × 525,600 ≈ 2,207,520 minutes — over 2 million times further than the Sun. This illustrates the vast scale of space.'},
+  {d:'Physics',diff:4,q:'A student investigates friction by measuring the force needed to pull a 2kg block at constant speed across different surfaces. Why must the block move at constant speed (not accelerating)?',o:['It makes the experiment easier to time','At constant speed, forces are balanced — friction equals the pulling force exactly. If accelerating, the pulling force exceeds friction, making it impossible to measure friction alone.','Acceleration would damage the block','Constant speed is always safer'],a:1,e:'Newton\'s first law: at constant velocity, net force = 0. So the friction force exactly equals the applied pulling force. If the block accelerated, the pulling force would exceed friction, and you could not directly measure the frictional force.'},
+
+  // ── WORKING SCIENTIFICALLY L1 ───────────────────────
+  {d:'Working Scientifically',diff:1,q:'What is the variable you deliberately change in a fair test?',o:['The dependent variable','The control variable','The independent variable','The anomalous variable'],a:2,e:'The independent variable is what you choose to change. The dependent variable is what you measure as a result. Control variables are kept the same to make it a fair test.'},
+  {d:'Working Scientifically',diff:1,q:'Why should an experiment be repeated several times?',o:['To use more equipment','To make results more reliable and spot anomalies','Because one result is always wrong','To make the write-up longer'],a:1,e:'Repeating experiments and calculating a mean reduces the effect of random errors and increases reliability and confidence in the conclusion.'},
+  {d:'Working Scientifically',diff:1,q:'What is a prediction?',o:['A result you copy from a book','A statement written after the experiment explaining what happened','A testable statement written before the experiment about what you think will happen and why','A type of measurement'],a:2,e:'A prediction (or hypothesis) is written before the experiment. It states what you expect to happen and why, based on your scientific knowledge.'},
+  {d:'Working Scientifically',diff:1,q:'Which type of graph is best for showing results from separate categories (e.g. favourite colours in a class)?',o:['Line graph','Scatter graph','Bar chart','Pie chart only'],a:2,e:'Bar charts are used for discrete/categorical data — separate groups with no continuous relationship between them, like colours, materials, or animal types.'},
+  {d:'Working Scientifically',diff:1,q:'What does it mean for a test to be "fair"?',o:['Everyone gets the same score','Only one variable is changed at a time while all others are kept constant','The experiment is easy','The results are positive'],a:1,e:'A fair test changes only one variable (the independent variable) while keeping all other variables constant. This ensures any changes in results are caused by the one variable you changed.'},
+  {d:'Working Scientifically',diff:1,q:'What should you do with an anomalous result?',o:['Ignore it and pretend it didn\'t happen','Delete it from your data table','Record it, note it as anomalous, and exclude it from your mean calculation','Use it as your final answer'],a:2,e:'Anomalous results should always be recorded (scientific honesty) but identified and excluded from mean calculations. They should be investigated — they may indicate an error or an interesting finding.'},
+
+  // ── WORKING SCIENTIFICALLY L2 ───────────────────────
+  {d:'Working Scientifically',diff:2,q:'Results: 23, 24, 22, 45, 23 seconds. What should you do with the result of 45?',o:['Use it — it is the most important result','Note it as anomalous and exclude it from the mean','Repeat the whole experiment from scratch','Use all five to calculate the mean'],a:1,e:'45 is anomalous — far outside the cluster of 22–24. Record it, note it as anomalous, and calculate the mean from the remaining four: (23+24+22+23)÷4 = 23 s.'},
+  {d:'Working Scientifically',diff:2,q:'A student tests friction on 5 surfaces (distance a car travels in cm): carpet 12, tiles 45, rubber 8, wood 30, ice 82. Which surface has the most friction?',o:['Ice — 82 cm','Tiles — 45 cm','Wood — 30 cm','Rubber — 8 cm'],a:3,e:'Most friction = shortest distance travelled (friction slows the car most). Rubber at 8 cm creates the most friction. Ice at 82 cm creates the least.'},
+  {d:'Working Scientifically',diff:2,q:'Which graph is best for showing how temperature of cooling water changes every minute over 20 minutes?',o:['Pie chart','Bar chart with gaps','Line graph — continuous data over time','Tally chart'],a:2,e:'Temperature over time is continuous data — it changes smoothly between measurements. A line graph shows this trend clearly and allows interpolation between points.'},
+  {d:'Working Scientifically',diff:2,q:'Cambridge style — A student grows plants in 5 different amounts of fertiliser: 0g, 2g, 4g, 6g, 8g. All other variables are kept the same. What type of variable is the amount of fertiliser?',o:['Dependent variable','Control variable','Independent variable','Anomalous variable'],a:2,e:'The independent variable is the one deliberately changed by the student — in this case, the amount of fertiliser. The dependent variable (what changes in response) would be the plant\'s height or growth.'},
+  {d:'Working Scientifically',diff:2,q:'A student measures plant heights after 2 weeks: 12cm, 14cm, 11cm, 13cm, 12cm. What is the mean height?',o:['11cm','12.4cm','13cm','14cm'],a:1,e:'Mean = sum ÷ number of values. (12+14+11+13+12) ÷ 5 = 62 ÷ 5 = 12.4 cm. Always check: the mean should fall within the range of your data.'},
+  {d:'Working Scientifically',diff:2,q:'A student concludes: "Fertiliser always makes plants grow taller." What is wrong with this conclusion?',o:['Nothing — it is correct','It overclaims — one experiment cannot justify "always". Should say "in this investigation" and refer to specific data','The student should not mention fertiliser','Conclusions must be shorter than this'],a:1,e:'"Always" goes beyond the evidence of one investigation. A good conclusion refers to specific data values and uses qualified language: "In this investigation, increasing fertiliser from 0 to 6g increased mean height from X to Y cm."'},
+  {d:'Working Scientifically',diff:2,q:'Why is it important to use a large sample size in an investigation?',o:['It makes the experiment look more impressive','A larger sample makes results more reliable by reducing the effect of chance variation','It uses more equipment','Large samples are always required by law'],a:1,e:'With small samples, one unusual result can significantly distort the mean. Larger samples reduce the influence of random variation, making results more representative and reliable.'},
+
+  // ── WORKING SCIENTIFICALLY L3 ───────────────────────
+  {d:'Working Scientifically',diff:3,q:'Cambridge style — A student tests how the length of a pendulum affects the time for 10 swings. Results: 10cm→6.3s, 20cm→9.0s, 30cm→11.0s, 40cm→12.7s, 50cm→14.1s. What type of graph should she draw, and what pattern do the results show?',o:['Bar chart — no pattern','Line graph — as pendulum length increases, swing time increases, but not proportionally (the relationship is not linear)','Pie chart — equal distribution','Bar chart — swing time decreases'],a:1,e:'Continuous data (length vs time) requires a line graph. The data shows a positive but non-linear relationship — time increases as length increases, but not in direct proportion (doubling length does not double time).'},
+  {d:'Working Scientifically',diff:3,q:'A student investigates whether paper thickness affects the strength of a bridge (measured by the mass it holds before collapsing). She tests 1, 2, 3, and 4 layers. She only builds one bridge for each thickness. What is the main weakness of her method?',o:['She used too many layers','One trial per condition is unreliable — a single result may be anomalous. She should repeat each thickness at least 3 times and calculate a mean.','The paper should be plastic','Bridges should not be tested with mass'],a:1,e:'Single results are unreliable — any result could be anomalous. Repeating each condition multiple times allows anomalies to be identified and a reliable mean to be calculated.'},
+  {d:'Working Scientifically',diff:3,q:'A student writes: "My results support my prediction because the plant grew taller with more light." What is missing from this conclusion?',o:['Nothing — it is complete','Specific data values (e.g. "grew from X to Y cm"), reference to the range tested, and acknowledgement of limitations','It should be longer','The student should not mention their prediction'],a:1,e:'A strong conclusion references specific data ("height increased from 8cm to 19cm as light increased from 0 to full sunlight"), acknowledges the range tested, addresses whether the hypothesis was supported, and identifies any anomalies or limitations.'},
+  {d:'Working Scientifically',diff:3,q:'Two students investigate friction using the same block on the same surface. Student A gets: 4.2N, 4.5N, 4.1N, 4.3N. Student B gets: 3.8N, 5.1N, 4.9N, 3.2N. Whose results are more reliable and why?',o:['Student B — higher values are more accurate','Student A — the results are more consistent (clustered closely together), suggesting better technique and lower random error','Both are equally reliable','Neither is reliable because the values are different'],a:1,e:'Reliability is about consistency — repeated measurements giving similar results. Student A\'s range is 0.4N; Student B\'s is 1.9N. Student A\'s tighter clustering suggests better experimental technique and lower random error.'},
+
+  // ── WORKING SCIENTIFICALLY L4 ───────────────────────
+  {d:'Working Scientifically',diff:4,q:'A student claims: "My experiment proves that more fertiliser always makes plants grow taller." Identify two problems with this claim.',o:['There are no problems — this is a valid scientific claim','(1) "Proves" is too strong — science produces evidence that supports or contradicts hypotheses, never absolute proof. (2) "Always" overgeneralises beyond the conditions tested — other variables (soil type, light, water) may affect the relationship.','The student used too much fertiliser','Scientific conclusions must be shorter'],a:1,e:'Science never "proves" — it provides evidence. "Always" claims cannot be made from a single investigation with limited variables. Good scientific language: "This investigation provides evidence that, under these conditions, increasing fertiliser increased plant growth."'},
+  {d:'Working Scientifically',diff:4,q:'Cambridge style — A student measures the force of friction for a block on 3 surfaces, 5 times each. Her means are: sandpaper 8.4N, wood 4.2N, glass 1.1N. She calculates percentage difference between sandpaper and wood as (8.4−4.2)/8.4 × 100 = 50%. Is this a valid comparison and what additional analysis would strengthen her conclusion?',o:['Yes — percentage difference is always valid','The calculation is mathematically correct, but comparing only means ignores the spread of data. Calculating range or standard deviation for each surface would show whether the differences are meaningful or within normal variation.','She should use different units','Percentage difference is not valid in science'],a:1,e:'Comparing means alone can be misleading if data is highly variable. Statistical spread (range, standard deviation) tells you whether apparent differences between conditions are genuine or could be due to random variation. This is the basis of statistical significance.'},
+  {d:'Working Scientifically',diff:4,q:'A student investigates whether background music affects memory. She asks 20 students to memorise a list with music and 20 to memorise without. The music group scores a mean of 14/20; the silent group scores 11/20. She concludes music improves memory. What confounding variable might explain the difference instead?',o:['The list was too long','The music and silent groups may have differed in baseline memory ability — without random allocation or a pre-test, the difference may reflect existing differences between groups rather than the effect of music','She tested too many students','The scoring system was unfair'],a:1,e:'A confounding variable is an unmeasured factor that could explain the results. Without randomisation or matching groups by baseline ability, pre-existing differences between participants could account for the result. Good experimental design controls for confounders.'},
 ];
+
 
 let FALLBACK_USED = new Set();
 function getFallback(domain, diff) {
@@ -469,15 +611,22 @@ function getFallback(domain, diff) {
 // ═══════════════════════════════════════════════════════
 let S = {};
 
+// Count correct diff-4 (extension) answers in current session
+function correctExtensionCount() {
+  return S.qs ? S.qs.filter(e => e.q.diff === 4 && e.correct).length : 0;
+}
+
 function targetDiff(theta) {
-  if (theta < -0.8) return 1;
-  if (theta > 1.5)  return 4;
-  if (theta > 0.6)  return 3;
-  return 2;
+  // Diff 5 Challenge (KS3 Y7/8) unlocks after 10 correct diff-4 answers
+  if (correctExtensionCount() >= 10 && theta > 1.2) return 5;
+  if (theta < -0.8) return 1;  // Below grade level
+  if (theta > 1.5)  return 4;  // KS2/KS3 bridge (extension)
+  if (theta > 0.6)  return 3;  // Top of grade
+  return 2;                    // At grade level
 }
 function updateTheta(theta, correct, diff) {
   const step = 0.45;
-  const dv = {1:-1,2:0,3:.5,4:1}[diff]||0;
+  const dv = {1:-1,2:0,3:.5,4:1,5:1.5}[diff]||0;
   return correct
     ? Math.min(3,  theta + step*(1+dv*.3))
     : Math.max(-3, theta - step*(1-dv*.2));
@@ -486,41 +635,122 @@ function updateTheta(theta, correct, diff) {
 // ═══════════════════════════════════════════════════════
 // QUESTION FETCHER
 // Calls Apps Script action=question — no API key in browser.
-// Apps Script calls Gemini server-side using Script Properties.
-// Falls back to local bank on any error.
 // ═══════════════════════════════════════════════════════
-async function fetchQuestion(domain, diff, theta, style) {
-  if (!SHEETS_ENDPOINT || SHEETS_ENDPOINT === 'YOUR_APPS_SCRIPT_ENDPOINT_HERE') {
-    return null;
-  }
+// QUESTION FETCHER — THREE TIER SYSTEM
+// Tier 1: Google Sheets bank  (levels 1–4, action=getQuestion)
+// Tier 2: Hardcoded fallback  (if Sheets unavailable)
+// Tier 3: Gemini AI           (diff 5 Challenge only)
+// No API key in the browser at any point.
+// ═══════════════════════════════════════════════════════
+
+// Fetch from Google Sheets question bank (levels 1–4)
+async function fetchFromBank(domain, diff) {
+  if (!SHEETS_ENDPOINT || SHEETS_ENDPOINT === 'YOUR_APPS_SCRIPT_ENDPOINT_HERE') return null;
   try {
-    await waitForRateLimit();
     const params = new URLSearchParams({
-      action: 'question',
-      domain, diff, theta: theta.toFixed(2), style, year: '5'
+      action: 'getQuestion',
+      domain, diff, year: '5',
+      excludeIds: (S.usedBankIDs || []).join(',')
     });
     const r = await fetch(SHEETS_ENDPOINT + '?' + params.toString(), {
-      signal: AbortSignal.timeout(12000)
+      signal: AbortSignal.timeout(8000)
     });
-    if (!r.ok) { console.warn('Apps Script error', r.status); return null; }
+    if (!r.ok) { console.warn('Bank fetch error', r.status); return null; }
     const data = await r.json();
-    if (data.error) { console.warn('Question error:', data.error); return null; }
-    if (!data.q || !data.o || data.o.length !== 4 || data.a === undefined) return null;
+    if (data.error || !data.q || !data.o || data.o.length !== 4 || data.a === undefined) return null;
+    // Track this ID to avoid repeating it this session
+    if (data.id) {
+      S.usedBankIDs = S.usedBankIDs || [];
+      S.usedBankIDs.push(data.id);
+    }
     return {
-      d: data.d || domain,
-      diff: data.diff || diff,
-      q: data.q,
-      context: data.context || null,
-      o: data.o,
-      a: parseInt(data.a),
-      e: data.e || '',
-      ai: true,
-      ext: data.ext || false
+      d: data.d || domain, diff: data.diff || diff,
+      q: data.q, context: data.context || null,
+      o: data.o, a: parseInt(data.a),
+      e: data.e || '', fromBank: true, ext: false
     };
   } catch(err) {
-    console.warn('fetchQuestion failed:', err.message || err);
+    console.warn('fetchFromBank failed:', err.message || err);
     return null;
   }
+}
+
+// Fetch AI Challenge question (diff 5 only)
+async function fetchAIChallenge(domain, theta, style) {
+  if (!SHEETS_ENDPOINT || SHEETS_ENDPOINT === 'YOUR_APPS_SCRIPT_ENDPOINT_HERE') return null;
+  const params = new URLSearchParams({
+    action: 'question',
+    domain, diff: 5, theta: theta.toFixed(2), style, year: '5'
+  });
+  const url = SHEETS_ENDPOINT + '?' + params.toString();
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      await waitForRateLimit();
+      const r = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (r.status === 429) {
+        console.warn('429 quota hit — waiting 8s before retry');
+        await new Promise(res => setTimeout(res, 8000));
+        continue;
+      }
+      if (!r.ok) { console.warn('AI fetch error', r.status); return null; }
+      const data = await r.json();
+      if (data.error || !data.q || !data.o || data.o.length !== 4 || data.a === undefined) return null;
+      return {
+        d: data.d || domain, diff: 5,
+        q: data.q, context: data.context || null,
+        o: data.o, a: parseInt(data.a),
+        e: data.e || '', ai: true, ext: false, challenge: true
+      };
+    } catch(err) {
+      console.warn('fetchAIChallenge failed:', err.message || err);
+      return null;
+    }
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════
+// CHALLENGE UNLOCK OVERLAY
+// Full-screen animated moment shown the first time
+// a student reaches diff 5 in a session.
+// ═══════════════════════════════════════════════════════
+function showUnlockOverlay(name, onComplete) {
+  const overlay = document.createElement('div');
+  overlay.id = 'unlock-overlay';
+  overlay.innerHTML = `
+    <div class="unlock-stars" id="unlock-stars"></div>
+    <div class="unlock-content">
+      <div class="unlock-icon">🧠</div>
+      <div class="unlock-title">Challenge Unlocked</div>
+      <div class="unlock-name">${name}</div>
+      <div class="unlock-msg">You've answered 10 extension questions correctly.<br>You've earned access to Year 7/8 level questions.</div>
+      <div class="unlock-sub">This question is generated just for you by AI.</div>
+      <button class="unlock-btn" id="unlock-btn">I'm ready →</button>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  // Generate stars
+  const starsEl = document.getElementById('unlock-stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'unlock-star';
+    const sz = Math.random() * 3 + 0.5;
+    s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${(Math.random()*4+1).toFixed(1)}s;--dl:${(Math.random()*3).toFixed(1)}s;--x:${(Math.random()*200-100).toFixed(0)}px;--y:${(Math.random()*200-100).toFixed(0)}px`;
+    starsEl.appendChild(s);
+  }
+
+  // Animate in
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => overlay.classList.add('visible'));
+  });
+
+  document.getElementById('unlock-btn').onclick = () => {
+    overlay.classList.add('dismissing');
+    setTimeout(() => {
+      overlay.remove();
+      onComplete();
+    }, 400);
+  };
 }
 
 // ═══════════════════════════════════════════════════════
@@ -538,7 +768,9 @@ function startQuiz() {
     style:  document.getElementById('inp-style').value,
     theta:0, streak:0, maxStreak:0,
     qs:[], currentQ:null, qNum:0,
-    startTime:Date.now(), qStart:Date.now()
+    startTime:Date.now(), qStart:Date.now(),
+    usedBankIDs: [],   // tracks Sheet question IDs shown this session
+    challengeUnlocked: false  // whether the unlock overlay has been shown
   };
   FALLBACK_USED.clear();
   lastRequestTime = 0;
@@ -562,34 +794,55 @@ function showLoading(msg) {
 }
 
 async function loadQuestion() {
-  showLoading('Generating your next question…');
   const domains = ['Biology','Chemistry','Physics','Working Scientifically'];
   const domain  = S.domain === 'all'
     ? domains[Math.floor(Math.random() * domains.length)]
     : S.domain;
   const diff = targetDiff(S.theta);
 
-  let q = await fetchQuestion(domain, diff, S.theta, S.style);
-  if (!q) q = getFallback(domain, diff);
+  // ── DIFF 5: Challenge tier — show unlock overlay first time ──
+  if (diff === 5) {
+    if (!S.challengeUnlocked) {
+      S.challengeUnlocked = true;
+      showUnlockOverlay(S.name, async () => {
+        showLoading('🧠 Generating your Challenge question…');
+        let q = await fetchAIChallenge(domain, S.theta, S.style);
+        if (!q) q = getFallback(domain, 4); // best fallback is diff 4
+        S.currentQ = q; S.qNum += 1; S.qStart = Date.now();
+        renderQuestion(q);
+      });
+      return; // loadQuestion resumes inside the overlay callback
+    }
+    showLoading('🧠 Generating your next Challenge question…');
+    let q = await fetchAIChallenge(domain, S.theta, S.style);
+    if (!q) q = getFallback(domain, 4);
+    S.currentQ = q; S.qNum += 1; S.qStart = Date.now();
+    renderQuestion(q);
+    return;
+  }
 
-  S.currentQ = q;
-  S.qNum    += 1;
-  S.qStart   = Date.now();
+  // ── LEVELS 1–4: Sheets bank first, then hardcoded fallback ──
+  showLoading('Loading next question…');
+  let q = await fetchFromBank(domain, diff);
+  if (!q) q = getFallback(domain, diff);
+  S.currentQ = q; S.qNum += 1; S.qStart = Date.now();
   renderQuestion(q);
 }
+
 
 function renderQuestion(q) {
   const n   = S.qNum;
   const dcb = {Biology:'db-bio',Chemistry:'db-chem',Physics:'db-phys','Working Scientifically':'db-ws'};
-  const dchip = {1:'dc-easy Easy',2:'dc-medium Medium',3:'dc-hard Hard',4:'dc-ext Extension'};
-  const [dcls,dlbl] = (dchip[q.diff]||'dc-medium Medium').split(' ');
+  const dchip = {1:'dc-easy Below level',2:'dc-medium At level',3:'dc-hard Top of grade',4:'dc-ext Extension','5':'dc-chal Challenge'};
+  const parts = (dchip[q.diff]||'dc-medium At level').split(' ');
+  const dcls = parts[0], dlbl = parts.slice(1).join(' ');
 
   document.getElementById('hdr-name').textContent  = S.name;
   document.getElementById('hdr-cls').textContent   = S.cls;
   document.getElementById('hdr-count').textContent = `Q${n}`;
   document.getElementById('prog').style.width      = Math.min(95,n*4)+'%';
-  document.getElementById('hdr-diff').textContent  = q.ext ? '★ Extension' : dlbl;
-  document.getElementById('hdr-diff').className    = 'diff-chip '+(q.ext?'dc-ext':dcls);
+  document.getElementById('hdr-diff').textContent  = q.diff === 5 ? '🧠 Challenge' : dlbl;
+  document.getElementById('hdr-diff').className    = 'diff-chip '+(q.diff === 5 ? 'dc-chal' : q.ext ? 'dc-ext' : dcls);
 
   const streak = document.getElementById('streak');
   if(S.streak>=3){streak.classList.add('show');document.getElementById('streak-n').textContent=S.streak;}
@@ -598,11 +851,19 @@ function renderQuestion(q) {
   const letters = ['A','B','C','D'];
   const ctxHtml = q.context
     ? `<div class="q-ctx"><div class="q-ctx-lbl">📋 Read this first</div>${q.context}</div>`:'';
-  const hintHtml = q.ext
-    ? '<div class="q-hint">🚀 <strong>Extension challenge</strong> — this goes beyond Year 5. Give it your best try!</div>':'';
-  const badge = q.ai && !q._fb
-    ? '<span class="ai-chip">AI</span>'
-    : (q._fb ? '<span class="fb-chip">Bank</span>' : '');
+  const hintHtml = q.diff === 5
+    ? '<div class="q-hint">🧠 <strong>Challenge question</strong> — this is Year 7/8 level. You\'ve earned it!</div>'
+    : q.ext
+    ? '<div class="q-hint">🚀 <strong>Extension challenge</strong> — this goes beyond Year 5. Give it your best try!</div>'
+    : '';
+
+  const badge = q.challenge
+    ? '<span class="ai-chip" style="background:#1e1b4b;color:#c7d2fe">🧠 AI Challenge</span>'
+    : q.fromBank
+    ? '<span class="fb-chip" style="background:#ede9fe;color:#5b21b6">📚 Bank</span>'
+    : q._fb
+    ? '<span class="fb-chip">Local</span>'
+    : '';
 
   document.getElementById('qwrap').innerHTML = `
     <div class="fade-in">
